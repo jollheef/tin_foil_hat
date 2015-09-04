@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-import "vexillary"
+import "tinfoilhat/vexillary"
 
 func TestGenerateKey(t *testing.T) {
 
