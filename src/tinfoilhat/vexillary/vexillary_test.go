@@ -9,8 +9,7 @@
 package vexillary_test
 
 import (
-	"fmt"
-	"os"
+	"log"
 	"testing"
 )
 
@@ -18,31 +17,23 @@ import "tinfoilhat/vexillary"
 
 func TestGenerateKey(t *testing.T) {
 
-	fmt.Println("GenerateFlag test")
-
 	_, err := vexillary.GenerateKey()
 	if err != nil {
-		fmt.Println("\tGenerate key error:", err)
-		os.Exit(1)
+		log.Fatalln("Generate key error:", err)
 	}
 }
 
 func TestGenerateFlag(t *testing.T) {
 
-	fmt.Println("GenerateFlag test")
-
 	priv, _ := vexillary.GenerateKey()
 
 	_, err := vexillary.GenerateFlag(priv)
 	if err != nil {
-		fmt.Println("\tGenerate flag error:", err)
-		os.Exit(1)
+		log.Fatalln("Generate flag error:", err)
 	}
 }
 
 func TestValidFlag(t *testing.T) {
-
-	fmt.Println("ValidFlag test")
 
 	priv, _ := vexillary.GenerateKey()
 	flag, _ := vexillary.GenerateFlag(priv)
@@ -50,15 +41,13 @@ func TestValidFlag(t *testing.T) {
 	// Check validation of valid flag
 	valid, err := vexillary.ValidFlag(flag, priv.PublicKey)
 	if !valid {
-		fmt.Println("\tValid flag is invalid:", err)
-		os.Exit(1)
+		log.Fatalln("Valid flag is invalid:", err)
 	}
 
 	// Check validation of invalid flag
 	invalid_flag := "aaaaaaa6a0993562af00d027aff63e9502754018="
 	valid, err = vexillary.ValidFlag(invalid_flag, priv.PublicKey)
 	if valid {
-		fmt.Println("\tInvalid flag is valid:", err)
-		os.Exit(1)
+		log.Fatalln("Invalid flag is valid:", err)
 	}
 }
