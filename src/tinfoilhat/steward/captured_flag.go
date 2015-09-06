@@ -107,7 +107,7 @@ func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 	return
 }
 
-func AlreadyCaptured(db *sql.DB, cflag CapturedFlag) (exist bool, err error) {
+func AlreadyCaptured(db *sql.DB, flagId int) (exist bool, err error) {
 
 	stmt, err := db.Prepare("SELECT EXISTS(SELECT `id` FROM `captured_flag` " +
 		"WHERE `flag_id`=?)")
@@ -117,7 +117,7 @@ func AlreadyCaptured(db *sql.DB, cflag CapturedFlag) (exist bool, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(cflag.Flag.Id).Scan(&exist)
+	err = stmt.QueryRow(flagId).Scan(&exist)
 	if err != nil {
 		return
 	}

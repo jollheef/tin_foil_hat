@@ -85,7 +85,7 @@ func TestAlreadyCaptured(t *testing.T) {
 
 	err = steward.CaptureFlag(db.db, cflg1)
 
-	captured, err := steward.AlreadyCaptured(db.db, cflg1)
+	captured, err := steward.AlreadyCaptured(db.db, cflg1.Flag.Id)
 	if err != nil {
 		log.Fatalln("Already captured check failed:", err)
 	}
@@ -94,7 +94,7 @@ func TestAlreadyCaptured(t *testing.T) {
 		log.Fatalln("Captured flag is not captured")
 	}
 
-	captured, err = steward.AlreadyCaptured(db.db, cflg2)
+	captured, err = steward.AlreadyCaptured(db.db, cflg2.Flag.Id)
 	if err != nil {
 		log.Fatalln("Already captured check failed:", err)
 	}
