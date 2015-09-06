@@ -11,6 +11,7 @@ package steward
 import "database/sql"
 
 type Flag struct {
+	Id        int
 	Flag      string
 	Round     int
 	TeamId    int
@@ -72,15 +73,17 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 
 	flg.Flag = flag
 
-	stmt, err := db.Prepare("SELECT `round`, `team_id`, `service_id` " +
-		"FROM `flag` WHERE `flag`=?")
+	stmt, err := db.Prepare(
+		"SELECT `id`, `round`, `team_id`, `service_id` " +
+			"FROM `flag` WHERE `flag`=?")
 	if err != nil {
 		return
 	}
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(flag).Scan(&flg.Round, &flg.TeamId, &flg.ServiceId)
+	err = stmt.QueryRow(flag).Scan(&flg.Id, &flg.Round, &flg.TeamId,
+		&flg.ServiceId)
 	if err != nil {
 		return
 	}
