@@ -21,7 +21,7 @@ type Flag struct {
 func createFlagTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
-	CREATE TABLE "flag" (
+	CREATE TABLE IF NOT EXISTS "flag" (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		round	INTEGER NOT NULL,
 		flag	TEXT NOT NULL UNIQUE,

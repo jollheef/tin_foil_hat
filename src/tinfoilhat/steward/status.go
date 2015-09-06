@@ -20,7 +20,7 @@ type Status struct {
 func createStatusTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
-	CREATE TABLE "status" (
+	CREATE TABLE IF NOT EXISTS "status" (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		round	INTEGER NOT NULL,
 		team_id	INTEGER NOT NULL,

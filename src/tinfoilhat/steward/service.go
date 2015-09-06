@@ -19,7 +19,7 @@ type Service struct {
 func createServiceTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
-	CREATE TABLE "service" (
+	CREATE TABLE IF NOT EXISTS "service" (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		name	TEXT NOT NULL,
 		port	INTEGER NOT NULL,

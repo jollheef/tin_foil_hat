@@ -18,7 +18,7 @@ type CapturedFlag struct {
 func createCapturedFlagTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
-	CREATE TABLE "captured_flag" (
+	CREATE TABLE IF NOT EXISTS "captured_flag" (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		flag_id	INTEGER NOT NULL,
 		team_id	INTEGER NOT NULL,

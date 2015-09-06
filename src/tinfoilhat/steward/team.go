@@ -19,7 +19,7 @@ type Team struct {
 func createTeamTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
-	CREATE TABLE team (
+	CREATE TABLE IF NOT EXISTS team (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		name	TEXT NOT NULL UNIQUE,
 		subnet	TEXT NOT NULL UNIQUE

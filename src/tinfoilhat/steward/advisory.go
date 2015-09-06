@@ -22,7 +22,7 @@ type Advisory struct {
 func createAdvisoryTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
-	CREATE TABLE "advisory" (
+	CREATE TABLE IF NOT EXISTS "advisory" (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		team_id	INTEGER NOT NULL,
 		score	INTEGER,
