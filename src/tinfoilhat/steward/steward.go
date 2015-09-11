@@ -47,6 +47,11 @@ func createSchema(db *sql.DB) error {
 		return err
 	}
 
+	err = createRoundTable(db)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
