@@ -103,3 +103,24 @@ func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 
 	return
 }
+
+func GetState(db *sql.DB, halfStatus Status) (state ServiceState, err error) {
+
+	stmt, err := db.Prepare(
+		"SELECT `state` FROM `status` WHERE `round`=? AND `team_id`=? " +
+			"AND `service_id`=? " +
+			"AND ID = (SELECT MAX(ID) FROM `status`)")
+	if err != nil {
+		return
+	}
+
+	defer stmt.Close()
+
+	err = stmt.QueryRow(halfStatus.Round, halfStatus.TeamId,
+		halfStatus.ServiceId).Scan(&state)
+	if err != nil {
+		return
+	}
+
+	return
+}

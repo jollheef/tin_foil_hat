@@ -65,3 +65,31 @@ func TestGetAllStatus(t *testing.T) {
 		log.Fatalln("Get states invalid")
 	}
 }
+
+func TestGetServiceCurrentStatus(t *testing.T) {
+
+	db, err := openDB()
+
+	defer db.Close()
+
+	round := 1
+	team := 2
+	service := 3
+
+	status1 := steward.Status{round, team, service, steward.STATUS_OK}
+
+	steward.PutStatus(db.db, status1)
+
+	halfStatus := steward.Status{round, team, service,
+		steward.STATUS_UNKNOWN}
+
+	state, err := steward.GetState(db.db, halfStatus)
+	if err != nil {
+		log.Fatalln("Get state failed:", err)
+	}
+
+	if state != steward.STATUS_OK {
+		log.Fatalln("Get states invalid")
+	}
+
+}
