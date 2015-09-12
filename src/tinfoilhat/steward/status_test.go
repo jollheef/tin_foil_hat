@@ -39,11 +39,18 @@ func TestGetAllStatus(t *testing.T) {
 	team := 2
 	service := 3
 
-	steward.PutStatus(db.db, steward.Status{round, team, service, 4})
-	steward.PutStatus(db.db, steward.Status{round, team, service, 10})
-	steward.PutStatus(db.db, steward.Status{round, team, service, 20})
+	status1 := steward.Status{round, team, service, steward.STATUS_OK}
+	status2 := steward.Status{round, team, service, steward.STATUS_MUMBLE}
+	status3 := steward.Status{round, team, service, steward.STATUS_CORRUPT}
 
-	states, err := steward.GetStates(db.db, round, team, service)
+	steward.PutStatus(db.db, status1)
+	steward.PutStatus(db.db, status2)
+	steward.PutStatus(db.db, status3)
+
+	halfStatus := steward.Status{round, team, service,
+		steward.STATUS_UNKNOWN}
+
+	states, err := steward.GetStates(db.db, halfStatus)
 	if err != nil {
 		log.Fatalln("Get states failed:", err)
 	}
@@ -52,7 +59,9 @@ func TestGetAllStatus(t *testing.T) {
 		log.Fatalln("Get states moar/less than put:", err)
 	}
 
-	if states[0] != 4 || states[1] != 10 || states[2] != 20 {
+	if states[0] != steward.STATUS_OK ||
+		states[1] != steward.STATUS_MUMBLE ||
+		states[2] != steward.STATUS_CORRUPT {
 		log.Fatalln("Get states invalid")
 	}
 }

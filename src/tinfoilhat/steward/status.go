@@ -10,11 +10,30 @@ package steward
 
 import "database/sql"
 
+type ServiceState int
+
+const (
+	// Service is online, serves the requests, stores and
+	// returns flags and behaves as expected
+	STATUS_OK ServiceState = iota
+	// Service is online, but behaves not as expected, e.g. if HTTP server
+	// listens the port, but doesn't respond on request
+	STATUS_MUMBLE
+	// Service is online, but past flags cannot be retrieved
+	STATUS_CORRUPT
+	// Service is offline
+	STATUS_DOWN
+	// Checker error
+	STATUS_ERROR
+	// Unknown
+	STATUS_UNKNOWN
+)
+
 type Status struct {
 	Round     int
 	TeamId    int
 	ServiceId int
-	State     int
+	State     ServiceState
 }
 
 func createStatusTable(db *sql.DB) (err error) {
@@ -51,7 +70,7 @@ func PutStatus(db *sql.DB, status Status) (err error) {
 	return
 }
 
-func GetStates(db *sql.DB, round int, teamId int, serviceId int) (states []int,
+func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 	err error) {
 
 	stmt, err := db.Prepare(
@@ -63,7 +82,8 @@ func GetStates(db *sql.DB, round int, teamId int, serviceId int) (states []int,
 
 	defer stmt.Close()
 
-	rows, err := stmt.Query(round, teamId, serviceId)
+	rows, err := stmt.Query(halfStatus.Round, halfStatus.TeamId,
+		halfStatus.ServiceId)
 	if err != nil {
 		return
 	}
@@ -78,7 +98,7 @@ func GetStates(db *sql.DB, round int, teamId int, serviceId int) (states []int,
 			return
 		}
 
-		states = append(states, state)
+		states = append(states, ServiceState(state))
 	}
 
 	return
