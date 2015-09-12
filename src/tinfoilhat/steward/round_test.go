@@ -46,7 +46,7 @@ func TestRoundWork(t *testing.T) {
 		if current_round.Id != new_round {
 			log.Fatalln("Current round number invalid")
 		}
-		if current_round.LenSeconds != round_len {
+		if current_round.Len != round_len {
 			log.Fatalln("Current round len invalid")
 		}
 		if time.Now().Sub(current_round.StartTime) > 5*time.Second {

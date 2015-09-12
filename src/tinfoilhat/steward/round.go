@@ -14,9 +14,9 @@ import (
 )
 
 type Round struct {
-	Id         int64
-	LenSeconds time.Duration
-	StartTime  time.Time
+	Id        int64
+	Len       time.Duration
+	StartTime time.Time
 }
 
 func createRoundTable(db *sql.DB) (err error) {
@@ -74,7 +74,7 @@ func CurrentRound(db *sql.DB) (round Round, err error) {
 		return
 	}
 
-	round.LenSeconds = time.Duration(len_seconds) * time.Second
+	round.Len = time.Duration(len_seconds) * time.Second
 
 	round.StartTime = time.Unix(timestamp, 0)
 
