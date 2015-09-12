@@ -74,3 +74,23 @@ func GetTeams(db *sql.DB) (teams []Team, err error) {
 
 	return
 }
+
+func GetTeam(db *sql.DB, team_id int64) (team Team, err error) {
+
+	stmt, err := db.Prepare("SELECT `name`, `subnet` FROM `team`" +
+		"WHERE `id`=?")
+	if err != nil {
+		return
+	}
+
+	defer stmt.Close()
+
+	team.Id = team_id
+
+	err = stmt.QueryRow(team_id).Scan(&team.Name, &team.Subnet)
+	if err != nil {
+		return
+	}
+
+	return
+}

@@ -52,3 +52,28 @@ func TestGetTeams(t *testing.T) {
 		log.Fatalln("Added teams broken")
 	}
 }
+
+func TestGetTeam(t *testing.T) {
+
+	db, err := openDB()
+
+	defer db.Close()
+
+	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24"}
+
+	team1.Id, _ = steward.AddTeam(db.db, team1.Name, team1.Subnet)
+
+	_team1, err := steward.GetTeam(db.db, team1.Id)
+	if err != nil {
+		log.Fatalln("Get team failed:", err)
+	}
+
+	if _team1 != team1 {
+		log.Fatalln("Added team broken")
+	}
+
+	_, err = steward.GetTeam(db.db, 10) // invalid team id
+	if err == nil {
+		log.Fatalln("Get invalid team broken")
+	}
+}
