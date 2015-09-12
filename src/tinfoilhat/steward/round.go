@@ -13,13 +13,19 @@ import (
 	"time"
 )
 
+type Round struct {
+	Id         int64
+	LenSeconds time.Duration
+	StartTime  time.Time
+}
+
 func createRoundTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS "round" (
 		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 		len_seconds INTEGER  NOT NULL,
-		start_timestamp	INTEGER DEFAULT CURRENT_TIMESTAMP
+		start_time	INTEGER DEFAULT CURRENT_TIMESTAMP
 	)`)
 
 	return
@@ -49,10 +55,11 @@ func NewRound(db *sql.DB, len time.Duration) (round int64, err error) {
 	return
 }
 
-func CurrentRound(db *sql.DB) (round int64, len time.Duration, err error) {
+func CurrentRound(db *sql.DB) (round Round, err error) {
 
-	stmt, err := db.Prepare("SELECT `id`, `len_seconds` FROM `round` " +
-		"WHERE ID = (SELECT MAX(ID) FROM `round`)")
+	stmt, err := db.Prepare(
+		"SELECT `id`, `len_seconds`, strftime('%s', `start_time`) " +
+			"FROM `round` WHERE ID = (SELECT MAX(ID) FROM `round`)")
 	if err != nil {
 		return
 	}
@@ -60,12 +67,16 @@ func CurrentRound(db *sql.DB) (round int64, len time.Duration, err error) {
 	defer stmt.Close()
 
 	var len_seconds int64
-	err = stmt.QueryRow().Scan(&round, &len_seconds)
+	var timestamp int64
+
+	err = stmt.QueryRow().Scan(&round.Id, &len_seconds, &timestamp)
 	if err != nil {
 		return
 	}
 
-	len = time.Duration(len_seconds) * time.Second
+	round.LenSeconds = time.Duration(len_seconds) * time.Second
+
+	round.StartTime = time.Unix(timestamp, 0)
 
 	return
 }

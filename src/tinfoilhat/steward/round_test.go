@@ -24,7 +24,7 @@ func TestRoundWork(t *testing.T) {
 
 	round_len := time.Minute * 2
 
-	_, _, err = steward.CurrentRound(db.db)
+	_, err = steward.CurrentRound(db.db)
 	if err == nil {
 		log.Fatalln("Current round in empty database already exist")
 	}
@@ -39,15 +39,19 @@ func TestRoundWork(t *testing.T) {
 			log.Fatalln("New round number invalid", new_round, i)
 		}
 
-		current_round, len, err := steward.CurrentRound(db.db)
+		current_round, err := steward.CurrentRound(db.db)
 		if err != nil {
 			log.Fatalln("Get current round fail:", err)
 		}
-		if current_round != new_round {
+		if current_round.Id != new_round {
 			log.Fatalln("Current round number invalid")
 		}
-		if round_len != len {
+		if current_round.LenSeconds != round_len {
 			log.Fatalln("Current round len invalid")
+		}
+		if time.Now().Sub(current_round.StartTime) > 5*time.Second {
+			log.Fatalln("Time must be ~ current:",
+				current_round.StartTime)
 		}
 	}
 }
