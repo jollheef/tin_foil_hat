@@ -16,6 +16,7 @@ type Flag struct {
 	Round     int
 	TeamId    int
 	ServiceId int
+	Cred      string
 }
 
 func createFlagTable(db *sql.DB) (err error) {
@@ -26,7 +27,8 @@ func createFlagTable(db *sql.DB) (err error) {
 		round	INTEGER NOT NULL,
 		flag	TEXT NOT NULL UNIQUE,
 		team_id	INTEGER NOT NULL,
-		service_id	INTEGER NOT NULL
+		service_id	INTEGER NOT NULL,
+		cred	TEXT NOT NULL
 	)`)
 
 	return
@@ -34,16 +36,17 @@ func createFlagTable(db *sql.DB) (err error) {
 
 func AddFlag(db *sql.DB, flg Flag) error {
 
-	stmt, err := db.Prepare(
-		"INSERT INTO `flag` (`round`, `team_id`, `service_id`, `flag`) " +
-			"VALUES (?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO `flag` " +
+		"(`round`, `team_id`, `service_id`, `flag`, `cred`) " +
+		"VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(flg.Round, flg.TeamId, flg.ServiceId, flg.Flag)
+	_, err = stmt.Exec(flg.Round, flg.TeamId, flg.ServiceId,
+		flg.Flag, flg.Cred)
 	if err != nil {
 		return err
 	}
@@ -74,7 +77,7 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 	flg.Flag = flag
 
 	stmt, err := db.Prepare(
-		"SELECT `id`, `round`, `team_id`, `service_id` " +
+		"SELECT `id`, `round`, `team_id`, `service_id`, `cred` " +
 			"FROM `flag` WHERE `flag`=?")
 	if err != nil {
 		return
@@ -83,7 +86,7 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 	defer stmt.Close()
 
 	err = stmt.QueryRow(flag).Scan(&flg.Id, &flg.Round, &flg.TeamId,
-		&flg.ServiceId)
+		&flg.ServiceId, &flg.Cred)
 	if err != nil {
 		return
 	}

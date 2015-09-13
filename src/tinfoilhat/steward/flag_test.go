@@ -21,7 +21,7 @@ func TestAddFlag(t *testing.T) {
 
 	defer db.Close()
 
-	err = steward.AddFlag(db.db, steward.Flag{1, "lolka", 1, 2, 3})
+	err = steward.AddFlag(db.db, steward.Flag{1, "lolka", 1, 2, 3, "1:2"})
 	if err != nil {
 		log.Fatalln("Add flag failed:", err)
 	}
@@ -33,7 +33,7 @@ func TestFlagExist(t *testing.T) {
 
 	defer db.Close()
 
-	flg := steward.Flag{0, "tralala", 5, 10, 4}
+	flg := steward.Flag{0, "tralala", 5, 10, 4, "1:2"}
 
 	err = steward.AddFlag(db.db, flg)
 
@@ -54,7 +54,7 @@ func TestGetFlagInfo(t *testing.T) {
 
 	defer db.Close()
 
-	flg := steward.Flag{1, "asdfasdf", 5345, 433, 353}
+	flg := steward.Flag{1, "asdfasdf", 5345, 433, 353, "1:2"}
 
 	err = steward.AddFlag(db.db, flg)
 

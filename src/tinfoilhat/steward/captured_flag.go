@@ -58,7 +58,7 @@ func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 	defer tx.Commit()
 
 	stmt, err := tx.Prepare("SELECT `id`, `flag`, `team_id`, " +
-		"`service_id` FROM `flag` WHERE `round`=?")
+		"`service_id`, `cred` FROM `flag` WHERE `round`=?")
 	if err != nil {
 		return
 	}
@@ -77,7 +77,8 @@ func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 		cflag.Flag.Round = round
 
 		err = rows.Scan(&cflag.Flag.Id, &cflag.Flag.Flag,
-			&cflag.Flag.TeamId, &cflag.Flag.ServiceId)
+			&cflag.Flag.TeamId, &cflag.Flag.ServiceId,
+			&cflag.Flag.Cred)
 		if err != nil {
 			return
 		}
