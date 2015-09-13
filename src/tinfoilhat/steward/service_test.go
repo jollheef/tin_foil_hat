@@ -21,7 +21,7 @@ func TestAddService(t *testing.T) {
 
 	defer db.Close()
 
-	svc := steward.Service{"lol", 10, "/test"}
+	svc := steward.Service{-1, "lol", 10, "/test"}
 
 	err = steward.AddService(db.db, svc)
 	if err != nil {
@@ -35,7 +35,7 @@ func TestGetServices(t *testing.T) {
 
 	defer db.Close()
 
-	svc := steward.Service{"lol", 10, "/test"}
+	svc := steward.Service{-1, "lol", 10, "/test"}
 
 	const services_amount int = 5
 
@@ -54,6 +54,7 @@ func TestGetServices(t *testing.T) {
 	}
 
 	for i := 0; i < len(services); i++ {
+		svc.Id = i + 1
 		svc.Port = i
 		if services[i] != svc {
 			log.Fatalln("Get service", services[i], "instead", svc)

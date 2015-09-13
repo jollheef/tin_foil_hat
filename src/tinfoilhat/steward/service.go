@@ -11,6 +11,7 @@ package steward
 import "database/sql"
 
 type Service struct {
+	Id          int
 	Name        string
 	Port        int
 	CheckerPath string
@@ -51,7 +52,7 @@ func AddService(db *sql.DB, svc Service) error {
 
 func GetServices(db *sql.DB) (services []Service, err error) {
 
-	rows, err := db.Query("SELECT `name`, `port`, `checker_path` " +
+	rows, err := db.Query("SELECT `id`,`name`, `port`, `checker_path` " +
 		"FROM `service` ")
 	if err != nil {
 		return
@@ -62,7 +63,7 @@ func GetServices(db *sql.DB) (services []Service, err error) {
 	for rows.Next() {
 		var svc Service
 
-		err = rows.Scan(&svc.Name, &svc.Port, &svc.CheckerPath)
+		err = rows.Scan(&svc.Id, &svc.Name, &svc.Port, &svc.CheckerPath)
 		if err != nil {
 			return
 		}
