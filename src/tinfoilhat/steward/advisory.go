@@ -13,7 +13,7 @@ import "time"
 import "database/sql"
 
 type Advisory struct {
-	Id        int64
+	Id        int
 	Text      string
 	Score     int
 	Timestamp time.Time
@@ -34,7 +34,7 @@ func createAdvisoryTable(db *sql.DB) (err error) {
 	return
 }
 
-func AddAdvisory(db *sql.DB, team_id int, text string) (id int64, err error) {
+func AddAdvisory(db *sql.DB, team_id int, text string) (id int, err error) {
 
 	stmt, err := db.Prepare("INSERT INTO `advisory` (`team_id`, `text`) " +
 		"VALUES (?, ?)")
@@ -49,16 +49,18 @@ func AddAdvisory(db *sql.DB, team_id int, text string) (id int64, err error) {
 		return
 	}
 
-	id, err = res.LastInsertId()
+	id64, err := res.LastInsertId()
 
 	if err != nil {
 		return
 	}
 
+	id = int(id64)
+
 	return
 }
 
-func ReviewAdvisory(db *sql.DB, advisory_id int64, score int) error {
+func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
 
 	stmt, err := db.Prepare(
 		"UPDATE `advisory` SET `score`=?, `reviewed`=? WHERE `id`=?")

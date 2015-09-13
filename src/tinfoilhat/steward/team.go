@@ -11,7 +11,7 @@ package steward
 import "database/sql"
 
 type Team struct {
-	Id     int64
+	Id     int
 	Name   string
 	Subnet string
 }
@@ -28,7 +28,7 @@ func createTeamTable(db *sql.DB) (err error) {
 	return
 }
 
-func AddTeam(db *sql.DB, name string, subnet string) (id int64, err error) {
+func AddTeam(db *sql.DB, name string, subnet string) (id int, err error) {
 
 	stmt, err := db.Prepare("INSERT INTO `team` (`name`, `subnet`) " +
 		"VALUES (?, ?)")
@@ -43,11 +43,13 @@ func AddTeam(db *sql.DB, name string, subnet string) (id int64, err error) {
 		return
 	}
 
-	id, err = res.LastInsertId()
+	id64, err := res.LastInsertId()
 
 	if err != nil {
 		return
 	}
+
+	id = int(id64)
 
 	return
 }
@@ -75,7 +77,7 @@ func GetTeams(db *sql.DB) (teams []Team, err error) {
 	return
 }
 
-func GetTeam(db *sql.DB, team_id int64) (team Team, err error) {
+func GetTeam(db *sql.DB, team_id int) (team Team, err error) {
 
 	stmt, err := db.Prepare("SELECT `name`, `subnet` FROM `team`" +
 		"WHERE `id`=?")

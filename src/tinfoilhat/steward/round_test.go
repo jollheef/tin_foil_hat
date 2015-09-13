@@ -29,7 +29,7 @@ func TestRoundWork(t *testing.T) {
 		log.Fatalln("Current round in empty database already exist")
 	}
 
-	var i int64
+	var i int
 	for i = 1; i < 5; i++ {
 		new_round, err := steward.NewRound(db.db, round_len)
 		if err != nil {

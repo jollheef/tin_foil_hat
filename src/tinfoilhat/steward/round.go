@@ -14,7 +14,7 @@ import (
 )
 
 type Round struct {
-	Id        int64
+	Id        int
 	Len       time.Duration
 	StartTime time.Time
 }
@@ -31,7 +31,7 @@ func createRoundTable(db *sql.DB) (err error) {
 	return
 }
 
-func NewRound(db *sql.DB, len time.Duration) (round int64, err error) {
+func NewRound(db *sql.DB, len time.Duration) (round int, err error) {
 
 	stmt, err := db.Prepare("INSERT INTO `round` (len_seconds) " +
 		"VALUES (?)")
@@ -46,11 +46,13 @@ func NewRound(db *sql.DB, len time.Duration) (round int64, err error) {
 		return
 	}
 
-	round, err = res.LastInsertId()
+	round64, err := res.LastInsertId()
 
 	if err != nil {
 		return
 	}
+
+	round = int(round64)
 
 	return
 }

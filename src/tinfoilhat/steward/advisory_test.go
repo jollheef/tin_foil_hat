@@ -56,7 +56,7 @@ func TestGetAdvisoryScore(t *testing.T) {
 	score := 40
 	amount := 5
 
-	var ids []int64
+	var ids []int
 
 	for i := 0; i < amount; i++ {
 		id, _ := steward.AddAdvisory(db.db, team_id, advisory_text+string(i))
