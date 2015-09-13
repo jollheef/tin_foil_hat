@@ -21,7 +21,7 @@ func createServiceTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS "service" (
-		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		id	SERIAL PRIMARY KEY,
 		name	TEXT NOT NULL,
 		port	INTEGER NOT NULL,
 		checker_path	TEXT NOT NULL
@@ -33,8 +33,8 @@ func createServiceTable(db *sql.DB) (err error) {
 func AddService(db *sql.DB, svc Service) error {
 
 	stmt, err := db.Prepare(
-		"INSERT INTO `service` (`name`, `port`, `checker_path`) " +
-			"VALUES (?, ?, ?)")
+		"INSERT INTO service (name, port, checker_path) " +
+			"VALUES ($1, $2, $3)")
 	if err != nil {
 		return err
 	}
@@ -52,8 +52,8 @@ func AddService(db *sql.DB, svc Service) error {
 
 func GetServices(db *sql.DB) (services []Service, err error) {
 
-	rows, err := db.Query("SELECT `id`,`name`, `port`, `checker_path` " +
-		"FROM `service` ")
+	rows, err := db.Query("SELECT id,name, port, checker_path " +
+		"FROM service ")
 	if err != nil {
 		return
 	}

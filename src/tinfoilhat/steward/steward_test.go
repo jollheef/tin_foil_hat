@@ -11,7 +11,6 @@ package steward_test
 import (
 	"database/sql"
 	"log"
-	"os"
 	"testing"
 )
 
@@ -21,11 +20,9 @@ type testDB struct {
 	db *sql.DB
 }
 
-const db_path string = "/tmp/test.sql"
+const db_path string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
 
 func openDB() (t testDB, err error) {
-
-	os.Remove(db_path)
 
 	t.db, err = steward.PrivateOpenDatabase(db_path)
 
@@ -34,9 +31,10 @@ func openDB() (t testDB, err error) {
 
 func (t testDB) Close() {
 
-	t.db.Close()
+	t.db.Exec("DROP SCHEMA public CASCADE")
+	t.db.Exec("CREATE SCHEMA public")
 
-	os.Remove(db_path)
+	t.db.Close()
 }
 
 func TestOpenDatabase(t *testing.T) {

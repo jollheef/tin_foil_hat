@@ -40,12 +40,12 @@ func createStatusTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS "status" (
-		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		id	SERIAL PRIMARY KEY,
 		round	INTEGER NOT NULL,
 		team_id	INTEGER NOT NULL,
 		service_id	INTEGER NOT NULL,
 		state	INTEGER NOT NULL,
-		timestamp	INTEGER DEFAULT 'CURRENT_TIMESTAMP'
+		timestamp	TIMESTAMP with time zone DEFAULT now()
 	)`)
 
 	return
@@ -53,8 +53,8 @@ func createStatusTable(db *sql.DB) (err error) {
 
 func PutStatus(db *sql.DB, status Status) (err error) {
 
-	stmt, err := db.Prepare("INSERT INTO `status` (`round`, `team_id`, " +
-		"`service_id`, `state`) VALUES (?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO status (round, team_id, " +
+		"service_id, state) VALUES ($1, $2, $3, $4)")
 	if err != nil {
 		return
 	}
@@ -74,8 +74,8 @@ func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 	err error) {
 
 	stmt, err := db.Prepare(
-		"SELECT `state` FROM `status` WHERE `round`=? AND `team_id`=? " +
-			"AND `service_id`=?")
+		"SELECT state FROM status WHERE round=$1 AND team_id=$2 " +
+			"AND service_id=$3")
 	if err != nil {
 		return
 	}
@@ -107,9 +107,9 @@ func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 func GetState(db *sql.DB, halfStatus Status) (state ServiceState, err error) {
 
 	stmt, err := db.Prepare(
-		"SELECT `state` FROM `status` WHERE `round`=? AND `team_id`=? " +
-			"AND `service_id`=? " +
-			"AND ID = (SELECT MAX(ID) FROM `status`)")
+		"SELECT state FROM status WHERE round=$1 AND team_id=$2 " +
+			"AND service_id=$3 " +
+			"AND ID = (SELECT MAX(ID) FROM status)")
 	if err != nil {
 		return
 	}

@@ -19,10 +19,10 @@ func createCapturedFlagTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS "captured_flag" (
-		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		id	SERIAL PRIMARY KEY,
 		flag_id	INTEGER NOT NULL,
 		team_id	INTEGER NOT NULL,
-		timestamp	INTEGER DEFAULT 'CURRENT_TIMESTAMP'
+		timestamp	TIMESTAMP with time zone DEFAULT now()
 	)`)
 
 	return
@@ -31,8 +31,8 @@ func createCapturedFlagTable(db *sql.DB) (err error) {
 func CaptureFlag(db *sql.DB, flg CapturedFlag) (err error) {
 
 	stmt, err := db.Prepare(
-		"INSERT INTO `captured_flag` (`flag_id`, `team_id`) " +
-			"VALUES (?, ?)")
+		"INSERT INTO captured_flag (flag_id, team_id) " +
+			"VALUES ($1, $2)")
 	if err != nil {
 		return
 	}
@@ -50,15 +50,8 @@ func CaptureFlag(db *sql.DB, flg CapturedFlag) (err error) {
 func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 	err error) {
 
-	tx, err := db.Begin()
-	if err != nil {
-		return
-	}
-
-	defer tx.Commit()
-
-	stmt, err := tx.Prepare("SELECT `id`, `flag`, `team_id`, " +
-		"`service_id`, `cred` FROM `flag` WHERE `round`=?")
+	stmt, err := db.Prepare("SELECT id, flag, team_id, " +
+		"service_id, cred FROM flag WHERE round=$1")
 	if err != nil {
 		return
 	}
@@ -83,9 +76,8 @@ func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 			return
 		}
 
-		nstmt, err := tx.Prepare(
-			"SELECT `team_id` FROM `captured_flag` " +
-				"WHERE `flag_id`=?")
+		nstmt, err := db.Prepare(
+			"SELECT team_id FROM captured_flag WHERE flag_id=$1")
 		if err != nil {
 			return cflgs, err
 		}
@@ -110,8 +102,8 @@ func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 
 func AlreadyCaptured(db *sql.DB, flagId int) (captured bool, err error) {
 
-	stmt, err := db.Prepare("SELECT EXISTS(SELECT `id` FROM `captured_flag` " +
-		"WHERE `flag_id`=?)")
+	stmt, err := db.Prepare("SELECT EXISTS(SELECT id FROM captured_flag " +
+		"WHERE flag_id=$1)")
 	if err != nil {
 		return
 	}

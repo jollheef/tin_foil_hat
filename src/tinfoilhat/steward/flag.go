@@ -23,7 +23,7 @@ func createFlagTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS "flag" (
-		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		id	SERIAL PRIMARY KEY,
 		round	INTEGER NOT NULL,
 		flag	TEXT NOT NULL UNIQUE,
 		team_id	INTEGER NOT NULL,
@@ -36,9 +36,9 @@ func createFlagTable(db *sql.DB) (err error) {
 
 func AddFlag(db *sql.DB, flg Flag) error {
 
-	stmt, err := db.Prepare("INSERT INTO `flag` " +
-		"(`round`, `team_id`, `service_id`, `flag`, `cred`) " +
-		"VALUES (?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO flag " +
+		"(round, team_id, service_id, flag, cred) " +
+		"VALUES ($1, $2, $3, $4, $5)")
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func AddFlag(db *sql.DB, flg Flag) error {
 func FlagExist(db *sql.DB, flag string) (exist bool, err error) {
 
 	stmt, err := db.Prepare(
-		"SELECT EXISTS(SELECT `id` FROM `flag` WHERE `flag`=?)")
+		"SELECT EXISTS(SELECT id FROM flag WHERE flag=$1)")
 	if err != nil {
 		return
 	}
@@ -77,8 +77,8 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 	flg.Flag = flag
 
 	stmt, err := db.Prepare(
-		"SELECT `id`, `round`, `team_id`, `service_id`, `cred` " +
-			"FROM `flag` WHERE `flag`=?")
+		"SELECT id, round, team_id, service_id, cred " +
+			"FROM flag WHERE flag=$1")
 	if err != nil {
 		return
 	}

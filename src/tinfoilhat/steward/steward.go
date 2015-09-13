@@ -12,7 +12,7 @@ package steward
 
 import (
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 func createSchema(db *sql.DB) error {
@@ -57,7 +57,7 @@ func createSchema(db *sql.DB) error {
 
 func openDatabase(path string) (db *sql.DB, err error) {
 
-	db, err = sql.Open("sqlite3", path)
+	db, err = sql.Open("postgres", path)
 	if err != nil {
 		return
 	}
@@ -75,5 +75,5 @@ var PrivateOpenDatabase = openDatabase
 
 // defer db.Close() after open
 func OpenDatabase() (db *sql.DB, err error) {
-	return openDatabase("./foo.db")
+	return openDatabase("user=postgres dbname=tinfoilhat sslmode=disable")
 }

@@ -23,11 +23,11 @@ func createAdvisoryTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS "advisory" (
-		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		id	SERIAL PRIMARY KEY,
 		team_id	INTEGER NOT NULL,
 		score	INTEGER,
-		reviewed	INTEGER,
-		timestamp	INTEGER DEFAULT CURRENT_TIMESTAMP,
+		reviewed	BOOLEAN,
+		timestamp	TIMESTAMP with time zone DEFAULT now(),
 		text	TEXT NOT NULL
 	)`)
 
@@ -36,26 +36,18 @@ func createAdvisoryTable(db *sql.DB) (err error) {
 
 func AddAdvisory(db *sql.DB, team_id int, text string) (id int, err error) {
 
-	stmt, err := db.Prepare("INSERT INTO `advisory` (`team_id`, `text`) " +
-		"VALUES (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO advisory (team_id, text) " +
+		"VALUES ($1, $2) RETURNING id")
 	if err != nil {
 		return
 	}
 
 	defer stmt.Close()
 
-	res, err := stmt.Exec(team_id, text)
+	err = stmt.QueryRow(team_id, text).Scan(&id)
 	if err != nil {
 		return
 	}
-
-	id64, err := res.LastInsertId()
-
-	if err != nil {
-		return
-	}
-
-	id = int(id64)
 
 	return
 }
@@ -63,7 +55,7 @@ func AddAdvisory(db *sql.DB, team_id int, text string) (id int, err error) {
 func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
 
 	stmt, err := db.Prepare(
-		"UPDATE `advisory` SET `score`=?, `reviewed`=? WHERE `id`=?")
+		"UPDATE advisory SET score=$1, reviewed=$2 WHERE id=$3")
 	if err != nil {
 		return err
 	}
@@ -82,8 +74,8 @@ func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
 func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 
 	stmt, err := db.Prepare(
-		"SELECT sum(score) FROM `advisory` WHERE `team_id`=? " +
-			"AND `reviewed`=?")
+		"SELECT sum(score) FROM advisory WHERE team_id=$1 " +
+			"AND reviewed=$2")
 	if err != nil {
 		return
 	}
@@ -101,8 +93,7 @@ func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 
 	rows, err := db.Query(
-		"SELECT `id`, `text`, `score`, strftime('%s', `timestamp`) " +
-			"FROM `advisory` ")
+		"SELECT id, text, score, timestamp FROM advisory ")
 	if err != nil {
 		return
 	}
@@ -111,14 +102,11 @@ func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 
 	for rows.Next() {
 		var adv Advisory
-		var timestamp int64
 
-		err = rows.Scan(&adv.Id, &adv.Text, &adv.Score, &timestamp)
+		err = rows.Scan(&adv.Id, &adv.Text, &adv.Score, &adv.Timestamp)
 		if err != nil {
 			return
 		}
-
-		adv.Timestamp = time.Unix(timestamp, 0)
 
 		advisories = append(advisories, adv)
 	}

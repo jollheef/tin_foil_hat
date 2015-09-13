@@ -20,7 +20,7 @@ func createTeamTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS team (
-		id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		id	SERIAL PRIMARY KEY,
 		name	TEXT NOT NULL UNIQUE,
 		subnet	TEXT NOT NULL UNIQUE
 	)`)
@@ -30,33 +30,25 @@ func createTeamTable(db *sql.DB) (err error) {
 
 func AddTeam(db *sql.DB, name string, subnet string) (id int, err error) {
 
-	stmt, err := db.Prepare("INSERT INTO `team` (`name`, `subnet`) " +
-		"VALUES (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO team (name, subnet) " +
+		"VALUES ($1, $2) RETURNING id")
 	if err != nil {
 		return
 	}
 
 	defer stmt.Close()
 
-	res, err := stmt.Exec(name, subnet)
+	err = stmt.QueryRow(name, subnet).Scan(&id)
 	if err != nil {
 		return
 	}
-
-	id64, err := res.LastInsertId()
-
-	if err != nil {
-		return
-	}
-
-	id = int(id64)
 
 	return
 }
 
 func GetTeams(db *sql.DB) (teams []Team, err error) {
 
-	rows, err := db.Query("SELECT `id`, `name`, `subnet` FROM `team`")
+	rows, err := db.Query("SELECT id, name, subnet FROM team")
 	if err != nil {
 		return
 	}
@@ -79,8 +71,8 @@ func GetTeams(db *sql.DB) (teams []Team, err error) {
 
 func GetTeam(db *sql.DB, team_id int) (team Team, err error) {
 
-	stmt, err := db.Prepare("SELECT `name`, `subnet` FROM `team`" +
-		"WHERE `id`=?")
+	stmt, err := db.Prepare("SELECT name, subnet FROM team " +
+		"WHERE id=$1")
 	if err != nil {
 		return
 	}

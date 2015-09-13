@@ -9,6 +9,7 @@
 package steward_test
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -19,6 +20,9 @@ import "tinfoilhat/steward"
 func TestAddAdvisory(t *testing.T) {
 
 	db, err := openDB()
+	if err != nil {
+		log.Fatalln("Open database failed:", err)
+	}
 
 	defer db.Close()
 
@@ -59,7 +63,11 @@ func TestGetAdvisoryScore(t *testing.T) {
 	var ids []int
 
 	for i := 0; i < amount; i++ {
-		id, _ := steward.AddAdvisory(db.db, team_id, advisory_text+string(i))
+		entry_text := fmt.Sprintf("%s%d", advisory_text, i)
+		id, err := steward.AddAdvisory(db.db, team_id, entry_text)
+		if err != nil {
+			log.Fatalln("Add advisory failed:", err)
+		}
 		ids = append(ids, id)
 		steward.ReviewAdvisory(db.db, id, score)
 	}
@@ -70,7 +78,8 @@ func TestGetAdvisoryScore(t *testing.T) {
 	}
 
 	if team_score != score*amount {
-		log.Fatalln("Team advisory score not equal of sum of entries")
+		log.Fatalf("Team advisory score (%d) not equal of sum of "+
+			"entries (%d)", team_score, score*amount)
 	}
 }
 
