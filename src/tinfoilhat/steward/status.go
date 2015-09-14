@@ -29,6 +29,25 @@ const (
 	STATUS_UNKNOWN
 )
 
+func (state ServiceState) String() string {
+	switch state {
+	case STATUS_OK:
+		return "ok"
+	case STATUS_MUMBLE:
+		return "mumble"
+	case STATUS_CORRUPT:
+		return "corrupt"
+	case STATUS_DOWN:
+		return "down"
+	case STATUS_ERROR:
+		return "error"
+	case STATUS_UNKNOWN:
+		return "unknown"
+	}
+
+	return "undefined"
+}
+
 type Status struct {
 	Round     int
 	TeamId    int
