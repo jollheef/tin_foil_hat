@@ -67,3 +67,24 @@ func TestGetFlagInfo(t *testing.T) {
 		log.Fatalln("Readed flag is not equal to writed before")
 	}
 }
+
+func TestGetCred(t *testing.T) {
+
+	db, err := openDB()
+
+	defer db.Close()
+
+	flg := steward.Flag{1, "asdfasdf", 5345, 433, 353, "1:2"}
+
+	err = steward.AddFlag(db.db, flg)
+
+	flag, cred, err := steward.GetCred(db.db, flg.Round, flg.TeamId,
+		flg.ServiceId)
+	if err != nil {
+		log.Fatalln("Get cred failed:", err)
+	}
+
+	if flag != flg.Flag || cred != flg.Cred {
+		log.Fatalln("Gotten cred invalid")
+	}
+}

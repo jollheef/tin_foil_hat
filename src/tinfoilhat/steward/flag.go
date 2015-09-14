@@ -93,3 +93,21 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 
 	return
 }
+
+func GetCred(db *sql.DB, round, team, service int) (flag, cred string, err error) {
+
+	stmt, err := db.Prepare("SELECT flag, cred FROM flag WHERE round=$1" +
+		" AND team_id=$2 AND service_id=$3")
+	if err != nil {
+		return
+	}
+
+	defer stmt.Close()
+
+	err = stmt.QueryRow(round, team, service).Scan(&flag, &cred)
+	if err != nil {
+		return
+	}
+
+	return
+}
