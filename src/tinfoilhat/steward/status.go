@@ -109,7 +109,8 @@ func GetState(db *sql.DB, halfStatus Status) (state ServiceState, err error) {
 	stmt, err := db.Prepare(
 		"SELECT state FROM status WHERE round=$1 AND team_id=$2 " +
 			"AND service_id=$3 " +
-			"AND ID = (SELECT MAX(ID) FROM status)")
+			"AND ID = (SELECT MAX(ID) FROM status " +
+			"WHERE round=$1 AND team_id=$2 AND service_id=$3)")
 	if err != nil {
 		return
 	}
