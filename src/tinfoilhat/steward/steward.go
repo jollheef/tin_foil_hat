@@ -52,6 +52,11 @@ func createSchema(db *sql.DB) error {
 		return err
 	}
 
+	err = createRoundResultTable(db)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
