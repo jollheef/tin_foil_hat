@@ -10,11 +10,6 @@ package steward
 
 import "database/sql"
 
-type CapturedFlag struct {
-	Flag   Flag
-	TeamId int
-}
-
 func createCapturedFlagTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
@@ -28,7 +23,7 @@ func createCapturedFlagTable(db *sql.DB) (err error) {
 	return
 }
 
-func CaptureFlag(db *sql.DB, flg CapturedFlag) (err error) {
+func CaptureFlag(db *sql.DB, flag_id, team_id int) (err error) {
 
 	stmt, err := db.Prepare(
 		"INSERT INTO captured_flag (flag_id, team_id) " +
@@ -39,7 +34,7 @@ func CaptureFlag(db *sql.DB, flg CapturedFlag) (err error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(flg.Flag.Id, flg.TeamId)
+	_, err = stmt.Exec(flag_id, team_id)
 	if err != nil {
 		return
 	}
@@ -47,8 +42,7 @@ func CaptureFlag(db *sql.DB, flg CapturedFlag) (err error) {
 	return
 }
 
-func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
-	err error) {
+func GetCapturedFlags(db *sql.DB, round, team_id int) (flgs []Flag, err error) {
 
 	stmt, err := db.Prepare("SELECT id, flag, team_id, " +
 		"service_id, cred FROM flag WHERE round=$1")
@@ -66,34 +60,33 @@ func GetCapturedFlags(db *sql.DB, round int, team_id int) (cflgs []CapturedFlag,
 	defer rows.Close()
 
 	for rows.Next() {
-		var cflag CapturedFlag
-		cflag.Flag.Round = round
+		var flag Flag
+		flag.Round = round
 
-		err = rows.Scan(&cflag.Flag.Id, &cflag.Flag.Flag,
-			&cflag.Flag.TeamId, &cflag.Flag.ServiceId,
-			&cflag.Flag.Cred)
+		err = rows.Scan(&flag.Id, &flag.Flag, &flag.TeamId,
+			&flag.ServiceId, &flag.Cred)
 		if err != nil {
 			return
 		}
 
 		nstmt, err := db.Prepare(
-			"SELECT team_id FROM captured_flag WHERE flag_id=$1")
+			"SELECT EXISTS(SELECT id FROM captured_flag " +
+				"WHERE flag_id=$1 AND team_id=$2)")
 		if err != nil {
-			return cflgs, err
+			return flgs, err
 		}
 
 		defer nstmt.Close()
 
-		nrows, err := nstmt.Query(cflag.Flag.Id)
+		var captured bool
+
+		err = nstmt.QueryRow(flag.Id, team_id).Scan(&captured)
 		if err != nil {
-			return cflgs, err
+			return flgs, err
 		}
 
-		defer nrows.Close()
-
-		for nrows.Next() {
-			nrows.Scan(&cflag.TeamId)
-			cflgs = append(cflgs, cflag)
+		if captured {
+			flgs = append(flgs, flag)
 		}
 	}
 

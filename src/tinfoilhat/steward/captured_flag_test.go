@@ -21,11 +21,9 @@ func TestCaptureFlag(t *testing.T) {
 
 	defer db.Close()
 
-	flg := steward.CapturedFlag{steward.Flag{10, "", 0, 0, 0, ""}, 20}
-
-	err = steward.CaptureFlag(db.db, flg)
+	err = steward.CaptureFlag(db.db, 10, 20)
 	if err != nil {
-		log.Fatalln("Add status failed:", err)
+		log.Fatalln("Capture flag failed:", err)
 	}
 }
 
@@ -51,23 +49,29 @@ func TestGetCapturedFlags(t *testing.T) {
 		log.Fatalln("Add flag failed:", err)
 	}
 
-	cflg1 := steward.CapturedFlag{flg1, 20}
-	cflg2 := steward.CapturedFlag{flg2, 30}
+	err = steward.CaptureFlag(db.db, flg1.Id, 20)
+	err = steward.CaptureFlag(db.db, flg2.Id, 30)
 
-	err = steward.CaptureFlag(db.db, cflg1)
-	err = steward.CaptureFlag(db.db, cflg2)
-
-	flags, err := steward.GetCapturedFlags(db.db, round, team_id)
+	flags1, err := steward.GetCapturedFlags(db.db, round, 20)
 	if err != nil {
 		log.Fatalln("Get captured flags failed:", err)
 	}
 
-	if len(flags) != 2 {
+	if len(flags1) != 1 {
 		log.Fatalln("Get captured flags more/less than added")
 	}
 
-	if flags[0] != cflg1 || flags[1] != cflg2 {
-		log.Fatalln("Getted flags invalid", flags[0], cflg1, flags[1], cflg2)
+	flags2, err := steward.GetCapturedFlags(db.db, round, 30)
+	if err != nil {
+		log.Fatalln("Get captured flags failed:", err)
+	}
+
+	if len(flags2) != 1 {
+		log.Fatalln("Get captured flags more/less than added")
+	}
+
+	if flags1[0] != flg1 || flags2[0] != flg2 {
+		log.Fatalln("Getted flags invalid", flags1[0], flg1, flags2[0], flg2)
 	}
 }
 
@@ -80,12 +84,9 @@ func TestAlreadyCaptured(t *testing.T) {
 	flg1 := steward.Flag{1, "f", 1, 1, 1, "1:2"}
 	flg2 := steward.Flag{2, "b", 1, 1, 1, "1:2"}
 
-	cflg1 := steward.CapturedFlag{flg1, 20}
-	cflg2 := steward.CapturedFlag{flg2, 30}
+	err = steward.CaptureFlag(db.db, flg1.Id, 20)
 
-	err = steward.CaptureFlag(db.db, cflg1)
-
-	captured, err := steward.AlreadyCaptured(db.db, cflg1.Flag.Id)
+	captured, err := steward.AlreadyCaptured(db.db, flg1.Id)
 	if err != nil {
 		log.Fatalln("Already captured check failed:", err)
 	}
@@ -94,7 +95,7 @@ func TestAlreadyCaptured(t *testing.T) {
 		log.Fatalln("Captured flag is not captured")
 	}
 
-	captured, err = steward.AlreadyCaptured(db.db, cflg2.Flag.Id)
+	captured, err = steward.AlreadyCaptured(db.db, flg2.Id)
 	if err != nil {
 		log.Fatalln("Already captured check failed:", err)
 	}
