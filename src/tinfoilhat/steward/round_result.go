@@ -14,8 +14,8 @@ type RoundResult struct {
 	Id           int
 	TeamId       int
 	Round        int
-	AttackScore  int
-	DefenceScore int
+	AttackScore  float64
+	DefenceScore float64
 }
 
 func createRoundResultTable(db *sql.DB) (err error) {
@@ -25,9 +25,10 @@ func createRoundResultTable(db *sql.DB) (err error) {
 		id	SERIAL PRIMARY KEY,
 		team_id	INTEGER NOT NULL,
 		round	INTEGER,
-		attack_score	INTEGER,
-		defence_score	INTEGER
-	)`)
+		attack_score	FLOAT(24),
+		defence_score	FLOAT(24),
+		UNIQUE (team_id, round)
+	);`)
 
 	return
 }
