@@ -75,7 +75,7 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 			return err
 		}
 
-		res.DefenceScore = 1 + def
+		res.DefenceScore = def * 2
 
 		round_res[team] = res
 	}
@@ -98,6 +98,9 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 			res := round_res[attacked_team]
 			res.DefenceScore -= per_service
+			if res.DefenceScore < 0 {
+				res.DefenceScore = 0
+			}
 			round_res[attacked_team] = res
 
 			attack_res := round_res[team]
