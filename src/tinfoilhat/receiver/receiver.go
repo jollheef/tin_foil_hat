@@ -174,7 +174,7 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		return
 	}
 
-	err = steward.CaptureFlag(db, steward.CapturedFlag{flg, flg.TeamId})
+	err = steward.CaptureFlag(db, flg.Id, flg.TeamId)
 	if err != nil {
 		log.Println("\tCapture flag failed:", err)
 		fmt.Fprintf(conn, InternalErrorMsg)
