@@ -1,2 +1,4 @@
 pkg
 bin
+src/tinfoilhat/checker/python-api/__pycache__/
+
