@@ -8,7 +8,10 @@
 
 package steward
 
-import "database/sql"
+import (
+	"database/sql"
+	"sync"
+)
 
 type RoundResult struct {
 	Id           int
@@ -33,10 +36,16 @@ func createRoundResultTable(db *sql.DB) (err error) {
 	return
 }
 
+var AddRoundResultMutex sync.Mutex // Use as FIFO queue
+
 func AddRoundResult(db *sql.DB, res RoundResult) (id int, err error) {
 
+	AddRoundResultMutex.Lock()
+
+	defer AddRoundResultMutex.Unlock()
+
 	if res.Round > 1 { // if not first round
-		previous, err := GetRoundResult(db, res.TeamId, res.Round-1)
+		previous, err := GetLastResult(db, res.TeamId)
 		if err != nil {
 			return id, err
 		}
