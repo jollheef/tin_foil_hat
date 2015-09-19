@@ -50,23 +50,26 @@ func Pulse(db *sql.DB, priv *rsa.PrivateKey, start_time time.Time,
 	timeout := 100 * time.Millisecond
 
 	log.Println("Wait start time...")
-	if Wait(start_time, timeout) {
+	if Wait(start_time, timeout) || time.Now().Before(lunch_start_time) {
+		log.Println("game run")
 		err = game.Run(lunch_start_time)
 		if err != nil {
 			return
 		}
 	}
 
+	log.Println("Wait lunch time")
 	Wait(lunch_start_time, timeout)
 
 	log.Println("Lunch...")
-	if Wait(lunch_end_time, timeout) {
+	if Wait(lunch_end_time, timeout) || time.Now().Before(end_time) {
 		err = game.Run(end_time)
 		if err != nil {
 			return
 		}
 	}
 
+	log.Println("Wait end time")
 	Wait(end_time, timeout)
 
 	return
