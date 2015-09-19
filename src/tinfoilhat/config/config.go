@@ -34,7 +34,10 @@ type Receiver struct {
 }
 
 type Config struct {
-	Database struct{ Connection string }
+	Database struct {
+		Connection     string
+		MaxConnections int
+	}
 	Pulse    Pulse
 	Receiver Receiver
 	Teams    []steward.Team

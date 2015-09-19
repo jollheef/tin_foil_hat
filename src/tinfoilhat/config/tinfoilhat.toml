@@ -1,5 +1,6 @@
 [Database]
 connection = "user=postgres dbname=tinfoilhat sslmode=disable"
+max_connections = 90 # should be less than same value in postgresql.conf
 
 [Pulse]
 start = "Aug 2 15:04 2015"
