@@ -24,7 +24,7 @@ const db_path string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
 
 func openDB() (t testDB, err error) {
 
-	t.db, err = steward.PrivateOpenDatabase(db_path)
+	t.db, err = steward.OpenDatabase(db_path)
 
 	return
 }
@@ -42,6 +42,21 @@ func TestOpenDatabase(t *testing.T) {
 	db, err := openDB()
 	if err != nil {
 		log.Fatalln("Database open failed:", err)
+	}
+
+	defer db.Close()
+}
+
+func TestCleanDatabase(*testing.T) {
+
+	db, err := openDB()
+	if err != nil {
+		log.Fatalln("Database open failed:", err)
+	}
+
+	err = steward.CleanDatabase(db.db)
+	if err != nil {
+		log.Fatalln("Clean database failed:", err)
 	}
 
 	defer db.Close()

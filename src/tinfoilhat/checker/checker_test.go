@@ -33,11 +33,11 @@ const db_path string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
 
 func openDB() (t testDB, err error) {
 
-	t.db, err = steward.PrivateOpenDatabase(db_path)
+	t.db, err = steward.OpenDatabase(db_path)
 
 	t.Close()
 
-	t.db, err = steward.PrivateOpenDatabase(db_path)
+	t.db, err = steward.OpenDatabase(db_path)
 
 	return
 }

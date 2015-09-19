@@ -17,11 +17,6 @@ import (
 	"time"
 )
 
-import (
-	"tinfoilhat/steward"
-	"tinfoilhat/vexillary"
-)
-
 func Wait(end time.Time, timeout time.Duration) (waited bool) {
 
 	if time.Now().After(end) {
@@ -48,7 +43,7 @@ func Pulse(db *sql.DB, priv *rsa.PrivateKey, start_time time.Time,
 
 	log.Println("Contest start time", start_time)
 
-	game, err := NewGame(db, priv, round, timeout_between_check)
+	game, err := NewGame(db, priv, round_len, check_timeout)
 
 	defer game.Over()
 
@@ -73,4 +68,6 @@ func Pulse(db *sql.DB, priv *rsa.PrivateKey, start_time time.Time,
 	}
 
 	Wait(end_time, timeout)
+
+	return
 }

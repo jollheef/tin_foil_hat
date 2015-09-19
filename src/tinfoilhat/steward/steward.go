@@ -60,7 +60,8 @@ func createSchema(db *sql.DB) error {
 	return nil
 }
 
-func openDatabase(path string) (db *sql.DB, err error) {
+// defer db.Close() after open
+func OpenDatabase(path string) (db *sql.DB, err error) {
 
 	db, err = sql.Open("postgres", path)
 	if err != nil {
@@ -75,10 +76,17 @@ func openDatabase(path string) (db *sql.DB, err error) {
 	return
 }
 
-// for test purpose
-var PrivateOpenDatabase = openDatabase
+func CleanDatabase(db *sql.DB) (err error) {
 
-// defer db.Close() after open
-func OpenDatabase() (db *sql.DB, err error) {
-	return openDatabase("user=postgres dbname=tinfoilhat sslmode=disable")
+	for _, table := range []string{"team", "advisory", "captured_flag",
+		"flag", "service", "status", "round", "round_result"} {
+
+		_, err = db.Exec("DELETE FROM " + table)
+		if err != nil {
+			return
+		}
+
+	}
+
+	return
 }
