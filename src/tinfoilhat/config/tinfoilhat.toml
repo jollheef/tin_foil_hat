@@ -1,0 +1,31 @@
+[Database]
+connection = "user=postgres dbname=tinfoilhat sslmode=disable"
+
+[Pulse]
+start = "Aug 2 15:04 2015"
+half = "4h"
+lunch = "1h"
+round_len = "2m"
+check_timeout = "30s"
+
+[Receiver]
+addr = ":8080"
+receive_timeout = "1s"
+
+[[Teams]]
+name = "FooTeam"
+subnet = "10.0.1.0/24"
+
+[[Teams]]
+name = "BarTeam"
+subnet = "10.0.2.0/24"
+
+[[Services]]
+name = "FooService"
+port = 53000
+checker_path = "/path/too/foo_checker.py"
+
+[[Services]]
+name = "BarService"
+port = 63000
+checker_path = "/path/too/bar_checker.py"
