@@ -83,3 +83,27 @@ func GetRoundResult(db *sql.DB, team_id, round int) (res RoundResult, err error)
 
 	return
 }
+
+func GetLastResult(db *sql.DB, team_id int) (res RoundResult, err error) {
+
+	stmt, err := db.Prepare("SELECT id, round, attack_score, defence_score " +
+		"FROM round_result WHERE team_id=$1 " +
+		"AND round = (SELECT MAX(round) FROM round_result " +
+		"WHERE team_id=$1)")
+	if err != nil {
+		return
+	}
+
+	defer stmt.Close()
+
+	err = stmt.QueryRow(team_id).Scan(&res.Id, &res.Round, &res.AttackScore,
+		&res.DefenceScore)
+	if err != nil {
+		return
+	}
+
+	res.TeamId = team_id
+
+	return
+
+}

@@ -60,9 +60,18 @@ func TestGetRoundResult(t *testing.T) {
 		log.Fatalln("Add round result failed:", err)
 	}
 
+	last_res, err := steward.GetLastResult(db.db, second.TeamId)
+	if err != nil {
+		log.Fatalln("Get last result failed:", err)
+	}
+
 	res, err := steward.GetRoundResult(db.db, second.TeamId, second.Round)
 	if err != nil {
 		log.Fatalln("Get round result failed:", err)
+	}
+
+	if res != last_res {
+		log.Fatalln("Last result != round result", res, last_res)
 	}
 
 	attack_sum := first.AttackScore + second.AttackScore
