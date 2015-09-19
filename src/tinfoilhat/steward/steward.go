@@ -78,14 +78,20 @@ func OpenDatabase(path string) (db *sql.DB, err error) {
 
 func CleanDatabase(db *sql.DB) (err error) {
 
-	for _, table := range []string{"team", "advisory", "captured_flag",
-		"flag", "service", "status", "round", "round_result"} {
+	tables := []string{"team", "advisory", "captured_flag", "flag",
+		"service", "status", "round", "round_result"}
+
+	for _, table := range tables {
 
 		_, err = db.Exec("DELETE FROM " + table)
 		if err != nil {
 			return
 		}
 
+		_, err = db.Exec("ALTER SEQUENCE " + table + "_id_seq RESTART WITH 1;")
+		if err != nil {
+			return
+		}
 	}
 
 	return
