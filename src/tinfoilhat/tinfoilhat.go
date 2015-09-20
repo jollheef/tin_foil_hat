@@ -13,6 +13,7 @@ package main
 import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
+	"time"
 )
 
 import (
@@ -44,6 +45,8 @@ func main() {
 	if err != nil {
 		log.Fatalln("Open database fail:", err)
 	}
+
+	defer db.Close()
 
 	db.SetMaxOpenConns(config.Database.MaxConnections)
 
@@ -85,7 +88,11 @@ func main() {
 		config.Receiver.ReceiveTimeout.Duration)
 
 	go scoreboard.Scoreboard(db, config.Scoreboard.WwwPath,
-		config.Scoreboard.Addr, config.Scoreboard.UpdateTimeout.Duration)
+		config.Scoreboard.Addr,
+		config.Scoreboard.UpdateTimeout.Duration,
+		config.Pulse.Start.Time,
+		config.Pulse.Half.Duration,
+		config.Pulse.Lunch.Duration)
 
 	err = pulse.Pulse(db, priv,
 		config.Pulse.Start.Time,
@@ -95,5 +102,10 @@ func main() {
 		config.Pulse.CheckTimeout.Duration)
 	if err != nil {
 		log.Fatalln("Game error:", err)
+	}
+
+	log.Println("It's now safe to turn off you computer")
+	for {
+		time.Sleep(time.Hour)
 	}
 }

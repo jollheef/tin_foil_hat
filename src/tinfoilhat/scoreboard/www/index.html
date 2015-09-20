@@ -4,29 +4,32 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IBST.PSU Scoreboard</title>
+    <title>IBST.PSU CTF Scoreboard</title>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
 
     <script type="text/javascript">
-      var serversocket = new WebSocket("ws://localhost:8000/scoreboard");
+      var scoreboard = new WebSocket("ws://" + location.host + "/scoreboard");
 
-      serversocket.onmessage = function(e) {
-      document.getElementById('scoreboard-table').innerHTML = e.data
+      scoreboard.onmessage = function(e) {
+        document.getElementById('scoreboard-table').innerHTML = e.data
       }
 
+      var info = new WebSocket("ws://" + location.host + "/info");
+
+      info.onmessage = function(e) {
+        document.getElementById('info').innerHTML = e.data
+      }
     </script>
   </head>
   <body>
-    <br>
-    <center><h1>IBST.PSU CTF III Scoreboard</h1></center>
-    <br>
-    <div class="container">
-      <table id="scoreboard-table" class="table fancy-table">
-      </table>
-    </div>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha/js/bootstrap.min.js"></script>
-  </body>
+     <div class="page-header"><center><h1>IBST.PSU CTF III Final Scoreboard</h1></center></div>
+     <div style="padding: 15px;">
+       <div id="info"></div>
+       <br>
+       <table id="scoreboard-table" class="table table-hover"></table>
+       <script src="js/bootstrap.min.js"></script>
+     </div>
+</body>
 </html>
