@@ -9,14 +9,20 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
 
     <script type="text/javascript">
-      var scoreboard = new WebSocket("ws://" + location.host + "/advisory");
+      var advisory = new WebSocket("ws://" + location.host + "/advisory");
 
-      scoreboard.onmessage = function(e) {
+      advisory.onmessage = function(e) {
         document.getElementById('advisory').innerHTML = e.data
       }
     </script>
   </head>
   <body>
+    <ul class="nav nav-tabs">
+      <li><a href="index.html">Scoreboard</a></li>
+      <li class="active">
+        <a href="#">Advisory</a>
+      </li>
+    </ul>
     <div class="page-header"><center><h1>IBST.PSU CTF III Final Security Advisory board</h1></center></div>
     <div style="padding: 15px;">
       <div id="advisory"></div>
