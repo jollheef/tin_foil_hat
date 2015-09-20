@@ -61,21 +61,26 @@ func ScoreboardHandler(ws *websocket.Conn) {
 	}
 }
 
+func GetInfo() string {
+
+	alert_type := ""
+
+	if contest_status == CONTEST_RUNNING {
+		alert_type = "alert-danger"
+	}
+
+	info := fmt.Sprintf(
+		`<span class="alert %s">Contest %s</span>`+
+			`<span class="alert">Round %d</span>`+
+			`<span class="alert">Updated at %s</span>`,
+		alert_type, contest_status, round, last_updated)
+
+	return info
+}
+
 func InfoHandler(ws *websocket.Conn) {
 	for {
-		alert_type := ""
-
-		if contest_status == CONTEST_RUNNING {
-			alert_type = "alert-danger"
-		}
-
-		info := fmt.Sprintf(
-			`<span class="alert %s">Contest %s</span>`+
-				`<span class="alert">Round %d</span>`+
-				`<span class="alert">Updated at %s</span>`,
-			alert_type, contest_status, round, last_updated)
-
-		_, err := fmt.Fprintf(ws, info)
+		_, err := fmt.Fprintf(ws, GetInfo())
 		if err != nil {
 			log.Println("Socket closed:", err)
 			return
@@ -148,6 +153,7 @@ func Scoreboard(db *sql.DB, www_path, addr string, update_timeout time.Duration,
 	http.Handle("/advisory", websocket.Handler(AdvisoryHandler))
 	http.Handle("/info", websocket.Handler(InfoHandler))
 	http.Handle("/", http.FileServer(http.Dir(www_path)))
+	http.HandleFunc("/static-scoreboard", StaticScoreboard)
 
 	log.Println("Launching scoreboard at", addr)
 
