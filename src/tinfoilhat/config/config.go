@@ -38,6 +38,11 @@ type Config struct {
 		Connection     string
 		MaxConnections int
 	}
+	Scoreboard struct {
+		WwwPath       string
+		Addr          string
+		UpdateTimeout Duration
+	}
 	Pulse    Pulse
 	Receiver Receiver
 	Teams    []steward.Team

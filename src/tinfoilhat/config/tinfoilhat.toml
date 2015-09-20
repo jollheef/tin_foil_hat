@@ -2,6 +2,11 @@
 connection = "user=postgres dbname=tinfoilhat sslmode=disable"
 max_connections = 90 # should be less than same value in postgresql.conf
 
+[Scoreboard]
+www_path = "/home/mikhail/dev/tin_foil_hat/src/tinfoilhat/scoreboard/www"
+addr = ":8000" # do not forget change it in index.html
+update_timeout = "1s"
+
 [Pulse]
 start = "Aug 2 15:04 2015"
 half = "4h"
