@@ -87,6 +87,9 @@ func main() {
 	go receiver.FlagReceiver(db, priv, config.FlagReceiver.Addr,
 		config.FlagReceiver.ReceiveTimeout.Duration)
 
+	go receiver.AdvisoryReceiver(db, config.AdvisoryReceiver.Addr,
+		config.AdvisoryReceiver.ReceiveTimeout.Duration)
+
 	go scoreboard.Scoreboard(db, config.Scoreboard.WwwPath,
 		config.Scoreboard.Addr,
 		config.Scoreboard.UpdateTimeout.Duration,
