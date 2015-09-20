@@ -80,9 +80,6 @@ func NewGame(db *sql.DB, priv *rsa.PrivateKey, round_len time.Duration,
 }
 
 func (g Game) Over() {
-
-	g.db.Close()
-
 	log.Println("Game over")
 }
 
