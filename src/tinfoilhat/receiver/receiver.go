@@ -184,7 +184,7 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 	fmt.Fprintf(conn, CapturedMsg)
 }
 
-func Receiver(db *sql.DB, priv *rsa.PrivateKey, addr string, timeout time.Duration) {
+func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string, timeout time.Duration) {
 
 	log.Println("Launching receiver at", addr, "...")
 

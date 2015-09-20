@@ -84,8 +84,8 @@ func main() {
 		log.Fatalln("Generate key fail:", err)
 	}
 
-	go receiver.Receiver(db, priv, config.Receiver.Addr,
-		config.Receiver.ReceiveTimeout.Duration)
+	go receiver.FlagReceiver(db, priv, config.FlagReceiver.Addr,
+		config.FlagReceiver.ReceiveTimeout.Duration)
 
 	go scoreboard.Scoreboard(db, config.Scoreboard.WwwPath,
 		config.Scoreboard.Addr,

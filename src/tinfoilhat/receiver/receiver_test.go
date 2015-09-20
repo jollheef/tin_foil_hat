@@ -157,7 +157,7 @@ func TestReceiver(t *testing.T) {
 		log.Fatalln("New round failed:", err)
 	}
 
-	go receiver.Receiver(db.db, priv, addr, time.Nanosecond)
+	go receiver.FlagReceiver(db.db, priv, addr, time.Nanosecond)
 
 	time.Sleep(time.Second) // wait for init listener
 
@@ -276,7 +276,7 @@ func TestReceiver(t *testing.T) {
 	new_addr := "127.0.0.1:64000"
 
 	// Start new receiver for test timeouts
-	go receiver.Receiver(db.db, priv, new_addr, time.Second)
+	go receiver.FlagReceiver(db.db, priv, new_addr, time.Second)
 
 	time.Sleep(time.Second) // wait for init listener
 

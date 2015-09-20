@@ -28,7 +28,12 @@ type Pulse struct {
 	CheckTimeout Duration
 }
 
-type Receiver struct {
+type FlagReceiver struct {
+	Addr           string
+	ReceiveTimeout Duration
+}
+
+type AdvisoryReceiver struct {
 	Addr           string
 	ReceiveTimeout Duration
 }
@@ -43,10 +48,11 @@ type Config struct {
 		Addr          string
 		UpdateTimeout Duration
 	}
-	Pulse    Pulse
-	Receiver Receiver
-	Teams    []steward.Team
-	Services []steward.Service
+	Pulse            Pulse
+	FlagReceiver     FlagReceiver
+	AdvisoryReceiver AdvisoryReceiver
+	Teams            []steward.Team
+	Services         []steward.Service
 }
 
 type Duration struct {
