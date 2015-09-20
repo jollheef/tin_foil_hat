@@ -129,3 +129,56 @@ func TestGetAdvisories(t *testing.T) {
 	}
 
 }
+
+func TestHideUnhideAdvisory(*testing.T) {
+
+	db, err := openDB()
+
+	defer db.Close()
+
+	adv := steward.Advisory{Text: "pony"}
+
+	team_id := 10
+
+	adv.Id, err = steward.AddAdvisory(db.db, team_id, adv.Text)
+	if err != nil {
+		log.Fatalln("Add advisory fail:", err)
+	}
+
+	advisories, err := steward.GetAdvisories(db.db)
+	if err != nil {
+		log.Fatalln("Get advisory fail:", err)
+	}
+
+	if len(advisories) != 1 {
+		log.Fatalln("No added advisory")
+	}
+
+	err = steward.HideAdvisory(db.db, adv.Id, true)
+	if err != nil {
+		log.Fatalln("Hide advisory fail:", err)
+	}
+
+	advisories, err = steward.GetAdvisories(db.db)
+	if err != nil {
+		log.Fatalln("Get advisory fail:", err)
+	}
+
+	if len(advisories) != 0 {
+		log.Fatalln("Hide advisory does not work")
+	}
+
+	err = steward.HideAdvisory(db.db, adv.Id, false)
+	if err != nil {
+		log.Fatalln("Hide advisory fail:", err)
+	}
+
+	advisories, err = steward.GetAdvisories(db.db)
+	if err != nil {
+		log.Fatalln("Get advisory fail:", err)
+	}
+
+	if len(advisories) != 1 {
+		log.Fatalln("Unhide advisory does not work")
+	}
+}

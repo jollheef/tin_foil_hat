@@ -28,6 +28,7 @@ func createAdvisoryTable(db *sql.DB) (err error) {
 		team_id	INTEGER NOT NULL,
 		score	INTEGER DEFAULT 0,
 		reviewed	BOOLEAN DEFAULT false,
+		hided	BOOLEAN DEFAULT false,
 		timestamp	TIMESTAMP with time zone DEFAULT now(),
 		text	TEXT NOT NULL
 	)`)
@@ -72,6 +73,25 @@ func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
 	return nil
 }
 
+func HideAdvisory(db *sql.DB, advisory_id int, hide bool) error {
+
+	stmt, err := db.Prepare(
+		"UPDATE advisory SET hided=$1 WHERE id=$2")
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(hide, advisory_id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 
 	stmt, err := db.Prepare(
@@ -94,7 +114,8 @@ func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 
 	rows, err := db.Query(
-		"SELECT id, text, score, timestamp, reviewed FROM advisory ")
+		"SELECT id, text, score, timestamp, reviewed FROM advisory " +
+			"WHERE hided=false")
 	if err != nil {
 		return
 	}

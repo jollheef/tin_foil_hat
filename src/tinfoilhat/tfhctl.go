@@ -32,6 +32,12 @@ var (
 	advReview   = adv.Command("review", "Review advisory.")
 	advReviewId = advReview.Arg("id", "advisory id").Required().Int()
 	advScore    = advReview.Arg("score", "advisory id").Required().Int()
+
+	advHide   = adv.Command("hide", "Hide advisory.")
+	advHideId = advHide.Arg("id", "advisory id").Required().Int()
+
+	advUnhide   = adv.Command("unhide", "Unhide advisory.")
+	advUnhideId = advUnhide.Arg("id", "advisory id").Required().Int()
 )
 
 func main() {
@@ -73,6 +79,18 @@ func main() {
 		err := steward.ReviewAdvisory(db, *advReviewId, *advScore)
 		if err != nil {
 			log.Fatalln("Advisory review fail:", err)
+		}
+
+	case "advisory hide":
+		err := steward.HideAdvisory(db, *advHideId, true)
+		if err != nil {
+			log.Fatalln("Advisory hide fail:", err)
+		}
+
+	case "advisory unhide":
+		err := steward.HideAdvisory(db, *advUnhideId, false)
+		if err != nil {
+			log.Fatalln("Advisory unhide fail:", err)
 		}
 	}
 }
