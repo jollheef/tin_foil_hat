@@ -95,9 +95,11 @@ func TestGetAdvisories(t *testing.T) {
 
 	adv1.Text = "adv1_test"
 	adv1.Score = 10
+	adv1.Reviewed = true
 
 	adv2.Text = "adv2_test"
 	adv2.Score = 20
+	adv2.Reviewed = true
 
 	adv1.Id, _ = steward.AddAdvisory(db.db, team_id, adv1.Text)
 	adv2.Id, _ = steward.AddAdvisory(db.db, team_id, adv2.Text)

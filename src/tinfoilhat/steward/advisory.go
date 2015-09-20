@@ -15,6 +15,7 @@ import "database/sql"
 type Advisory struct {
 	Id        int
 	Text      string
+	Reviewed  bool
 	Score     int
 	Timestamp time.Time
 }
@@ -25,8 +26,8 @@ func createAdvisoryTable(db *sql.DB) (err error) {
 	CREATE TABLE IF NOT EXISTS "advisory" (
 		id	SERIAL PRIMARY KEY,
 		team_id	INTEGER NOT NULL,
-		score	INTEGER,
-		reviewed	BOOLEAN,
+		score	INTEGER DEFAULT 0,
+		reviewed	BOOLEAN DEFAULT false,
 		timestamp	TIMESTAMP with time zone DEFAULT now(),
 		text	TEXT NOT NULL
 	)`)
@@ -93,7 +94,7 @@ func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 
 	rows, err := db.Query(
-		"SELECT id, text, score, timestamp FROM advisory ")
+		"SELECT id, text, score, timestamp, reviewed FROM advisory ")
 	if err != nil {
 		return
 	}
@@ -103,7 +104,8 @@ func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 	for rows.Next() {
 		var adv Advisory
 
-		err = rows.Scan(&adv.Id, &adv.Text, &adv.Score, &adv.Timestamp)
+		err = rows.Scan(&adv.Id, &adv.Text, &adv.Score, &adv.Timestamp,
+			&adv.Reviewed)
 		if err != nil {
 			return
 		}
