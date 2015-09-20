@@ -53,7 +53,7 @@ func (tr TeamResult) ToHTML() string {
 		case steward.STATUS_UNKNOWN:
 			label = "default"
 		default:
-			label = "danger"
+			label = "important"
 		}
 
 		status += fmt.Sprintf(
