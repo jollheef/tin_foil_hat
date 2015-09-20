@@ -19,6 +19,7 @@ import (
 	"tinfoilhat/config"
 	"tinfoilhat/pulse"
 	"tinfoilhat/receiver"
+	"tinfoilhat/scoreboard"
 	"tinfoilhat/steward"
 	"tinfoilhat/vexillary"
 )
@@ -82,6 +83,9 @@ func main() {
 
 	go receiver.Receiver(db, priv, config.Receiver.Addr,
 		config.Receiver.ReceiveTimeout.Duration)
+
+	go scoreboard.Scoreboard(db, config.Scoreboard.WwwPath,
+		config.Scoreboard.Addr, config.Scoreboard.UpdateTimeout.Duration)
 
 	err = pulse.Pulse(db, priv,
 		config.Pulse.Start.Time,
