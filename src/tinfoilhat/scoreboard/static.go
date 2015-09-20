@@ -29,9 +29,7 @@ func StaticScoreboard(w http.ResponseWriter, r *http.Request) {
 	  </head>
 	  <body>
 	    <ul class="nav nav-tabs">
-	      <li class="active">
-	        <a href="/">Scoreboard</a>
-	      </li>
+	      <li><a href="/">Scoreboard</a></li>
 	      <li><a href="advisory.html">Advisory</a></li>
 	    </ul>
 	    <div class="page-header">
