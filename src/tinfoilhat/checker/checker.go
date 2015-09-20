@@ -157,7 +157,7 @@ func CheckFlags(db *sql.DB, round int, teams []steward.Team,
 
 				// First check service logic
 				state, _ := checkService(db, round, team, svc)
-				if state == steward.STATUS_OK {
+				if state == steward.STATUS_UP {
 					// If logic is correct, do flag check
 					state, _ = getFlag(db, round, team, svc)
 				}

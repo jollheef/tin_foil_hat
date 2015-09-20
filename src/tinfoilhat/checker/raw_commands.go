@@ -27,7 +27,7 @@ func exit_status(no int) string {
 func parseState(err error) (steward.ServiceState, error) {
 
 	if err == nil {
-		return steward.STATUS_OK, nil
+		return steward.STATUS_UP, nil
 	}
 
 	switch err.Error() {

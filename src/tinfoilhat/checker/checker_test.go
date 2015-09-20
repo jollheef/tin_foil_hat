@@ -243,7 +243,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Put flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_OK)
+	checkServicesStatus(db.db, round, teams, services, steward.STATUS_UP)
 
 	log.Println("Check flags of correct service...")
 
@@ -252,7 +252,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Check flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_OK)
+	checkServicesStatus(db.db, round, teams, services, steward.STATUS_UP)
 
 	service.ClearFlags()
 

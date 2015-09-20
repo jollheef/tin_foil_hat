@@ -31,7 +31,7 @@ func CountStatesResult(db *sql.DB, round, team int,
 
 	ok := 0.0
 	for _, state := range states {
-		if state == steward.STATUS_OK {
+		if state == steward.STATUS_UP {
 			ok++
 		}
 	}

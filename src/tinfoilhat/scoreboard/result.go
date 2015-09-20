@@ -36,7 +36,7 @@ func (tr TeamResult) ToHTML() string {
 		var label string
 
 		switch s {
-		case steward.STATUS_OK:
+		case steward.STATUS_UP:
 			label = "success"
 		case steward.STATUS_MUMBLE:
 		case steward.STATUS_CORRUPT:

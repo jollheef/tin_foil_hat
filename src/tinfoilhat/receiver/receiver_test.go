@@ -174,7 +174,7 @@ func TestReceiver(t *testing.T) {
 
 	// Flag must be captured only if service status ok
 	steward.PutStatus(db.db, steward.Status{first_round, team_id, service_id,
-		steward.STATUS_OK})
+		steward.STATUS_UP})
 
 	testFlag(addr, flag, receiver.CapturedMsg)
 
@@ -270,7 +270,7 @@ func TestReceiver(t *testing.T) {
 	testFlag(addr, flag5, receiver.ServiceNotUpMsg)
 
 	steward.PutStatus(db.db, steward.Status{round_id, team_id, service_id,
-		steward.STATUS_OK})
+		steward.STATUS_UP})
 
 	// If attempts limit exceeded flag must not be captured
 	new_addr := "127.0.0.1:64000"

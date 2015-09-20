@@ -152,7 +152,7 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		steward.STATUS_UNKNOWN}
 	state, err := steward.GetState(db, halfStatus)
 
-	if state != steward.STATUS_OK {
+	if state != steward.STATUS_UP {
 		log.Printf("\t%s service not ok, cannot capture", team.Name)
 		fmt.Fprintf(conn, ServiceNotUpMsg)
 		return

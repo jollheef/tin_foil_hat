@@ -15,7 +15,7 @@ type ServiceState int
 const (
 	// Service is online, serves the requests, stores and
 	// returns flags and behaves as expected
-	STATUS_OK ServiceState = iota
+	STATUS_UP ServiceState = iota
 	// Service is online, but behaves not as expected, e.g. if HTTP server
 	// listens the port, but doesn't respond on request
 	STATUS_MUMBLE
@@ -31,7 +31,7 @@ const (
 
 func (state ServiceState) String() string {
 	switch state {
-	case STATUS_OK:
+	case STATUS_UP:
 		return "ok"
 	case STATUS_MUMBLE:
 		return "mumble"

@@ -68,9 +68,9 @@ func TestCountStatesResult(*testing.T) {
 
 	svc := steward.Service{s, "foo", 8080, ""}
 
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_OK})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_OK})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_OK})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
 	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_MUMBLE})
 
 	res, err := counter.CountStatesResult(db.db, r, t, svc)
@@ -104,9 +104,9 @@ func TestCountDefenceResult(*testing.T) {
 	services = append(services, steward.Service{3, "baz", 8082, ""})
 	services = append(services, steward.Service{4, "qwe", 8083, ""})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_OK})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_OK})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_OK})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
 	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_DOWN})
 
 	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
@@ -114,11 +114,11 @@ func TestCountDefenceResult(*testing.T) {
 	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
 	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_OK})
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_OK})
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_OK})
+	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_UP})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_OK})
+	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_UP})
 	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_DOWN})
 	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_DOWN})
 	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_DOWN})
@@ -206,7 +206,7 @@ func TestCountRound(*testing.T) {
 			}
 
 			err = steward.PutStatus(db.db, steward.Status{round,
-				team.Id, svc.Id, steward.STATUS_OK})
+				team.Id, svc.Id, steward.STATUS_UP})
 			if err != nil {
 				log.Fatalln("Put status to database failed:", err)
 			}

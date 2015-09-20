@@ -39,7 +39,7 @@ func TestGetAllStatus(t *testing.T) {
 	team := 2
 	service := 3
 
-	status1 := steward.Status{round, team, service, steward.STATUS_OK}
+	status1 := steward.Status{round, team, service, steward.STATUS_UP}
 	status2 := steward.Status{round, team, service, steward.STATUS_MUMBLE}
 	status3 := steward.Status{round, team, service, steward.STATUS_CORRUPT}
 
@@ -59,7 +59,7 @@ func TestGetAllStatus(t *testing.T) {
 		log.Fatalln("Get states moar/less than put:", err)
 	}
 
-	if states[0] != steward.STATUS_OK ||
+	if states[0] != steward.STATUS_UP ||
 		states[1] != steward.STATUS_MUMBLE ||
 		states[2] != steward.STATUS_CORRUPT {
 		log.Fatalln("Get states invalid")
@@ -76,7 +76,7 @@ func TestGetServiceCurrentStatus(t *testing.T) {
 	team := 2
 	service := 3
 
-	status1 := steward.Status{round, team, service, steward.STATUS_OK}
+	status1 := steward.Status{round, team, service, steward.STATUS_UP}
 
 	steward.PutStatus(db.db, status1)
 
@@ -88,7 +88,7 @@ func TestGetServiceCurrentStatus(t *testing.T) {
 		log.Fatalln("Get state failed:", err)
 	}
 
-	if state != steward.STATUS_OK {
+	if state != steward.STATUS_UP {
 		log.Fatalln("Get states invalid")
 	}
 
