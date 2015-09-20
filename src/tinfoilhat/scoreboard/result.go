@@ -28,6 +28,15 @@ type TeamResult struct {
 	Status          []steward.ServiceState
 }
 
+func td(s string, best bool) string {
+	if best {
+		return `<td bgcolor="#00AAAA"><font color="#FFFFFF">` +
+			s + "</td>"
+	} else {
+		return `<td>` + s + `</td>`
+	}
+}
+
 func (tr TeamResult) ToHTML() string {
 
 	var status string
@@ -52,9 +61,27 @@ func (tr TeamResult) ToHTML() string {
 			label, s.String())
 	}
 
-	return fmt.Sprintf("<tr><td>%d</td><td>%s</td><td>%05.2f&#37</td>"+
-		"<td>%.3f</td><td>%.3f</td><td>%d</td>%10s</tr>", tr.Rank, tr.Name,
-		tr.ScorePercent, tr.Attack, tr.Defence, tr.Advisory, status)
+	var score_best, attack_best, defence_best, advisory_best bool
+	if tr.ScorePercent == 100 {
+		score_best = true
+	}
+	if tr.AttackPercent == 100 {
+		attack_best = true
+	}
+	if tr.DefencePercent == 100 {
+		defence_best = true
+	}
+	if tr.AdvisoryPercent == 100 {
+		advisory_best = true
+	}
+
+	info := fmt.Sprintf("<td>%d</td><td>%s</td>", tr.Rank, tr.Name)
+	score := td(fmt.Sprintf("%05.2f&#37", tr.ScorePercent), score_best)
+	attack := td(fmt.Sprintf("%.3f", tr.Attack), attack_best)
+	defence := td(fmt.Sprintf("%.3f", tr.Defence), defence_best)
+	advisory := td(fmt.Sprintf("%d", tr.Advisory), advisory_best)
+
+	return "<tr>" + info + score + attack + defence + advisory + status + "</tr>"
 }
 
 type ByScore []TeamResult
