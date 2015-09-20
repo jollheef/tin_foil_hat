@@ -32,7 +32,7 @@ const (
 func (state ServiceState) String() string {
 	switch state {
 	case STATUS_UP:
-		return "ok"
+		return "up"
 	case STATUS_MUMBLE:
 		return "mumble"
 	case STATUS_CORRUPT:
