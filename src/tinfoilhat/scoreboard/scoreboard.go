@@ -142,7 +142,10 @@ func Scoreboard(db *sql.DB, www_path, addr string, update_timeout time.Duration,
 	go ResultUpdater(db, update_timeout)
 	go StateUpdater(start, half, lunch, update_timeout)
 
+	go AdvisoryUpdater(db, update_timeout)
+
 	http.Handle("/scoreboard", websocket.Handler(ScoreboardHandler))
+	http.Handle("/advisory", websocket.Handler(AdvisoryHandler))
 	http.Handle("/info", websocket.Handler(InfoHandler))
 	http.Handle("/", http.FileServer(http.Dir(www_path)))
 

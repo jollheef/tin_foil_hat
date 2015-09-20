@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IBST.PSU CTF Security Advisory board</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <script type="text/javascript">
+      var scoreboard = new WebSocket("ws://" + location.host + "/advisory");
+
+      scoreboard.onmessage = function(e) {
+        document.getElementById('advisory').innerHTML = e.data
+      }
+    </script>
+  </head>
+  <body>
+    <div class="page-header"><center><h1>IBST.PSU CTF III Final Security Advisory board</h1></center></div>
+    <div style="padding: 15px;">
+      <div id="advisory"></div>
+      <script src="js/bootstrap.min.js"></script>
+    </div>
+  </body>
+</html>
