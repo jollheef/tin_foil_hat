@@ -31,6 +31,7 @@ func StaticScoreboard(w http.ResponseWriter, r *http.Request) {
 	    <ul class="nav nav-tabs">
 	      <li><a href="/">Scoreboard</a></li>
 	      <li><a href="advisory.html">Advisory</a></li>
+	      <li><a href="info.html">Information</a></li>
 	    </ul>
 	    <div class="page-header">
 	      <center><h1>IBST.PSU CTF III Final Scoreboard</h1></center>
