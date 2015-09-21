@@ -21,7 +21,7 @@ import "tinfoilhat/steward"
 
 func AdvisoryToHtml(adv steward.Advisory) (html string) {
 
-	html = fmt.Sprintf("<h3>IBST.PSU.CTF-%d-%04d</h3>",
+	html = fmt.Sprintf("<h3>ISA-%d-%04d</h3>",
 		adv.Timestamp.Year(), adv.Id)
 
 	html += "<br><h4>Summary:</h4>"
@@ -29,7 +29,7 @@ func AdvisoryToHtml(adv steward.Advisory) (html string) {
 	html += `<pre style="background-color: #000084; color: #ffffff">` +
 		adv.Text + "</pre>"
 
-	html += fmt.Sprintf("<h4>Published: %d.%d.%d %d:%d</h3>",
+	html += fmt.Sprintf("<h4>Published: %02d.%02d.%d %02d:%02d</h3>",
 		adv.Timestamp.Day(),
 		adv.Timestamp.Month(),
 		adv.Timestamp.Year(),
