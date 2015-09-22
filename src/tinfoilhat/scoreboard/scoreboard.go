@@ -39,6 +39,8 @@ var (
 
 func ScoreboardHandler(ws *websocket.Conn) {
 
+	defer ws.Close()
+
 	fmt.Fprintf(ws, current_result)
 	sended_result := current_result
 	last_update := time.Now()
@@ -79,6 +81,8 @@ func GetInfo() string {
 }
 
 func InfoHandler(ws *websocket.Conn) {
+
+	defer ws.Close()
 	for {
 		_, err := fmt.Fprintf(ws, GetInfo())
 		if err != nil {

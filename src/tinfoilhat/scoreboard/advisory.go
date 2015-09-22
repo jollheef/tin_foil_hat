@@ -72,5 +72,6 @@ func AdvisoryUpdater(db *sql.DB, update_timeout time.Duration) {
 }
 
 func AdvisoryHandler(ws *websocket.Conn) {
+	defer ws.Close()
 	fmt.Fprintf(ws, advisories)
 }
