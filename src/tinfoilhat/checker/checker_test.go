@@ -86,7 +86,7 @@ func (svc dummyService) SendCmd(command string) (err error) {
 
 	defer conn.Close()
 
-	fmt.Fprintf(conn, command+"\n")
+	fmt.Fprint(conn, command+"\n")
 
 	return
 }

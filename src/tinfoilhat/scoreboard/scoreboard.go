@@ -41,7 +41,7 @@ func ScoreboardHandler(ws *websocket.Conn) {
 
 	defer ws.Close()
 
-	fmt.Fprintf(ws, current_result)
+	fmt.Fprint(ws, current_result)
 	sended_result := current_result
 	last_update := time.Now()
 
@@ -52,7 +52,7 @@ func ScoreboardHandler(ws *websocket.Conn) {
 			sended_result = current_result
 			last_update = time.Now()
 
-			_, err := fmt.Fprintf(ws, current_result)
+			_, err := fmt.Fprint(ws, current_result)
 			if err != nil {
 				log.Println("Socket closed:", err)
 				return
@@ -84,7 +84,7 @@ func InfoHandler(ws *websocket.Conn) {
 
 	defer ws.Close()
 	for {
-		_, err := fmt.Fprintf(ws, GetInfo())
+		_, err := fmt.Fprint(ws, GetInfo())
 		if err != nil {
 			log.Println("Socket closed:", err)
 			return

@@ -39,7 +39,7 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 
 	defer conn.Close()
 
-	fmt.Fprintf(conn, "IBST.PSU CTF Advisory Receiver\n"+
+	fmt.Fprint(conn, "IBST.PSU CTF Advisory Receiver\n"+
 		"Insert empty line for close\n"+
 		"Input advisory: ")
 
@@ -65,18 +65,18 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 	team, err := TeamByAddr(db, addr)
 	if err != nil {
 		log.Println("\tGet team by ip failed:", err)
-		fmt.Fprintf(conn, InvalidTeamMsg)
+		fmt.Fprint(conn, InvalidTeamMsg)
 		return
 	}
 
 	_, err = steward.AddAdvisory(db, team.Id, advisory)
 	if err != nil {
 		log.Println("\tAdd advisory failed:", err)
-		fmt.Fprintf(conn, InternalErrorMsg)
+		fmt.Fprint(conn, InternalErrorMsg)
 		return
 	}
 
-	fmt.Fprintf(conn, "Accepted\n")
+	fmt.Fprint(conn, "Accepted\n")
 }
 
 func AdvisoryReceiver(db *sql.DB, addr string, timeout time.Duration) {
@@ -97,7 +97,7 @@ func AdvisoryReceiver(db *sql.DB, addr string, timeout time.Duration) {
 		ip, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			log.Println("\tCannot split remote addr:", err)
-			fmt.Fprintf(conn, InternalErrorMsg)
+			fmt.Fprint(conn, InternalErrorMsg)
 			conn.Close()
 			continue
 		}

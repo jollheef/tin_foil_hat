@@ -86,7 +86,7 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	defer conn.Close()
 
-	fmt.Fprintf(conn, GreetingMsg)
+	fmt.Fprint(conn, GreetingMsg)
 
 	flag, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
@@ -102,49 +102,49 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		log.Println("\tValidate flag failed:", err)
 	}
 	if !valid {
-		fmt.Fprintf(conn, InvalidFlagMsg)
+		fmt.Fprint(conn, InvalidFlagMsg)
 		return
 	}
 
 	exist, err := steward.FlagExist(db, flag)
 	if err != nil {
 		log.Println("\tExist flag check failed:", err)
-		fmt.Fprintf(conn, InternalErrorMsg)
+		fmt.Fprint(conn, InternalErrorMsg)
 		return
 	}
 	if !exist {
-		fmt.Fprintf(conn, FlagDoesNotExistMsg)
+		fmt.Fprint(conn, FlagDoesNotExistMsg)
 		return
 	}
 
 	flg, err := steward.GetFlagInfo(db, flag)
 	if err != nil {
 		log.Println("\tGet flag info failed:", err)
-		fmt.Fprintf(conn, InternalErrorMsg)
+		fmt.Fprint(conn, InternalErrorMsg)
 		return
 	}
 
 	captured, err := steward.AlreadyCaptured(db, flg.Id)
 	if err != nil {
 		log.Println("\tAlready captured check failed:", err)
-		fmt.Fprintf(conn, InternalErrorMsg)
+		fmt.Fprint(conn, InternalErrorMsg)
 		return
 	}
 	if captured {
-		fmt.Fprintf(conn, AlreadyCapturedMsg)
+		fmt.Fprint(conn, AlreadyCapturedMsg)
 		return
 	}
 
 	team, err := TeamByAddr(db, addr)
 	if err != nil {
 		log.Println("\tGet team by ip failed:", err)
-		fmt.Fprintf(conn, InvalidTeamMsg)
+		fmt.Fprint(conn, InvalidTeamMsg)
 		return
 	}
 
 	if flg.TeamId == team.Id {
 		log.Printf("\tTeam %s try to send their flag", team.Name)
-		fmt.Fprintf(conn, FlagYoursMsg)
+		fmt.Fprint(conn, FlagYoursMsg)
 		return
 	}
 
@@ -154,7 +154,7 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	if state != steward.STATUS_UP {
 		log.Printf("\t%s service not ok, cannot capture", team.Name)
-		fmt.Fprintf(conn, ServiceNotUpMsg)
+		fmt.Fprint(conn, ServiceNotUpMsg)
 		return
 	}
 
@@ -162,7 +162,7 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	if round.Id != flg.Round {
 		log.Printf("\t%s try to send flag from past round", team.Name)
-		fmt.Fprintf(conn, FlagExpiredMsg)
+		fmt.Fprint(conn, FlagExpiredMsg)
 		return
 	}
 
@@ -170,18 +170,18 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	if time.Now().After(round_end_time) {
 		log.Printf("\t%s try to send flag from finished round", team.Name)
-		fmt.Fprintf(conn, FlagExpiredMsg)
+		fmt.Fprint(conn, FlagExpiredMsg)
 		return
 	}
 
 	err = steward.CaptureFlag(db, flg.Id, team.Id)
 	if err != nil {
 		log.Println("\tCapture flag failed:", err)
-		fmt.Fprintf(conn, InternalErrorMsg)
+		fmt.Fprint(conn, InternalErrorMsg)
 		return
 	}
 
-	fmt.Fprintf(conn, CapturedMsg)
+	fmt.Fprint(conn, CapturedMsg)
 }
 
 func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string, timeout time.Duration) {
@@ -202,14 +202,14 @@ func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string, timeout time.Du
 		ip, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			log.Println("\tCannot split remote addr:", err)
-			fmt.Fprintf(conn, InternalErrorMsg)
+			fmt.Fprint(conn, InternalErrorMsg)
 			conn.Close()
 			continue
 		}
 
 		if time.Now().Before(connects[ip].Add(timeout)) {
 			log.Println("\tToo fast connects by", ip)
-			fmt.Fprintf(conn, AttemptsLimitMsg)
+			fmt.Fprint(conn, AttemptsLimitMsg)
 			conn.Close()
 			continue
 		}

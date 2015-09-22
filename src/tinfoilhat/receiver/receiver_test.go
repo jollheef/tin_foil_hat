@@ -112,7 +112,7 @@ func testFlag(addr, flag, response string) {
 		log.Fatalf("Invalid message [%v] instead [%v]", msg, good_msg)
 	}
 
-	fmt.Fprintf(conn, flag+"\n")
+	fmt.Fprint(conn, flag+"\n")
 
 	msg, err = bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
