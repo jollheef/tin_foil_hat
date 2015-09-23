@@ -89,7 +89,7 @@ func (g Game) Run(end time.Time) (err error) {
 
 	var counters sync.WaitGroup
 
-	for time.Now().Before(end) {
+	for time.Now().Add(g.roundLen).Before(end) {
 		err = g.Round(&counters)
 		if err != nil {
 			return
