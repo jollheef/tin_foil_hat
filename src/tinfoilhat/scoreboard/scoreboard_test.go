@@ -52,7 +52,7 @@ func TestCountScoreboard(*testing.T) {
 		Defence:  10,
 		Advisory: 10})
 
-	scoreboard.CountScore(&res)
+	scoreboard.CountScoreAndSort(&res)
 
 	sort.Sort(scoreboard.ByScore(res.Teams))
 
@@ -82,7 +82,7 @@ func dialWebsocket(db *sql.DB, wg *sync.WaitGroup, i int) {
 		log.Fatal(err)
 	}
 
-	html_res := res.ToHTML()
+	html_res := res.ToHTML(false)
 
 	var msg = make([]byte, len(html_res))
 	if _, err = ws.Read(msg); err != nil {
@@ -115,7 +115,7 @@ func TestParallelWebSocketConnect(*testing.T) {
 
 	go func() {
 		err := scoreboard.Scoreboard(db, www_path, addr, time.Second,
-			time.Now(), time.Minute, time.Minute)
+			time.Now(), time.Minute, time.Minute, time.Second)
 		if err != nil {
 			log.Fatal(err)
 		}

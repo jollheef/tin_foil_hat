@@ -95,7 +95,8 @@ func main() {
 		config.Scoreboard.UpdateTimeout.Duration,
 		config.Pulse.Start.Time,
 		config.Pulse.Half.Duration,
-		config.Pulse.Lunch.Duration)
+		config.Pulse.Lunch.Duration,
+		config.Pulse.DarkestTime.Duration)
 
 	err = pulse.Pulse(db, priv,
 		config.Pulse.Start.Time,

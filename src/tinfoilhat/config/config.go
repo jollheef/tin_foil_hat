@@ -26,6 +26,7 @@ type Pulse struct {
 	Lunch        Duration
 	RoundLen     Duration
 	CheckTimeout Duration
+	DarkestTime  Duration
 }
 
 type FlagReceiver struct {

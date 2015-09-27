@@ -13,6 +13,7 @@ half = "4h"
 lunch = "1h"
 round_len = "2m"
 check_timeout = "30s"
+darkest_time = "1h"
 
 [FlagReceiver]
 addr = ":8080"

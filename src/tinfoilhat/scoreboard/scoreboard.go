@@ -94,7 +94,8 @@ func InfoHandler(ws *websocket.Conn) {
 	}
 }
 
-func ResultUpdater(db *sql.DB, update_timeout time.Duration) {
+func ResultUpdater(db *sql.DB, update_timeout time.Duration,
+	darkest_time time.Time) {
 
 	for {
 		res, err := CollectLastResult(db)
@@ -104,7 +105,12 @@ func ResultUpdater(db *sql.DB, update_timeout time.Duration) {
 			continue
 		}
 
-		current_result = res.ToHTML()
+		if time.Now().Before(darkest_time) {
+			CountScoreAndSort(&res)
+			current_result = res.ToHTML(false)
+		} else {
+			current_result = res.ToHTML(true) // hide score
+		}
 
 		now := time.Now()
 		last_updated = fmt.Sprintf("%02d:%02d:%02d", now.Hour(),
@@ -121,11 +127,10 @@ func ResultUpdater(db *sql.DB, update_timeout time.Duration) {
 	}
 }
 
-func StateUpdater(start time.Time, half, lunch, timeout time.Duration) {
+func StateUpdater(start, lunch_start_time, lunch_end_time, end_time time.Time,
+	timeout time.Duration) {
+
 	for {
-		lunch_start_time := start.Add(half)
-		lunch_end_time := lunch_start_time.Add(lunch)
-		end_time := lunch_end_time.Add(half)
 
 		if time.Now().Before(start) {
 			contest_status = CONTEST_NOT_STARTED
@@ -144,12 +149,18 @@ func StateUpdater(start time.Time, half, lunch, timeout time.Duration) {
 }
 
 func Scoreboard(db *sql.DB, www_path, addr string, update_timeout time.Duration,
-	start time.Time, half, lunch time.Duration) (err error) {
+	start time.Time, half, lunch, darkest time.Duration) (err error) {
 
 	contest_status = CONTEST_STATE_NOT_AVAILABLE
 
-	go ResultUpdater(db, update_timeout)
-	go StateUpdater(start, half, lunch, update_timeout)
+	lunch_start := start.Add(half)
+	lunch_end := lunch_start.Add(lunch)
+	end_time := lunch_end.Add(half)
+
+	darkest_time := end_time.Add(-darkest)
+
+	go ResultUpdater(db, update_timeout, darkest_time)
+	go StateUpdater(start, lunch_start, lunch_end, end_time, update_timeout)
 
 	go AdvisoryUpdater(db, update_timeout)
 

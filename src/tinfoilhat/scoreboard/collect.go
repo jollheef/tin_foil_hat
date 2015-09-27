@@ -67,7 +67,7 @@ func Max(r *Result, fn func(TeamResult) float64) (max float64) {
 	return
 }
 
-func CountScore(r *Result) {
+func CountScoreAndSort(r *Result) {
 
 	max_attack := Max(r,
 		func(tr TeamResult) float64 { return tr.Attack })
@@ -145,8 +145,6 @@ func CollectLastResult(db *sql.DB) (r Result, err error) {
 
 		r.Teams = append(r.Teams, tr)
 	}
-
-	CountScore(&r)
 
 	return
 }

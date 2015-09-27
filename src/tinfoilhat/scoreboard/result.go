@@ -37,7 +37,7 @@ func td(s string, best bool) string {
 	}
 }
 
-func (tr TeamResult) ToHTML() string {
+func (tr TeamResult) ToHTML(hide_score bool) string {
 
 	var status string
 	for _, s := range tr.Status {
@@ -75,11 +75,23 @@ func (tr TeamResult) ToHTML() string {
 		advisory_best = true
 	}
 
-	info := fmt.Sprintf("<td>%d</td><td>%s</td>", tr.Rank, tr.Name)
-	score := td(fmt.Sprintf("%05.2f&#37", tr.ScorePercent), score_best)
-	attack := td(fmt.Sprintf("%.3f", tr.Attack), attack_best)
-	defence := td(fmt.Sprintf("%.3f", tr.Defence), defence_best)
-	advisory := td(fmt.Sprintf("%d", tr.Advisory), advisory_best)
+	var info, score, attack, defence, advisory string
+
+	if hide_score {
+		hidden := `<td>&#xFFFD</td>`
+		info = hidden + fmt.Sprintf("<td>%s</td>", tr.Name)
+		score = hidden
+		attack = hidden
+		defence = hidden
+		defence = hidden
+		advisory = hidden
+	} else {
+		info = fmt.Sprintf("<td>%d</td><td>%s</td>", tr.Rank, tr.Name)
+		score = td(fmt.Sprintf("%05.2f&#37", tr.ScorePercent), score_best)
+		attack = td(fmt.Sprintf("%.3f", tr.Attack), attack_best)
+		defence = td(fmt.Sprintf("%.3f", tr.Defence), defence_best)
+		advisory = td(fmt.Sprintf("%d", tr.Advisory), advisory_best)
+	}
 
 	return "<tr>" + info + score + attack + defence + advisory + status + "</tr>"
 }
@@ -95,7 +107,7 @@ type Result struct {
 	Services []string
 }
 
-func (r Result) ToHTML() string {
+func (r Result) ToHTML(hide_score bool) string {
 
 	var services string
 	for _, s := range r.Services {
@@ -111,7 +123,7 @@ func (r Result) ToHTML() string {
 			t.Status = append(t.Status, steward.STATUS_UNKNOWN)
 		}
 
-		teams += t.ToHTML()
+		teams += t.ToHTML(hide_score)
 	}
 
 	return fmt.Sprintf("<thead><th>#</th><th>Team</th><th>Score</th>"+
