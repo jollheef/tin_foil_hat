@@ -14,6 +14,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
 	"os"
+	"syscall"
 	"time"
 )
 
@@ -49,6 +50,14 @@ func main() {
 	}
 	defer logFile.Close()
 	log.SetOutput(logFile)
+
+	var rlim syscall.Rlimit
+	err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rlim)
+	if err != nil {
+		log.Fatalln("Getrlimit fail:", err)
+	}
+
+	log.Println("RLIMIT_NOFILE CUR:", rlim.Cur, "MAX:", rlim.Max)
 
 	db, err := steward.OpenDatabase(config.Database.Connection)
 	if err != nil {
