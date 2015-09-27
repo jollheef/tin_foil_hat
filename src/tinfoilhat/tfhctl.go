@@ -12,18 +12,23 @@ package main
 
 import (
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
+	"os"
 )
 
 import (
 	"tinfoilhat/config"
+	"tinfoilhat/scoreboard"
 	"tinfoilhat/steward"
 )
 
 var (
 	config_path = kingpin.Flag("config",
 		"Path to configuration file.").Required().String()
+
+	score = kingpin.Command("scoreboard", "View scoreboard.")
 
 	adv = kingpin.Command("advisory", "Work with advisories.")
 
@@ -92,5 +97,33 @@ func main() {
 		if err != nil {
 			log.Fatalln("Advisory unhide fail:", err)
 		}
+
+	case "scoreboard":
+		res, err := scoreboard.CollectLastResult(db)
+		if err != nil {
+			log.Fatalln("Get last result fail:", err)
+		}
+
+		scoreboard.CountScoreAndSort(&res)
+
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Rank", "Name", "Score", "Attack",
+			"Defence", "Advisory"})
+
+		for _, tr := range res.Teams {
+
+			var row []string
+
+			row = append(row, fmt.Sprintf("%d", tr.Rank))
+			row = append(row, tr.Name)
+			row = append(row, fmt.Sprintf("%05.2f%%", tr.ScorePercent))
+			row = append(row, fmt.Sprintf("%.3f", tr.Attack))
+			row = append(row, fmt.Sprintf("%.3f", tr.Defence))
+			row = append(row, fmt.Sprintf("%d", tr.Advisory))
+
+			table.Append(row)
+		}
+
+		table.Render()
 	}
 }
