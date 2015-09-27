@@ -12,6 +12,7 @@ package checker
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 )
@@ -19,6 +20,67 @@ import (
 import "tinfoilhat/steward"
 
 const timeout string = "10s" // max checker work time
+
+func readBytesUntilEOF(pipe io.ReadCloser) (buf []byte, err error) {
+
+	buf_size := 1024
+
+	for err != io.EOF {
+		stdout := make([]byte, buf_size)
+		var n int
+
+		n, err = pipe.Read(stdout)
+		if err != nil && err != io.EOF {
+			return
+		}
+
+		buf = append(buf, stdout[:n]...)
+	}
+
+	if err == io.EOF {
+		err = nil
+	}
+
+	return
+}
+
+func readUntilEOF(pipe io.ReadCloser) (str string, err error) {
+	buf, err := readBytesUntilEOF(pipe)
+	str = string(buf)
+	return
+}
+
+func system(name string, arg ...string) (stdout string, stderr string,
+	err error) {
+
+	cmd := exec.Command(name, arg...)
+
+	out_pipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return
+	}
+
+	err_pipe, err := cmd.StderrPipe()
+	if err != nil {
+		return
+	}
+
+	cmd.Start()
+
+	stdout, err = readUntilEOF(out_pipe)
+	if err != nil {
+		return
+	}
+
+	stderr, err = readUntilEOF(err_pipe)
+	if err != nil {
+		return
+	}
+
+	err = cmd.Wait()
+
+	return
+}
 
 func exit_status(no int) string {
 	return fmt.Sprintf("exit status %d", no)
@@ -46,43 +108,37 @@ func parseState(err error) (steward.ServiceState, error) {
 	return steward.STATUS_UNKNOWN, err
 }
 
-func put(checker string, ip string, port int, flag string) (cred string,
+func put(checker string, ip string, port int, flag string) (cred, logs string,
 	state steward.ServiceState, err error) {
 
-	cmd := exec.Command("timeout", timeout, checker, "put", ip,
+	cred, logs, err = system("timeout", timeout, checker, "put", ip,
 		fmt.Sprintf("%d", port), flag)
-
-	raw_cred, err := cmd.Output()
 
 	state, err = parseState(err)
 
-	cred = strings.Trim(string(raw_cred), " \n")
+	cred = strings.Trim(cred, " \n")
 
 	return
 }
 
-func get(checker string, ip string, port int, cred string) (flag string,
+func get(checker string, ip string, port int, cred string) (flag, logs string,
 	state steward.ServiceState, err error) {
 
-	cmd := exec.Command("timeout", timeout, checker, "get", ip,
+	flag, logs, err = system("timeout", timeout, checker, "get", ip,
 		fmt.Sprintf("%d", port), cred)
-
-	raw_flag, err := cmd.Output()
 
 	state, err = parseState(err)
 
-	flag = strings.Trim(string(raw_flag), " \n")
+	flag = strings.Trim(flag, " \n")
 
 	return
 }
 
 func check(checker string, ip string, port int) (state steward.ServiceState,
-	err error) {
+	logs string, err error) {
 
-	cmd := exec.Command("timeout", timeout, checker, "chk", ip,
+	_, logs, err = system("timeout", timeout, checker, "chk", ip,
 		fmt.Sprintf("%d", port))
-
-	_, err = cmd.Output()
 
 	state, err = parseState(err)
 

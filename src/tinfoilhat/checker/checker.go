@@ -31,10 +31,15 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 		return
 	}
 
-	cred, state, err := put(svc.CheckerPath, team.Vulnbox, svc.Port, flag)
+	cred, logs, state, err := put(svc.CheckerPath, team.Vulnbox, svc.Port, flag)
 	if err != nil {
 		log.Println("Put flag to service failed:", err)
 		return
+	}
+
+	if state != steward.STATUS_UP {
+		log.Printf("Put flag, round %d, team %s, service %s: %s", round,
+			team.Name, svc.Name, logs)
 	}
 
 	err = steward.PutStatus(db,
@@ -64,7 +69,7 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 		return
 	}
 
-	service_flag, state, err := get(svc.CheckerPath, team.Vulnbox,
+	service_flag, logs, state, err := get(svc.CheckerPath, team.Vulnbox,
 		svc.Port, cred)
 	if err != nil {
 		log.Println("Check service failed:", err)
@@ -75,16 +80,26 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 		state = steward.STATUS_CORRUPT
 	}
 
+	if state != steward.STATUS_UP {
+		log.Printf("Get flag, round %d, team %s, service %s: %s",
+			round, team.Name, svc.Name, logs)
+	}
+
 	return
 }
 
 func checkService(db *sql.DB, round int, team steward.Team,
 	svc steward.Service) (state steward.ServiceState, err error) {
 
-	state, err = check(svc.CheckerPath, team.Vulnbox, svc.Port)
+	state, logs, err := check(svc.CheckerPath, team.Vulnbox, svc.Port)
 	if err != nil {
 		log.Println("Check service failed:", err)
 		return
+	}
+
+	if state != steward.STATUS_UP {
+		log.Printf("Check, round %d, team %s, service %s: %s",
+			round, team.Name, svc.Name, logs)
 	}
 
 	return
