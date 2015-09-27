@@ -40,6 +40,7 @@ type AdvisoryReceiver struct {
 }
 
 type Config struct {
+	LogFile  string
 	Database struct {
 		Connection     string
 		MaxConnections int

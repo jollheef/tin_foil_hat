@@ -13,6 +13,7 @@ package main
 import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
+	"os"
 	"time"
 )
 
@@ -40,6 +41,14 @@ func main() {
 	if err != nil {
 		log.Fatalln("Cannot open config:", err)
 	}
+
+	logFile, err := os.OpenFile(config.LogFile,
+		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalln("Cannot open file:", err)
+	}
+	defer logFile.Close()
+	log.SetOutput(logFile)
 
 	db, err := steward.OpenDatabase(config.Database.Connection)
 	if err != nil {
