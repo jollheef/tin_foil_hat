@@ -10,7 +10,7 @@ BIN="/home/tfh/scoreboard/tinfoilhat"
 CONF="/home/tfh/scoreboard/config.toml"
 PID="/var/run/${NAME}.pid"
 
-extra_started_commands="reinit"
+extra_commands="reinit"
 
 depend() {
     need net
