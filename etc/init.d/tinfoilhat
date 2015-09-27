@@ -1,0 +1,50 @@
+#!/sbin/runscript
+# Copyright 2015 Mikhail Klementyev <jollheef <AT> riseup.net>
+# Distributed under the terms of the GNU General Public License v3
+# $Id$
+
+NAME="tinfoilhat"
+USER="tfh"
+
+BIN="/home/tfh/scoreboard/tinfoilhat"
+CONF="/home/tfh/scoreboard/config.toml"
+PID="/var/run/${NAME}.pid"
+
+extra_started_commands="reinit"
+
+depend() {
+    need net
+    need postgresql
+}
+
+start() {
+    ebegin "Starting ${NAME}"
+
+    start-stop-daemon --start --background \
+                      --user ${USER} \
+                      --pidfile ${PID} --make-pidfile \
+                      --exec ${BIN} -- ${CONF}
+
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping ${NAME}"
+
+    start-stop-daemon --stop --user ${USER} --pidfile ${PID}
+
+    eend $?
+}
+
+reinit() {
+    stop
+
+    ebegin "Start and reinitialization ${NAME}"
+
+    start-stop-daemon --start --background \
+                      --user ${USER} \
+                      --pidfile ${PID} --make-pidfile \
+                      --exec ${BIN} -- ${CONF} --reinit
+
+    eend $?
+}
