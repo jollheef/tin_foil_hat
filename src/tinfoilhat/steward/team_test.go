@@ -21,7 +21,9 @@ func TestAddTeam(t *testing.T) {
 
 	defer db.Close()
 
-	_, err = steward.AddTeam(db.db, "MySUperTeam", "192.168.111/24")
+	team := steward.Team{-1, "MySuperTeam", "192.168.111/24", "pl.hold1"}
+
+	_, err = steward.AddTeam(db.db, team)
 	if err != nil {
 		log.Fatalln("Add team failed:", err)
 	}
@@ -33,11 +35,11 @@ func TestGetTeams(t *testing.T) {
 
 	defer db.Close()
 
-	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24"}
-	team2 := steward.Team{-1, "MyFooTeam", "192.168.112/24"}
+	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24", "pl.hold1"}
+	team2 := steward.Team{-1, "MyFooTeam", "192.168.112/24", "pl.hold2"}
 
-	team1.Id, _ = steward.AddTeam(db.db, team1.Name, team1.Subnet)
-	team2.Id, _ = steward.AddTeam(db.db, team2.Name, team2.Subnet)
+	team1.Id, _ = steward.AddTeam(db.db, team1)
+	team2.Id, _ = steward.AddTeam(db.db, team2)
 
 	teams, err := steward.GetTeams(db.db)
 	if err != nil {
@@ -59,9 +61,9 @@ func TestGetTeam(t *testing.T) {
 
 	defer db.Close()
 
-	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24"}
+	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24", "pl.hold"}
 
-	team1.Id, _ = steward.AddTeam(db.db, team1.Name, team1.Subnet)
+	team1.Id, _ = steward.AddTeam(db.db, team1)
 
 	_team1, err := steward.GetTeam(db.db, team1.Id)
 	if err != nil {

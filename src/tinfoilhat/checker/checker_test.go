@@ -106,22 +106,6 @@ func (svc dummyService) ClearFlags() {
 	svc.SendCmd("CLEAR")
 }
 
-func TestVulnboxIP(t *testing.T) {
-
-	subnet := "127.0.0.1/24"
-
-	gotten_ip, err := checker.VulnboxIP(subnet)
-	if err != nil {
-		log.Fatalln("Parse subnet fail:", err)
-	}
-
-	vulnbox_ip := "127.0.0.3"
-
-	if gotten_ip != vulnbox_ip {
-		log.Fatalln("Parsed", gotten_ip, "instead", vulnbox_ip)
-	}
-}
-
 func checkServicesStatus(db *sql.DB, round int, teams []steward.Team,
 	services []steward.Service, status steward.ServiceState) {
 
@@ -173,7 +157,11 @@ func TestFlagsWork(t *testing.T) {
 		// just trick for bypass UNIQUE team subnet
 		subnet := fmt.Sprintf("127.%d.0.1/24", index)
 
-		_, err = steward.AddTeam(db.db, team, subnet)
+		vulnbox := fmt.Sprintf("127.0.%d.3", index)
+
+		t := steward.Team{-1, team, subnet, vulnbox}
+
+		_, err = steward.AddTeam(db.db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}

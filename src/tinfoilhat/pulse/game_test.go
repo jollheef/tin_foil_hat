@@ -127,7 +127,11 @@ func TestGame(*testing.T) {
 		// just trick for bypass UNIQUE team subnet
 		subnet := fmt.Sprintf("127.%d.0.1/24", index)
 
-		_, err = steward.AddTeam(db.db, team, subnet)
+		vulnbox := fmt.Sprintf("127.0.%d.3", index)
+
+		t := steward.Team{-1, team, subnet, vulnbox}
+
+		_, err = steward.AddTeam(db.db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}
@@ -151,7 +155,7 @@ func TestGame(*testing.T) {
 
 	defer game.Over()
 
-	end_time := time.Now().Add(time.Minute)
+	end_time := time.Now().Add(time.Minute + 10*time.Second)
 
 	err = game.Run(end_time)
 
@@ -165,7 +169,8 @@ func TestGame(*testing.T) {
 
 			res, err := steward.GetRoundResult(db.db, team_id, round)
 			if err != nil {
-				log.Fatalln("Get round result fail:", err)
+				log.Fatalf("Get round %d result fail: %s",
+					round, err)
 			}
 
 			if res.DefenceScore != float64(round*2) {

@@ -60,7 +60,7 @@ func TestParseAddr(t *testing.T) {
 	}
 }
 
-func TestTeamByAddr(t *testing.T) {
+func TestTeamByAddr(*testing.T) {
 
 	db, err := openDB()
 	if err != nil {
@@ -75,7 +75,9 @@ func TestTeamByAddr(t *testing.T) {
 
 		name := fmt.Sprintf("Team_%d", i)
 
-		team_id, err := steward.AddTeam(db.db, name, subnet)
+		t := steward.Team{-1, name, subnet, subnet}
+
+		team_id, err := steward.AddTeam(db.db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}
@@ -126,7 +128,7 @@ func testFlag(addr, flag, response string) {
 	}
 }
 
-func TestReceiver(t *testing.T) {
+func TestReceiver(*testing.T) {
 
 	db, err := openDB()
 	if err != nil {
@@ -164,8 +166,10 @@ func TestReceiver(t *testing.T) {
 	// The attacker must appear to be a team (e.g. jury cannot attack)
 	testFlag(addr, flag, receiver.InvalidTeamMsg)
 
+	t := steward.Team{-1, "TestTeam", "127.0.0.1/24", "1"}
+
 	// Correct flag must be captured
-	team_id, err := steward.AddTeam(db.db, "TestTeam", "127.0.0.1/24")
+	team_id, err := steward.AddTeam(db.db, t)
 	if err != nil {
 		log.Fatalln("Add team failed:", err)
 	}

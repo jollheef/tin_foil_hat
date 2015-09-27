@@ -13,7 +13,6 @@ package checker
 import (
 	"crypto/rsa"
 	"database/sql"
-	"fmt"
 	"log"
 	"sync"
 )
@@ -22,22 +21,6 @@ import (
 	"tinfoilhat/steward"
 	"tinfoilhat/vexillary"
 )
-
-const vulnbox_ip int = 3 // x.x.x.3
-
-func VulnboxIP(subnet string) (ip string, err error) {
-
-	var a, b, c, d, mask int
-
-	_, err = fmt.Sscanf(subnet, "%d.%d.%d.%d/%d", &a, &b, &c, &d, &mask)
-	if err != nil {
-		return
-	}
-
-	ip = fmt.Sprintf("%d.%d.%d.%d", a, b, c, vulnbox_ip)
-
-	return
-}
 
 func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 	svc steward.Service) (err error) {
@@ -48,13 +31,7 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 		return
 	}
 
-	ip, err := VulnboxIP(team.Subnet)
-	if err != nil {
-		log.Println("Parse team subnet failed:", err)
-		return
-	}
-
-	cred, state, err := put(svc.CheckerPath, ip, svc.Port, flag)
+	cred, state, err := put(svc.CheckerPath, team.Vulnbox, svc.Port, flag)
 	if err != nil {
 		log.Println("Put flag to service failed:", err)
 		return
@@ -80,12 +57,6 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 func getFlag(db *sql.DB, round int, team steward.Team,
 	svc steward.Service) (state steward.ServiceState, err error) {
 
-	ip, err := VulnboxIP(team.Subnet)
-	if err != nil {
-		log.Println("Parse team subnet failed:", err)
-		return
-	}
-
 	flag, cred, err := steward.GetCred(db, round, team.Id, svc.Id)
 	if err != nil {
 		log.Println("Get cred failed:", err)
@@ -93,7 +64,8 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 		return
 	}
 
-	service_flag, state, err := get(svc.CheckerPath, ip, svc.Port, cred)
+	service_flag, state, err := get(svc.CheckerPath, team.Vulnbox,
+		svc.Port, cred)
 	if err != nil {
 		log.Println("Check service failed:", err)
 		return
@@ -109,13 +81,7 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 func checkService(db *sql.DB, round int, team steward.Team,
 	svc steward.Service) (state steward.ServiceState, err error) {
 
-	ip, err := VulnboxIP(team.Subnet)
-	if err != nil {
-		log.Println("Parse team subnet failed:", err)
-		return
-	}
-
-	state, err = check(svc.CheckerPath, ip, svc.Port)
+	state, err = check(svc.CheckerPath, team.Vulnbox, svc.Port)
 	if err != nil {
 		log.Println("Check service failed:", err)
 		return

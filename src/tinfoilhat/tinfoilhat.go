@@ -62,7 +62,7 @@ func main() {
 
 			log.Println("Add team", team.Name)
 
-			_, err = steward.AddTeam(db, team.Name, team.Subnet)
+			_, err = steward.AddTeam(db, team)
 			if err != nil {
 				log.Fatalln("Add team failed:", err)
 			}

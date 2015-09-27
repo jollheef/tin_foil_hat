@@ -151,7 +151,11 @@ func TestCountRound(*testing.T) {
 		// just trick for bypass UNIQUE team subnet
 		subnet := fmt.Sprintf("127.%d.0.1/24", index)
 
-		_, err = steward.AddTeam(db.db, team, subnet)
+		vulnbox := fmt.Sprintf("127.0.%d.3/24", index)
+
+		t := steward.Team{-1, team, subnet, vulnbox}
+
+		_, err = steward.AddTeam(db.db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}
