@@ -45,7 +45,22 @@ var (
 	advUnhideId = advUnhide.Arg("id", "advisory id").Required().Int()
 )
 
+var (
+	COMMIT_ID  string
+	BUILD_DATE string
+	BUILD_TIME string
+)
+
+func buildInfo() (str string) {
+	str = fmt.Sprintf("Version: tin_foil_hat %s %s %s\n",
+		COMMIT_ID[:7], BUILD_DATE, BUILD_TIME)
+	str += "Author: Mikhail Klementyev <jollheef@riseup.net>\n"
+	return
+}
+
 func main() {
+
+	fmt.Println(buildInfo())
 
 	kingpin.Parse()
 
