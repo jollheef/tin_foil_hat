@@ -48,7 +48,12 @@ func CollectTeamResult(db *sql.DB, team steward.Team,
 		s := steward.Status{round.Id, team.Id, svc.Id, -1}
 		state, err := steward.GetState(db, s)
 		if err != nil {
-			state = steward.STATUS_DOWN
+			// Try to get status from previous round
+			s.Round -= 1
+			state, err = steward.GetState(db, s)
+			if err != nil {
+				state = steward.STATUS_DOWN
+			}
 		}
 
 		tr.Status = append(tr.Status, state)
