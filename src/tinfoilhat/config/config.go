@@ -32,11 +32,13 @@ type Pulse struct {
 type FlagReceiver struct {
 	Addr           string
 	ReceiveTimeout Duration
+	SocketTimeout  Duration
 }
 
 type AdvisoryReceiver struct {
 	Addr           string
 	ReceiveTimeout Duration
+	SocketTimeout  Duration
 }
 
 type Config struct {

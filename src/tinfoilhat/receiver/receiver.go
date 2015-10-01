@@ -184,7 +184,8 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 	fmt.Fprint(conn, CapturedMsg)
 }
 
-func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string, timeout time.Duration) {
+func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string,
+	timeout, socket_timeout time.Duration) {
 
 	log.Println("Launching receiver at", addr, "...")
 
@@ -210,6 +211,14 @@ func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string, timeout time.Du
 		if time.Now().Before(connects[ip].Add(timeout)) {
 			log.Println("\tToo fast connects by", ip)
 			fmt.Fprint(conn, AttemptsLimitMsg)
+			conn.Close()
+			continue
+		}
+
+		err = conn.SetDeadline(time.Now().Add(socket_timeout))
+		if err != nil {
+			log.Println("Set deadline fail:", err)
+			fmt.Fprint(conn, InternalErrorMsg)
 			conn.Close()
 			continue
 		}

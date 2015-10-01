@@ -79,7 +79,8 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 	fmt.Fprint(conn, "Accepted\n")
 }
 
-func AdvisoryReceiver(db *sql.DB, addr string, timeout time.Duration) {
+func AdvisoryReceiver(db *sql.DB, addr string, timeout,
+	socket_timeout time.Duration) {
 
 	log.Println("Launching advisory receiver at", addr, "...")
 
@@ -106,6 +107,14 @@ func AdvisoryReceiver(db *sql.DB, addr string, timeout time.Duration) {
 			log.Println("\tToo fast connects by", ip)
 			fmt.Fprintf(conn, "Attempts limit exceeded (wait %s)\n",
 				connects[ip].Add(timeout).Sub(time.Now()))
+			conn.Close()
+			continue
+		}
+
+		err = conn.SetDeadline(time.Now().Add(socket_timeout))
+		if err != nil {
+			log.Println("Set deadline fail:", err)
+			fmt.Fprint(conn, InternalErrorMsg)
 			conn.Close()
 			continue
 		}

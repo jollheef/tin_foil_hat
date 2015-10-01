@@ -121,10 +121,12 @@ func main() {
 	}
 
 	go receiver.FlagReceiver(db, priv, config.FlagReceiver.Addr,
-		config.FlagReceiver.ReceiveTimeout.Duration)
+		config.FlagReceiver.ReceiveTimeout.Duration,
+		config.FlagReceiver.SocketTimeout.Duration)
 
 	go receiver.AdvisoryReceiver(db, config.AdvisoryReceiver.Addr,
-		config.AdvisoryReceiver.ReceiveTimeout.Duration)
+		config.AdvisoryReceiver.ReceiveTimeout.Duration,
+		config.AdvisoryReceiver.SocketTimeout.Duration)
 
 	go scoreboard.Scoreboard(db, config.Scoreboard.WwwPath,
 		config.Scoreboard.Addr,

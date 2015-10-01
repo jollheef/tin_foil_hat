@@ -23,10 +23,12 @@ darkest_time = "1h"
 [FlagReceiver]
 addr = ":8080"
 receive_timeout = "1s"
+socket_timeout = "10s"
 
 [AdvisoryReceiver]
 addr = ":8090"
 receive_timeout = "30s"
+socket_timeout = "1m"
 
 [[Teams]]
 name = "FooTeam"
