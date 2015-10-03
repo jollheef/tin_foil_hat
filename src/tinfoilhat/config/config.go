@@ -42,8 +42,9 @@ type AdvisoryReceiver struct {
 }
 
 type Config struct {
-	LogFile  string
-	Database struct {
+	LogFile        string
+	CheckerTimeout Duration
+	Database       struct {
 		Connection     string
 		MaxConnections int
 	}

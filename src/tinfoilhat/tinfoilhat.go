@@ -20,6 +20,7 @@ import (
 )
 
 import (
+	"tinfoilhat/checker"
 	"tinfoilhat/config"
 	"tinfoilhat/pulse"
 	"tinfoilhat/receiver"
@@ -114,6 +115,8 @@ func main() {
 			}
 		}
 	}
+
+	checker.SetTimeout(config.CheckerTimeout.Duration)
 
 	priv, err := vexillary.GenerateKey()
 	if err != nil {

@@ -15,11 +15,16 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 import "tinfoilhat/steward"
 
-const timeout string = "10s" // max checker work time
+var timeout string = "10s" // max checker work time
+
+func SetTimeout(d time.Duration) {
+	timeout = fmt.Sprintf("%ds", int(d.Seconds()))
+}
 
 func readBytesUntilEOF(pipe io.ReadCloser) (buf []byte, err error) {
 
