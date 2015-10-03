@@ -14,6 +14,7 @@ import (
 	"database/sql"
 	"fmt"
 	"golang.org/x/net/websocket"
+	"html/template"
 	"time"
 )
 
@@ -27,7 +28,7 @@ func AdvisoryToHtml(adv steward.Advisory) (html string) {
 	html += "<br><h4>Summary:</h4>"
 
 	html += `<pre style="background-color: #000084; color: #ffffff">` +
-		adv.Text + "</pre>"
+		template.HTMLEscapeString(adv.Text) + "</pre>"
 
 	html += fmt.Sprintf("<h4>Published: %02d.%02d.%d %02d:%02d</h3>",
 		adv.Timestamp.Day(),
