@@ -51,3 +51,9 @@ checker_path = "/path/too/foo_checker.py"
 name = "BarService"
 port = 63000
 checker_path = "/path/too/bar_checker.py"
+
+[[Services]]
+name = "UdpService"
+port = 43000
+checker_path = "/path/too/bar_checker.py"
+udp = true

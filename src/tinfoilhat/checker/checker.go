@@ -13,7 +13,9 @@ package checker
 import (
 	"crypto/rsa"
 	"database/sql"
+	"fmt"
 	"log"
+	"net"
 	"sync"
 )
 
@@ -21,6 +23,19 @@ import (
 	"tinfoilhat/steward"
 	"tinfoilhat/vexillary"
 )
+
+func tcpPortOpen(team steward.Team, svc steward.Service) bool {
+
+	addr := fmt.Sprintf("%s:%d", team.Vulnbox, svc.Port)
+
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		return false
+	} else {
+		conn.Close()
+		return true
+	}
+}
 
 func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 	svc steward.Service) (err error) {
@@ -31,15 +46,27 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 		return
 	}
 
-	cred, logs, state, err := put(svc.CheckerPath, team.Vulnbox, svc.Port, flag)
-	if err != nil {
-		log.Println("Put flag to service failed:", err)
-		return
+	portOpen := true
+	if !svc.Udp {
+		portOpen = tcpPortOpen(team, svc)
 	}
 
-	if state != steward.STATUS_UP {
-		log.Printf("Put flag, round %d, team %s, service %s: %s", round,
-			team.Name, svc.Name, logs)
+	var cred, logs string
+	var state steward.ServiceState
+	if portOpen {
+		cred, logs, state, err = put(svc.CheckerPath, team.Vulnbox,
+			svc.Port, flag)
+		if err != nil {
+			log.Println("Put flag to service failed:", err)
+			return
+		}
+
+		if state != steward.STATUS_UP {
+			log.Printf("Put flag, round %d, team %s, service %s: %s",
+				round, team.Name, svc.Name, logs)
+		}
+	} else {
+		state = steward.STATUS_DOWN
 	}
 
 	err = steward.PutStatus(db,

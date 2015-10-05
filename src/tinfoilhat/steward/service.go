@@ -15,6 +15,7 @@ type Service struct {
 	Name        string
 	Port        int
 	CheckerPath string
+	Udp         bool
 }
 
 func createServiceTable(db *sql.DB) (err error) {
@@ -24,7 +25,8 @@ func createServiceTable(db *sql.DB) (err error) {
 		id	SERIAL PRIMARY KEY,
 		name	TEXT NOT NULL,
 		port	INTEGER NOT NULL,
-		checker_path	TEXT NOT NULL
+		checker_path	TEXT NOT NULL,
+		udp	BOOLEAN NOT NULL
 	)`)
 
 	return
@@ -33,15 +35,15 @@ func createServiceTable(db *sql.DB) (err error) {
 func AddService(db *sql.DB, svc Service) error {
 
 	stmt, err := db.Prepare(
-		"INSERT INTO service (name, port, checker_path) " +
-			"VALUES ($1, $2, $3)")
+		"INSERT INTO service (name, port, checker_path, udp) " +
+			"VALUES ($1, $2, $3, $4)")
 	if err != nil {
 		return err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(svc.Name, svc.Port, svc.CheckerPath)
+	_, err = stmt.Exec(svc.Name, svc.Port, svc.CheckerPath, svc.Udp)
 
 	if err != nil {
 		return err
@@ -52,7 +54,7 @@ func AddService(db *sql.DB, svc Service) error {
 
 func GetServices(db *sql.DB) (services []Service, err error) {
 
-	rows, err := db.Query("SELECT id,name, port, checker_path " +
+	rows, err := db.Query("SELECT id,name, port, checker_path, udp " +
 		"FROM service ")
 	if err != nil {
 		return
@@ -63,7 +65,8 @@ func GetServices(db *sql.DB) (services []Service, err error) {
 	for rows.Next() {
 		var svc Service
 
-		err = rows.Scan(&svc.Id, &svc.Name, &svc.Port, &svc.CheckerPath)
+		err = rows.Scan(&svc.Id, &svc.Name, &svc.Port, &svc.CheckerPath,
+			&svc.Udp)
 		if err != nil {
 			return
 		}

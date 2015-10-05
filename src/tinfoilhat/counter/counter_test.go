@@ -66,7 +66,7 @@ func TestCountStatesResult(*testing.T) {
 	t := 1 // team id
 	s := 1 // service id
 
-	svc := steward.Service{s, "foo", 8080, ""}
+	svc := steward.Service{s, "foo", 8080, "", false}
 
 	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
 	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
@@ -99,10 +99,10 @@ func TestCountDefenceResult(*testing.T) {
 	t := 1
 
 	services := make([]steward.Service, 0)
-	services = append(services, steward.Service{1, "foo", 8080, ""})
-	services = append(services, steward.Service{2, "bar", 8081, ""})
-	services = append(services, steward.Service{3, "baz", 8082, ""})
-	services = append(services, steward.Service{4, "qwe", 8083, ""})
+	services = append(services, steward.Service{1, "foo", 8080, "", false})
+	services = append(services, steward.Service{2, "bar", 8081, "", false})
+	services = append(services, steward.Service{3, "baz", 8082, "", false})
+	services = append(services, steward.Service{4, "qwe", 8083, "", false})
 
 	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
 	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
@@ -164,7 +164,7 @@ func TestCountRound(*testing.T) {
 	for _, service := range []string{"Foo", "Bar", "Baz", "Boo"} {
 
 		err = steward.AddService(db.db,
-			steward.Service{-1, service, 8080, ""})
+			steward.Service{-1, service, 8080, "", false})
 		if err != nil {
 			log.Fatalln("Add service failed:", err)
 		}

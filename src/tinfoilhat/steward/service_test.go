@@ -21,7 +21,7 @@ func TestAddService(t *testing.T) {
 
 	defer db.Close()
 
-	svc := steward.Service{-1, "lol", 10, "/test"}
+	svc := steward.Service{-1, "lol", 10, "/test", false}
 
 	err = steward.AddService(db.db, svc)
 	if err != nil {
@@ -35,7 +35,7 @@ func TestGetServices(t *testing.T) {
 
 	defer db.Close()
 
-	svc := steward.Service{-1, "lol", 10, "/test"}
+	svc := steward.Service{-1, "lol", 10, "/test", false}
 
 	const services_amount int = 5
 

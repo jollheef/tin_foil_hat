@@ -107,7 +107,14 @@ func main() {
 
 		for _, svc := range config.Services {
 
-			log.Println("Add service", svc.Name)
+			var network string
+			if svc.Udp {
+				network = "udp"
+			} else {
+				network = "tcp"
+			}
+
+			log.Printf("Add service %s (%s)\n", svc.Name, network)
 
 			err = steward.AddService(db, svc)
 			if err != nil {

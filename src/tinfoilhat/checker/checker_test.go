@@ -172,7 +172,7 @@ func TestFlagsWork(t *testing.T) {
 	for _, service := range []string{"Foo", "Bar", "Baz"} {
 
 		err = steward.AddService(db.db,
-			steward.Service{-1, service, port, checker_path})
+			steward.Service{-1, service, port, checker_path, false})
 		if err != nil {
 			log.Fatalln("Add service failed:", err)
 		}
