@@ -39,6 +39,20 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 
 	defer conn.Close()
 
+	round, err := steward.CurrentRound(db)
+	if err != nil {
+		log.Println("Get current round fail:", err)
+		fmt.Fprint(conn, InternalErrorMsg)
+		return
+	}
+
+	round_end_time := round.StartTime.Add(round.Len)
+
+	if time.Now().After(round_end_time) {
+		fmt.Fprintln(conn, "Current contest not runned")
+		return
+	}
+
 	fmt.Fprint(conn, "IBST.PSU CTF Advisory Receiver\n"+
 		"Insert empty line for close\n"+
 		"Input advisory: ")
