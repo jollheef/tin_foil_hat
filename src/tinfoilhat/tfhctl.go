@@ -33,7 +33,8 @@ var (
 	adv = kingpin.Command("advisory", "Work with advisories.")
 
 	advList        = adv.Command("list", "List advisories.")
-	advNotReviewed = adv.Flag("not-reviewed", "List only not reviewed advisory.").Bool()
+	advNotReviewed = adv.Flag("not-reviewed",
+		"List only not reviewed advisory.").Bool()
 
 	advReview   = adv.Command("review", "Review advisory.")
 	advReviewId = advReview.Arg("id", "advisory id").Required().Int()
