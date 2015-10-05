@@ -70,6 +70,15 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 		}
 	}
 
+	http_get_root := "GET / HTTP/1.1"
+	if len(advisory) > len(http_get_root) {
+		if advisory[0:len(http_get_root)] == http_get_root {
+			fmt.Fprintf(conn, "\n\nIt's not a HTTP server! "+
+				"Use netcat for communication.")
+			return
+		}
+	}
+
 	r := `[ -~]`
 	if HasUnacceptableSymbols(advisory, r) {
 		fmt.Fprintf(conn, "Accept only %s\n", r)
