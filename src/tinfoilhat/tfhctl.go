@@ -32,7 +32,8 @@ var (
 
 	adv = kingpin.Command("advisory", "Work with advisories.")
 
-	advList = adv.Command("list", "List advisories.")
+	advList        = adv.Command("list", "List advisories.")
+	advNotReviewed = adv.Flag("not-reviewed", "List only not reviewed advisory.").Bool()
 
 	advReview   = adv.Command("review", "Review advisory.")
 	advReviewId = advReview.Arg("id", "advisory id").Required().Int()
@@ -86,6 +87,10 @@ func main() {
 		}
 
 		for _, advisory := range advisories {
+
+			if *advNotReviewed && advisory.Reviewed {
+				continue
+			}
 
 			fmt.Printf(">>> Advisory: id %d <<<\n", advisory.Id)
 			fmt.Printf("(Score: %d, Reviewed: %t, Timestamp: %s)\n",
