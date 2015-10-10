@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - 1.4.2
+  - tip
+
+addons:
+  postgresql: "9.3"
+
+before_script:
+  - psql -c 'create database tinfoilhat_test;' -U postgres
