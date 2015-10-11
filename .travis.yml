@@ -5,7 +5,7 @@ go:
   - tip
 
 addons:
-  postgresql: "9.3"
+  postgresql: "9.4"
 
 before_script:
   - psql -c 'create database tinfoilhat_test;' -U postgres
