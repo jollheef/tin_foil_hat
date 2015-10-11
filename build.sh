@@ -20,7 +20,6 @@ export GOPATH=$(realpath ./)
 mkdir -p bin
 
 go build -ldflags "${LDFLAGS}" -o bin/tinfoilhat src/github.com/jollheef/tin_foil_hat/tinfoilhat.go
-go build -ldflags "${LDFLAGS}" -o bin/tfhctl src/github.com/jollheef/tin_foil_hat/tfhctl.go
 
 END_TIME=`date +%s`
 RUN_TIME=$((END_TIME-START_TIME))
