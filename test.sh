@@ -2,7 +2,7 @@
 
 START_TIME=`date +%s`
 
-PKGS=`find src/github.com/jollheef/tin_foil_hat/ -mindepth 1 -maxdepth 1 -type d | sed 's/src\///'`
+PKGS=`find src/tinfoilhat -mindepth 1 -maxdepth 1 -type d | sed 's/src\///'`
 
 for PKG in ${PKGS}; do
     GOPATH=$(realpath ./) go test ${PKG}
