@@ -1,4 +1,3 @@
 pkg
 bin
-src/tinfoilhat/checker/python-api/__pycache__/
-
+src/github.com/jollheef/tin_foil_hat/checker/python-api/__pycache__/

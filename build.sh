@@ -11,8 +11,10 @@ LDFLAGS+=" -X main.BUILD_TIME ${BUILD_TIME}"
 
 export GOPATH=$(realpath ./)
 
-go build -ldflags "${LDFLAGS}" -o bin/tinfoilhat src/tinfoilhat/tinfoilhat.go
-go build -ldflags "${LDFLAGS}" -o bin/tfhctl src/tinfoilhat/tfhctl.go
+REPO=github.com/jollheef/tin_foil_hat/
+
+go build -ldflags "${LDFLAGS}" -o bin/tinfoilhat src/${REPO}/tinfoilhat.go
+go build -ldflags "${LDFLAGS}" -o bin/tfhctl src/${REPO}/tfhctl.go
 
 END_TIME=`date +%s`
 RUN_TIME=$((END_TIME-START_TIME))
