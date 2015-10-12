@@ -97,7 +97,7 @@ class DummyChecker(Checker):
 
             return login + ":" + password
 
-        except OSError as e:
+        except (OSError, IOError) as e:
             if e.errno == 111:  # ConnectionRefusedError
                 raise ServiceDownException()
             else:
@@ -150,7 +150,7 @@ class DummyChecker(Checker):
         try:
             state = self.put(host, port, data)
             new_data = self.get(host, port, state)
-        except OSError as e:
+        except (OSError, IOError) as e:
             if e.errno == 111:  # ConnectionRefusedError
                 raise ServiceDownException()
             else:
