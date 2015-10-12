@@ -115,6 +115,9 @@ func TestGame(*testing.T) {
 	svc := newDummyService(service_path, port)
 	svc.Stop() // kill
 	svc.Start()
+
+	time.Sleep(time.Second) // wait for service init
+
 	defer svc.Stop()
 
 	priv, err := vexillary.GenerateKey()
