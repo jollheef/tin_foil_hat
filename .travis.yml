@@ -12,3 +12,6 @@ addons:
 
 before_script:
   - psql -c 'create database tinfoilhat_test;' -U postgres
+
+script:
+  - go list ./... | while read pkg; do go test -v ${pkg} || return 1; done
