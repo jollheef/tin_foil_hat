@@ -146,8 +146,15 @@ class DummyChecker(Checker):
         # Это отличается от put и get тем, что происходит в один момент,
         # тем самым наличие данных по прошествии времени не проверяется.
         data = self.random_password()
-        state = self.put(host, port, data)
-        new_data = self.get(host, port, state)
+
+        try:
+            state = self.put(host, port, data)
+            new_data = self.get(host, port, state)
+        except OSError as e:
+            if e.errno == 111:  # ConnectionRefusedError
+                raise ServiceDownException()
+            else:
+                raise ServiceMumbleException()
 
         if data != new_data:
             raise ServiceMumbleException()
