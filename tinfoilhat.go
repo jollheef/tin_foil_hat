@@ -43,8 +43,13 @@ var (
 )
 
 func buildInfo() (str string) {
+
+	if len(COMMIT_ID) > 7 {
+		COMMIT_ID = COMMIT_ID[:7] // abbreviated commit hash
+	}
+
 	str = fmt.Sprintf("Version: tin_foil_hat %s %s %s\n",
-		COMMIT_ID[:7], BUILD_DATE, BUILD_TIME)
+		COMMIT_ID, BUILD_DATE, BUILD_TIME)
 	str += "Author: Mikhail Klementyev <jollheef@riseup.net>\n"
 	return
 }
