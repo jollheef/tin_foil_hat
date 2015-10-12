@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/jollheef/tin_foil_hat.svg?branch=master)](https://travis-ci.org/jollheef/tin_foil_hat)
+[![GoDoc](https://godoc.org/github.com/jollheef/tin_foil_hat?status.svg)](http://godoc.org/github.com/jollheef/tin_foil_hat)
+[![Coverage Status](https://coveralls.io/repos/jollheef/tin_foil_hat/badge.svg?branch=master&service=github)](https://coveralls.io/github/jollheef/tin_foil_hat?branch=master)
+[![Go Report Card](http://goreportcard.com/badge/jollheef/tin_foil_hat)](http://goreportcard.com/report/jollheef/tin_foil_hat)
+
 # Tin foil hat
 Unix-way contest checking system.
 
