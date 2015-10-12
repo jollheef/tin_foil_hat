@@ -97,14 +97,11 @@ class DummyChecker(Checker):
 
             return login + ":" + password
 
-        except ConnectionRefusedError:
-            raise ServiceDownException()
-
-        except ConnectionResetError:
-            raise ServiceMumbleException()
-
-        except BrokenPipeError:
-            raise ServiceMumbleException()
+        except OSError as e:
+            if e.errno == 111:  # ConnectionRefusedError
+                raise ServiceDownException()
+            else:
+                raise ServiceMumbleException()
 
     """
     Получить флаг из сервиса
