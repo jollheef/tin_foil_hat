@@ -10,8 +10,15 @@ addons:
     packages:
       - python3
 
+before_install:
+  - go get github.com/axw/gocov/gocov
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+
 before_script:
   - psql -c 'create database tinfoilhat_test;' -U postgres
 
 script:
-  - go list ./... | while read pkg; do go test -v ${pkg} || return 1; done
+  - go list ./... | while read pkg; do go test -v -covermode=count -coverprofile=$(basename ${pkg}).cover ${pkg} || return 1; done
+  - ls | grep cover$ | xargs cat | sort -r | uniq >> coverage.out
+  - goveralls -coverprofile=coverage.out -service travis-ci -repotoken $REPO_TOKEN
