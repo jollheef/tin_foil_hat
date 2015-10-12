@@ -133,7 +133,8 @@ func checkService(db *sql.DB, round int, team steward.Team,
 }
 
 // Check service status and flag if it's exist.
-func checkFlag(db *sql.DB, team steward.Team, svc steward.Service, wg *sync.WaitGroup) {
+func checkFlag(db *sql.DB, round int, team steward.Team, svc steward.Service,
+	wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
@@ -143,10 +144,10 @@ func checkFlag(db *sql.DB, team steward.Team, svc steward.Service, wg *sync.Wait
 		portOpen = tcpPortOpen(team, svc)
 	}
 
-	var state steward.State
+	var state steward.ServiceState
 	if portOpen {
 		// First check service logic
-		state, _ := checkService(db, round, team, svc)
+		state, _ = checkService(db, round, team, svc)
 		if state == steward.STATUS_UP {
 			// If logic is correct, do flag check
 			state, _ = getFlag(db, round, team, svc)
@@ -155,7 +156,7 @@ func checkFlag(db *sql.DB, team steward.Team, svc steward.Service, wg *sync.Wait
 		state = steward.STATUS_DOWN
 	}
 
-	err = steward.PutStatus(db, steward.Status{round,
+	err := steward.PutStatus(db, steward.Status{round,
 		team.Id, svc.Id, state})
 	if err != nil {
 		log.Println("Add status failed:", err)
@@ -191,7 +192,7 @@ func CheckFlags(db *sql.DB, round int, teams []steward.Team,
 	for _, team := range teams {
 		for _, svc := range services {
 			wg.Add(1)
-			go checkFlag(db, team, svc, &wg)
+			go checkFlag(db, round, team, svc, &wg)
 		}
 	}
 
