@@ -1,5 +1,5 @@
 /**
- * @file tinfoilhat.go
+ * @file main.go
  * @author Mikhail Klementyev jollheef<AT>riseup.net
  * @license GNU GPLv3
  * @date September, 2015
