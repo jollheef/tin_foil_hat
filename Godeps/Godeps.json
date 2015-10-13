@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/jollheef/tin_foil_hat",
 	"GoVersion": "go1.4.2",
+	"Packages": [
+		"github.com/jollheef/tin_foil_hat/cli/tfhctl"
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/alecthomas/template",
@@ -22,6 +25,10 @@
 		{
 			"ImportPath": "github.com/naoina/toml",
 			"Rev": "751171607256bb66e64c9f0220c00662420c38e9"
+		},
+		{
+			"ImportPath": "github.com/olekukonko/tablewriter",
+			"Rev": "b9346ac189c55dd419f85c7ad2cd56f810bf19d6"
 		},
 		{
 			"ImportPath": "golang.org/x/net/websocket",
