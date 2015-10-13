@@ -4,4 +4,4 @@ services:
   - postgres
 
 targets:
-  ubuntu-12.04
+  - ubuntu-12.04
