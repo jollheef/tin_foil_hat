@@ -5,3 +5,4 @@ services:
 
 targets:
   ubuntu-12.04:
+  ubuntu-14.04:
