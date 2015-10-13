@@ -30,7 +30,7 @@ Web scoreboard.
 
 ### Build
 
-    $ export GOPATH=$(realpath ./) && go get github.com/jollheef/tin_foil_hat
+    $ export GOPATH=$(realpath ./) && go get github.com/jollheef/tin_foil_hat/...
 
 ### Run
 
