@@ -44,4 +44,4 @@ After that you need to fix 'connection' parameter in configuration file.
 
 Now, run it!
 
-    $ ./bin/tin_foil_hat ./src/github.com/jollheef/tin_foil_hat/config/tinfoilhat.toml
+    $ ./bin/tin_foil_hat ./src/github.com/jollheef/tin_foil_hat/config/tinfoilhat.toml --reinit
