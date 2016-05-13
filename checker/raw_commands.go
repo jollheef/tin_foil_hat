@@ -20,18 +20,19 @@ import (
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
-var timeout string = "10s" // max checker work time
+var timeout = "10s" // max checker work time
 
+// SetTimeout set max checker work time
 func SetTimeout(d time.Duration) {
 	timeout = fmt.Sprintf("%ds", int(d.Seconds()))
 }
 
 func readBytesUntilEOF(pipe io.ReadCloser) (buf []byte, err error) {
 
-	buf_size := 1024
+	bufSize := 1024
 
 	for err != io.EOF {
-		stdout := make([]byte, buf_size)
+		stdout := make([]byte, bufSize)
 		var n int
 
 		n, err = pipe.Read(stdout)
@@ -60,24 +61,24 @@ func system(name string, arg ...string) (stdout string, stderr string,
 
 	cmd := exec.Command(name, arg...)
 
-	out_pipe, err := cmd.StdoutPipe()
+	outPipe, err := cmd.StdoutPipe()
 	if err != nil {
 		return
 	}
 
-	err_pipe, err := cmd.StderrPipe()
+	errPipe, err := cmd.StderrPipe()
 	if err != nil {
 		return
 	}
 
 	cmd.Start()
 
-	stdout, err = readUntilEOF(out_pipe)
+	stdout, err = readUntilEOF(outPipe)
 	if err != nil {
 		return
 	}
 
-	stderr, err = readUntilEOF(err_pipe)
+	stderr, err = readUntilEOF(errPipe)
 	if err != nil {
 		return
 	}
@@ -87,7 +88,7 @@ func system(name string, arg ...string) (stdout string, stderr string,
 	return
 }
 
-func exit_status(no int) string {
+func exitStatus(no int) string {
 	return fmt.Sprintf("exit status %d", no)
 }
 
@@ -98,15 +99,15 @@ func parseState(err error) (steward.ServiceState, error) {
 	}
 
 	switch err.Error() {
-	case exit_status(124): // returns by timeout
+	case exitStatus(124): // returns by timeout
 		return steward.STATUS_DOWN, nil
-	case exit_status(1):
+	case exitStatus(1):
 		return steward.STATUS_ERROR, nil
-	case exit_status(2):
+	case exitStatus(2):
 		return steward.STATUS_MUMBLE, nil
-	case exit_status(3):
+	case exitStatus(3):
 		return steward.STATUS_CORRUPT, nil
-	case exit_status(4):
+	case exitStatus(4):
 		return steward.STATUS_DOWN, nil
 	}
 

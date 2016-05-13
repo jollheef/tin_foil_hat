@@ -31,10 +31,10 @@ func tcpPortOpen(team steward.Team, svc steward.Service) bool {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return false
-	} else {
-		conn.Close()
-		return true
 	}
+
+	conn.Close()
+	return true
 }
 
 func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
@@ -96,14 +96,14 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 		return
 	}
 
-	service_flag, logs, state, err := get(svc.CheckerPath, team.Vulnbox,
+	serviceFlag, logs, state, err := get(svc.CheckerPath, team.Vulnbox,
 		svc.Port, cred)
 	if err != nil {
 		log.Println("Check service failed:", err)
 		return
 	}
 
-	if flag != service_flag {
+	if flag != serviceFlag {
 		state = steward.STATUS_CORRUPT
 	}
 
@@ -164,6 +164,7 @@ func checkFlag(db *sql.DB, round int, team steward.Team, svc steward.Service,
 	}
 }
 
+// PutFlags put flags to services
 func PutFlags(db *sql.DB, priv *rsa.PrivateKey, round int,
 	teams []steward.Team, services []steward.Service) (err error) {
 
@@ -184,6 +185,7 @@ func PutFlags(db *sql.DB, priv *rsa.PrivateKey, round int,
 	return
 }
 
+// CheckFlags check flags in services
 func CheckFlags(db *sql.DB, round int, teams []steward.Team,
 	services []steward.Service) (err error) {
 
