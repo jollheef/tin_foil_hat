@@ -16,16 +16,14 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
 	"os"
-)
 
-import (
 	"github.com/jollheef/tin_foil_hat/config"
 	"github.com/jollheef/tin_foil_hat/scoreboard"
 	"github.com/jollheef/tin_foil_hat/steward"
 )
 
 var (
-	config_path = kingpin.Flag("config",
+	configPath = kingpin.Flag("config",
 		"Path to configuration file.").Required().String()
 
 	score = kingpin.Command("scoreboard", "View scoreboard.")
@@ -37,30 +35,30 @@ var (
 		"List only not reviewed advisory.").Bool()
 
 	advReview   = adv.Command("review", "Review advisory.")
-	advReviewId = advReview.Arg("id", "advisory id").Required().Int()
+	advReviewID = advReview.Arg("id", "advisory id").Required().Int()
 	advScore    = advReview.Arg("score", "advisory id").Required().Int()
 
 	advHide   = adv.Command("hide", "Hide advisory.")
-	advHideId = advHide.Arg("id", "advisory id").Required().Int()
+	advHideID = advHide.Arg("id", "advisory id").Required().Int()
 
 	advUnhide   = adv.Command("unhide", "Unhide advisory.")
-	advUnhideId = advUnhide.Arg("id", "advisory id").Required().Int()
+	advUnhideID = advUnhide.Arg("id", "advisory id").Required().Int()
 )
 
 var (
-	COMMIT_ID  string
-	BUILD_DATE string
-	BUILD_TIME string
+	commitID  string
+	buildDate string
+	buildTime string
 )
 
 func buildInfo() (str string) {
 
-	if len(COMMIT_ID) > 7 {
-		COMMIT_ID = COMMIT_ID[:7] // abbreviated commit hash
+	if len(commitID) > 7 {
+		commitID = commitID[:7] // abbreviated commit hash
 	}
 
 	str = fmt.Sprintf("Version: tin_foil_hat %s %s %s\n",
-		COMMIT_ID, BUILD_DATE, BUILD_TIME)
+		commitID, buildDate, buildTime)
 	str += "Author: Mikhail Klementyev <jollheef@riseup.net>\n"
 	return
 }
@@ -71,7 +69,7 @@ func main() {
 
 	kingpin.Parse()
 
-	config, err := config.ReadConfig(*config_path)
+	config, err := config.ReadConfig(*configPath)
 	if err != nil {
 		log.Fatalln("Cannot open config:", err)
 	}
@@ -107,19 +105,19 @@ func main() {
 		}
 
 	case "advisory review":
-		err := steward.ReviewAdvisory(db, *advReviewId, *advScore)
+		err := steward.ReviewAdvisory(db, *advReviewID, *advScore)
 		if err != nil {
 			log.Fatalln("Advisory review fail:", err)
 		}
 
 	case "advisory hide":
-		err := steward.HideAdvisory(db, *advHideId, true)
+		err := steward.HideAdvisory(db, *advHideID, true)
 		if err != nil {
 			log.Fatalln("Advisory hide fail:", err)
 		}
 
 	case "advisory unhide":
-		err := steward.HideAdvisory(db, *advUnhideId, false)
+		err := steward.HideAdvisory(db, *advUnhideID, false)
 		if err != nil {
 			log.Fatalln("Advisory unhide fail:", err)
 		}
