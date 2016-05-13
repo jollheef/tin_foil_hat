@@ -15,15 +15,13 @@ import (
 	"math/rand"
 	"sync"
 	"time"
-)
 
-import (
 	"github.com/jollheef/tin_foil_hat/checker"
 	"github.com/jollheef/tin_foil_hat/counter"
 	"github.com/jollheef/tin_foil_hat/steward"
 )
 
-// Do not forget something like rand.Seed(time.Now().UnixNano())
+// RandomizeTimeout Do not forget something like rand.Seed(time.Now().UnixNano())
 func RandomizeTimeout(duration, deviation time.Duration) (ret time.Duration) {
 
 	if duration < time.Second || deviation < time.Second {
@@ -47,6 +45,7 @@ func RandomizeTimeout(duration, deviation time.Duration) (ret time.Duration) {
 	return time.Second * time.Duration(val)
 }
 
+// Game contains game info
 type Game struct {
 	db       *sql.DB
 	priv     *rsa.PrivateKey
@@ -56,11 +55,12 @@ type Game struct {
 	services []steward.Service
 }
 
-func NewGame(db *sql.DB, priv *rsa.PrivateKey, round_len time.Duration,
+// NewGame create new Game object
+func NewGame(db *sql.DB, priv *rsa.PrivateKey, roundLen time.Duration,
 	timeout time.Duration) (g Game, err error) {
 
 	g.priv = priv
-	g.roundLen = round_len
+	g.roundLen = roundLen
 	g.timeout = timeout
 	g.db = db
 
@@ -79,10 +79,12 @@ func NewGame(db *sql.DB, priv *rsa.PrivateKey, round_len time.Duration,
 	return
 }
 
+// Over stop game
 func (g Game) Over() {
 	log.Println("Game over")
 }
 
+// Run start game
 func (g Game) Run(end time.Time) (err error) {
 
 	log.Println("Game start, end:", end)
@@ -105,16 +107,17 @@ func (g Game) Run(end time.Time) (err error) {
 	return
 }
 
+// Round start new round
 func (g Game) Round(counters *sync.WaitGroup) (err error) {
 
-	round_no, err := steward.NewRound(g.db, g.roundLen)
+	roundNo, err := steward.NewRound(g.db, g.roundLen)
 	if err != nil {
 		return
 	}
 
-	log.Println("New round", round_no)
+	log.Println("New round", roundNo)
 
-	err = checker.PutFlags(g.db, g.priv, round_no, g.teams, g.services)
+	err = checker.PutFlags(g.db, g.priv, roundNo, g.teams, g.services)
 	if err != nil {
 		return
 	}
@@ -124,9 +127,9 @@ func (g Game) Round(counters *sync.WaitGroup) (err error) {
 		return
 	}
 
-	round_end := round.StartTime.Add(round.Len)
+	roundEnd := round.StartTime.Add(round.Len)
 
-	for time.Now().Before(round_end) {
+	for time.Now().Before(roundEnd) {
 
 		log.Println("Round", round.Id, "check start")
 
@@ -137,7 +140,7 @@ func (g Game) Round(counters *sync.WaitGroup) (err error) {
 
 		timeout := RandomizeTimeout(g.timeout, g.timeout/3)
 
-		if time.Now().Add(timeout).After(round_end) {
+		if time.Now().Add(timeout).After(roundEnd) {
 			break
 		}
 
@@ -146,9 +149,9 @@ func (g Game) Round(counters *sync.WaitGroup) (err error) {
 		time.Sleep(timeout)
 	}
 
-	log.Println("Check", round.Id, "over, wait", time.Now().Sub(round_end))
+	log.Println("Check", round.Id, "over, wait", time.Now().Sub(roundEnd))
 
-	for time.Now().Before(round_end) {
+	for time.Now().Before(roundEnd) {
 		time.Sleep(time.Second / 10)
 	}
 

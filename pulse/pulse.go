@@ -17,6 +17,7 @@ import (
 	"time"
 )
 
+// Wait for time
 func Wait(end time.Time, timeout time.Duration) (waited bool) {
 
 	if time.Now().After(end) {
@@ -30,47 +31,48 @@ func Wait(end time.Time, timeout time.Duration) (waited bool) {
 	return true
 }
 
-func Pulse(db *sql.DB, priv *rsa.PrivateKey, start_time time.Time,
-	half, lunch, round_len, check_timeout time.Duration) (err error) {
+// Pulse manage game
+func Pulse(db *sql.DB, priv *rsa.PrivateKey, startTime time.Time,
+	half, lunch, roundLen, checkTimeout time.Duration) (err error) {
 
 	log.Println("Launching pulse...")
 
-	lunch_start_time := start_time.Add(half)
-	lunch_end_time := lunch_start_time.Add(lunch)
-	end_time := lunch_end_time.Add(half)
+	lunchStartTime := startTime.Add(half)
+	lunchEndTime := lunchStartTime.Add(lunch)
+	endTime := lunchEndTime.Add(half)
 
 	log.Println("Pulse start time", time.Now())
 
-	log.Println("Contest start time", start_time)
+	log.Println("Contest start time", startTime)
 
-	game, err := NewGame(db, priv, round_len, check_timeout)
+	game, err := NewGame(db, priv, roundLen, checkTimeout)
 
 	defer game.Over()
 
 	timeout := 100 * time.Millisecond
 
 	log.Println("Wait start time...")
-	if Wait(start_time, timeout) || time.Now().Before(lunch_start_time) {
+	if Wait(startTime, timeout) || time.Now().Before(lunchStartTime) {
 		log.Println("game run")
-		err = game.Run(lunch_start_time)
+		err = game.Run(lunchStartTime)
 		if err != nil {
 			return
 		}
 	}
 
 	log.Println("Wait lunch time")
-	Wait(lunch_start_time, timeout)
+	Wait(lunchStartTime, timeout)
 
 	log.Println("Lunch...")
-	if Wait(lunch_end_time, timeout) || time.Now().Before(end_time) {
-		err = game.Run(end_time)
+	if Wait(lunchEndTime, timeout) || time.Now().Before(endTime) {
+		err = game.Run(endTime)
 		if err != nil {
 			return
 		}
 	}
 
 	log.Println("Wait end time")
-	Wait(end_time, timeout)
+	Wait(endTime, timeout)
 
 	return
 }
