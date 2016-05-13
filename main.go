@@ -30,26 +30,26 @@ import (
 )
 
 var (
-	config_path = kingpin.Arg("config",
+	configPath = kingpin.Arg("config",
 		"Path to configuration file.").Required().String()
 
-	db_reinit = kingpin.Flag("reinit", "Reinit database.").Bool()
+	dbReinit = kingpin.Flag("reinit", "Reinit database.").Bool()
 )
 
 var (
-	COMMIT_ID  string
-	BUILD_DATE string
-	BUILD_TIME string
+	commitID  string
+	buildDate string
+	buildTime string
 )
 
 func buildInfo() (str string) {
 
-	if len(COMMIT_ID) > 7 {
-		COMMIT_ID = COMMIT_ID[:7] // abbreviated commit hash
+	if len(commitID) > 7 {
+		commitID = commitID[:7] // abbreviated commit hash
 	}
 
 	str = fmt.Sprintf("Version: tin_foil_hat %s %s %s\n",
-		COMMIT_ID, BUILD_DATE, BUILD_TIME)
+		commitID, buildDate, buildTime)
 	str += "Author: Mikhail Klementyev <jollheef@riseup.net>\n"
 	return
 }
@@ -60,7 +60,7 @@ func main() {
 
 	kingpin.Parse()
 
-	config, err := config.ReadConfig(*config_path)
+	config, err := config.ReadConfig(*configPath)
 	if err != nil {
 		log.Fatalln("Cannot open config:", err)
 	}
@@ -92,7 +92,7 @@ func main() {
 
 	db.SetMaxOpenConns(config.Database.MaxConnections)
 
-	if *db_reinit {
+	if *dbReinit {
 
 		log.Println("Reinit database")
 

@@ -11,9 +11,9 @@ cd ${RUNDIR}
 BUILD_DATE=`date -u +%d.%m.%Y`
 BUILD_TIME=`date -u +%H:%M:%S`
 
-LDFLAGS="-X main.COMMIT_ID ${COMMIT_ID}"
-LDFLAGS+=" -X main.BUILD_DATE ${BUILD_DATE}"
-LDFLAGS+=" -X main.BUILD_TIME ${BUILD_TIME}"
+LDFLAGS="-X main.commitID=${COMMIT_ID}"
+LDFLAGS+=" -X main.buildDate=${BUILD_DATE}"
+LDFLAGS+=" -X main.buildTime=${BUILD_TIME}"
 
 export GOPATH=$(realpath ./)
 
