@@ -11,15 +11,17 @@
 package config
 
 import (
-	"github.com/naoina/toml"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/naoina/toml"
 )
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
+// Pulse config
 type Pulse struct {
 	Start        Time
 	Half         Duration
@@ -29,18 +31,21 @@ type Pulse struct {
 	DarkestTime  Duration
 }
 
+// FlagReceiver config
 type FlagReceiver struct {
 	Addr           string
 	ReceiveTimeout Duration
 	SocketTimeout  Duration
 }
 
+// AdvisoryReceiver config
 type AdvisoryReceiver struct {
 	Addr           string
 	ReceiveTimeout Duration
 	SocketTimeout  Duration
 }
 
+// Config config
 type Config struct {
 	LogFile        string
 	CheckerTimeout Duration
@@ -60,20 +65,24 @@ type Config struct {
 	Services         []steward.Service
 }
 
+// Duration type with toml unmarshalling support
 type Duration struct {
 	time.Duration
 }
 
+// UnmarshalTOML for Duration
 func (d *Duration) UnmarshalTOML(data []byte) (err error) {
 	duration := strings.Replace(string(data), "\"", "", -1)
 	d.Duration, err = time.ParseDuration(duration)
 	return
 }
 
+// Time type with toml unmarshalling support
 type Time struct {
 	time.Time
 }
 
+// UnmarshalTOML for Time
 func (t *Time) UnmarshalTOML(data []byte) (err error) {
 
 	loc, err := time.LoadLocation("Europe/Moscow")
@@ -81,10 +90,10 @@ func (t *Time) UnmarshalTOML(data []byte) (err error) {
 		return
 	}
 
-	raw_time := strings.Replace(string(data), "\"", "", -1)
+	rawTime := strings.Replace(string(data), "\"", "", -1)
 
 	layout := "Jan _2 15:04 2006"
-	t.Time, err = time.ParseInLocation(layout, raw_time, loc)
+	t.Time, err = time.ParseInLocation(layout, rawTime, loc)
 	if err != nil {
 		return
 	}
@@ -92,6 +101,7 @@ func (t *Time) UnmarshalTOML(data []byte) (err error) {
 	return
 }
 
+// ReadConfig for tfh
 func ReadConfig(path string) (cfg Config, err error) {
 
 	f, err := os.Open(path)
