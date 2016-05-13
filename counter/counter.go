@@ -10,10 +10,13 @@
 
 package counter
 
-import "database/sql"
+import (
+	"database/sql"
 
-import "github.com/jollheef/tin_foil_hat/steward"
+	"github.com/jollheef/tin_foil_hat/steward"
+)
 
+// CountStatesResult count round states (up/down/etc.) result
 func CountStatesResult(db *sql.DB, round, team int,
 	service steward.Service) (score float64, err error) {
 
@@ -41,12 +44,13 @@ func CountStatesResult(db *sql.DB, round, team int,
 	return
 }
 
+// CountDefenceResult count round defence result
 func CountDefenceResult(db *sql.DB, round, team int,
 	services []steward.Service) (defence float64, err error) {
 
 	defence = 0
 
-	per_service := 1.0 / float64(len(services))
+	perService := 1.0 / float64(len(services))
 
 	for _, svc := range services {
 
@@ -55,16 +59,17 @@ func CountDefenceResult(db *sql.DB, round, team int,
 			return defence, err
 		}
 
-		defence += score * per_service
+		defence += score * perService
 	}
 
 	return
 }
 
+// CountRound count round result
 func CountRound(db *sql.DB, round int, teams []steward.Team,
 	services []steward.Service) (err error) {
 
-	round_res := make(map[steward.Team]steward.RoundResult)
+	roundRes := make(map[steward.Team]steward.RoundResult)
 
 	for _, team := range teams {
 
@@ -77,10 +82,10 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 		res.DefenceScore = def * 2
 
-		round_res[team] = res
+		roundRes[team] = res
 	}
 
-	per_service := 1.0 / float64(len(services))
+	perService := 1.0 / float64(len(services))
 
 	for _, team := range teams {
 
@@ -91,25 +96,25 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 		for _, flag := range cflags {
 
-			attacked_team, err := steward.GetTeam(db, flag.TeamId)
+			attackedTeam, err := steward.GetTeam(db, flag.TeamId)
 			if err != nil {
 				return err
 			}
 
-			res := round_res[attacked_team]
-			res.DefenceScore -= per_service
+			res := roundRes[attackedTeam]
+			res.DefenceScore -= perService
 			if res.DefenceScore < 0 {
 				res.DefenceScore = 0
 			}
-			round_res[attacked_team] = res
+			roundRes[attackedTeam] = res
 
-			attack_res := round_res[team]
-			attack_res.AttackScore += per_service
-			round_res[team] = attack_res
+			attackRes := roundRes[team]
+			attackRes.AttackScore += perService
+			roundRes[team] = attackRes
 		}
 	}
 
-	for _, res := range round_res {
+	for _, res := range roundRes {
 		_, err := steward.AddRoundResult(db, res)
 		if err != nil {
 			return err
