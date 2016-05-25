@@ -1,7 +1,7 @@
 /**
  * @file captured_flag_test.go
  * @author Mikhail Klementyev jollheef<AT>riseup.net
- * @license GNU GPLv3
+ * @license GNU AGPLv3
  * @date September, 2015
  * @brief test work with captured_flag table
  */

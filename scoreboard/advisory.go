@@ -1,7 +1,7 @@
 /**
  * @file scoreboard.go
  * @author Mikhail Klementyev jollheef<AT>riseup.net
- * @license GNU GPLv3
+ * @license GNU AGPLv3
  * @date September, 2015
  * @brief web security advisory
  *
