@@ -12,11 +12,12 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
 	"os"
 	"syscall"
 	"time"
+
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 import (
@@ -113,7 +114,7 @@ func main() {
 		for _, svc := range config.Services {
 
 			var network string
-			if svc.Udp {
+			if svc.UDP {
 				network = "udp"
 			} else {
 				network = "tcp"

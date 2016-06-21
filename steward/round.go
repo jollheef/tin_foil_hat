@@ -13,8 +13,9 @@ import (
 	"time"
 )
 
+// Round contains info about round
 type Round struct {
-	Id        int
+	ID        int
 	Len       time.Duration
 	StartTime time.Time
 }
@@ -31,6 +32,7 @@ func createRoundTable(db *sql.DB) (err error) {
 	return
 }
 
+// NewRound add new round to database
 func NewRound(db *sql.DB, len time.Duration) (round int, err error) {
 
 	stmt, err := db.Prepare("INSERT INTO round (len_seconds) " +
@@ -49,6 +51,7 @@ func NewRound(db *sql.DB, len time.Duration) (round int, err error) {
 	return
 }
 
+// CurrentRound returns current round
 func CurrentRound(db *sql.DB) (round Round, err error) {
 
 	stmt, err := db.Prepare("SELECT id, len_seconds, start_time " +
@@ -59,14 +62,14 @@ func CurrentRound(db *sql.DB) (round Round, err error) {
 
 	defer stmt.Close()
 
-	var len_seconds int64
+	var lenSeconds int64
 
-	err = stmt.QueryRow().Scan(&round.Id, &len_seconds, &round.StartTime)
+	err = stmt.QueryRow().Scan(&round.ID, &lenSeconds, &round.StartTime)
 	if err != nil {
 		return
 	}
 
-	round.Len = time.Duration(len_seconds) * time.Second
+	round.Len = time.Duration(lenSeconds) * time.Second
 
 	return
 }

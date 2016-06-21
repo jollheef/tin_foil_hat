@@ -131,9 +131,9 @@ func (g Game) Round(counters *sync.WaitGroup) (err error) {
 
 	for time.Now().Before(roundEnd) {
 
-		log.Println("Round", round.Id, "check start")
+		log.Println("Round", round.ID, "check start")
 
-		err = checker.CheckFlags(g.db, round.Id, g.teams, g.services)
+		err = checker.CheckFlags(g.db, round.ID, g.teams, g.services)
 		if err != nil {
 			return
 		}
@@ -144,12 +144,12 @@ func (g Game) Round(counters *sync.WaitGroup) (err error) {
 			break
 		}
 
-		log.Println("Round", round.Id, "check end, timeout", timeout)
+		log.Println("Round", round.ID, "check end, timeout", timeout)
 
 		time.Sleep(timeout)
 	}
 
-	log.Println("Check", round.Id, "over, wait", time.Now().Sub(roundEnd))
+	log.Println("Check", round.ID, "over, wait", time.Now().Sub(roundEnd))
 
 	for time.Now().Before(roundEnd) {
 		time.Sleep(time.Second / 10)
@@ -159,14 +159,14 @@ func (g Game) Round(counters *sync.WaitGroup) (err error) {
 	go func() {
 		defer counters.Done()
 
-		log.Println("Count round", round.Id, "start", time.Now())
+		log.Println("Count round", round.ID, "start", time.Now())
 
-		err = counter.CountRound(g.db, round.Id, g.teams, g.services)
+		err = counter.CountRound(g.db, round.ID, g.teams, g.services)
 		if err != nil {
-			log.Println("Count round", round.Id, "failed:", err)
+			log.Println("Count round", round.ID, "failed:", err)
 		}
 
-		log.Println("Count round", round.Id, "end", time.Now())
+		log.Println("Count round", round.ID, "end", time.Now())
 	}()
 
 	return

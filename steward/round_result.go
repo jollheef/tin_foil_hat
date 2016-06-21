@@ -13,9 +13,10 @@ import (
 	"sync"
 )
 
+// RoundResult contains info about result of round
 type RoundResult struct {
-	Id           int
-	TeamId       int
+	ID           int
+	TeamID       int
 	Round        int
 	AttackScore  float64
 	DefenceScore float64
@@ -36,16 +37,17 @@ func createRoundResultTable(db *sql.DB) (err error) {
 	return
 }
 
-var AddRoundResultMutex sync.Mutex // Use as FIFO queue
+var addRoundResultMutex sync.Mutex // Use as FIFO queue
 
+// AddRoundResult add round result to database
 func AddRoundResult(db *sql.DB, res RoundResult) (id int, err error) {
 
-	AddRoundResultMutex.Lock()
+	addRoundResultMutex.Lock()
 
-	defer AddRoundResultMutex.Unlock()
+	defer addRoundResultMutex.Unlock()
 
 	if res.Round > 1 { // if not first round
-		previous, err := GetLastResult(db, res.TeamId)
+		previous, err := GetLastResult(db, res.TeamID)
 		if err != nil {
 			return id, err
 		}
@@ -62,7 +64,7 @@ func AddRoundResult(db *sql.DB, res RoundResult) (id int, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(res.TeamId, res.Round, res.AttackScore,
+	err = stmt.QueryRow(res.TeamID, res.Round, res.AttackScore,
 		res.DefenceScore).Scan(&id)
 	if err != nil {
 		return
@@ -71,7 +73,8 @@ func AddRoundResult(db *sql.DB, res RoundResult) (id int, err error) {
 	return
 }
 
-func GetRoundResult(db *sql.DB, team_id, round int) (res RoundResult, err error) {
+// GetRoundResult get result for team and round
+func GetRoundResult(db *sql.DB, teamID, round int) (res RoundResult, err error) {
 
 	stmt, err := db.Prepare("SELECT id, attack_score, defence_score " +
 		"FROM round_result WHERE team_id=$1 AND round=$2")
@@ -81,19 +84,20 @@ func GetRoundResult(db *sql.DB, team_id, round int) (res RoundResult, err error)
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(team_id, round).Scan(&res.Id, &res.AttackScore,
+	err = stmt.QueryRow(teamID, round).Scan(&res.ID, &res.AttackScore,
 		&res.DefenceScore)
 	if err != nil {
 		return
 	}
 
-	res.TeamId = team_id
+	res.TeamID = teamID
 	res.Round = round
 
 	return
 }
 
-func GetLastResult(db *sql.DB, team_id int) (res RoundResult, err error) {
+// GetLastResult get last round result for team
+func GetLastResult(db *sql.DB, teamID int) (res RoundResult, err error) {
 
 	stmt, err := db.Prepare("SELECT id, round, attack_score, defence_score " +
 		"FROM round_result WHERE team_id=$1 " +
@@ -105,13 +109,13 @@ func GetLastResult(db *sql.DB, team_id int) (res RoundResult, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(team_id).Scan(&res.Id, &res.Round, &res.AttackScore,
+	err = stmt.QueryRow(teamID).Scan(&res.ID, &res.Round, &res.AttackScore,
 		&res.DefenceScore)
 	if err != nil {
 		return
 	}
 
-	res.TeamId = team_id
+	res.TeamID = teamID
 
 	return
 

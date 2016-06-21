@@ -49,8 +49,8 @@ func TestGetCapturedFlags(t *testing.T) {
 		log.Fatalln("Add flag failed:", err)
 	}
 
-	err = steward.CaptureFlag(db.db, flg1.Id, 20)
-	err = steward.CaptureFlag(db.db, flg2.Id, 30)
+	err = steward.CaptureFlag(db.db, flg1.ID, 20)
+	err = steward.CaptureFlag(db.db, flg2.ID, 30)
 
 	flags1, err := steward.GetCapturedFlags(db.db, round, 20)
 	if err != nil {
@@ -84,9 +84,9 @@ func TestAlreadyCaptured(t *testing.T) {
 	flg1 := steward.Flag{1, "f", 1, 1, 1, "1:2"}
 	flg2 := steward.Flag{2, "b", 1, 1, 1, "1:2"}
 
-	err = steward.CaptureFlag(db.db, flg1.Id, 20)
+	err = steward.CaptureFlag(db.db, flg1.ID, 20)
 
-	captured, err := steward.AlreadyCaptured(db.db, flg1.Id)
+	captured, err := steward.AlreadyCaptured(db.db, flg1.ID)
 	if err != nil {
 		log.Fatalln("Already captured check failed:", err)
 	}
@@ -95,7 +95,7 @@ func TestAlreadyCaptured(t *testing.T) {
 		log.Fatalln("Captured flag is not captured")
 	}
 
-	captured, err = steward.AlreadyCaptured(db.db, flg2.Id)
+	captured, err = steward.AlreadyCaptured(db.db, flg2.ID)
 	if err != nil {
 		log.Fatalln("Already captured check failed:", err)
 	}

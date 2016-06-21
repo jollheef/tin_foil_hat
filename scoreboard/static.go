@@ -15,7 +15,7 @@ import (
 	"net/http"
 )
 
-func StaticScoreboard(w http.ResponseWriter, r *http.Request) {
+func staticScoreboard(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, `
 	<!DOCTYPE html>
@@ -43,5 +43,5 @@ func StaticScoreboard(w http.ResponseWriter, r *http.Request) {
 	      <script src="js/bootstrap.min.js"></script>
 	    </div>
 	  </body>
-	</html>`, GetInfo(), current_result)
+	</html>`, getInfo(), currentResult)
 }

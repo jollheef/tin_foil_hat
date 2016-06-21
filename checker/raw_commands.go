@@ -95,23 +95,23 @@ func exitStatus(no int) string {
 func parseState(err error) (steward.ServiceState, error) {
 
 	if err == nil {
-		return steward.STATUS_UP, nil
+		return steward.StatusUP, nil
 	}
 
 	switch err.Error() {
 	case exitStatus(124): // returns by timeout
-		return steward.STATUS_DOWN, nil
+		return steward.StatusDown, nil
 	case exitStatus(1):
-		return steward.STATUS_ERROR, nil
+		return steward.StatusError, nil
 	case exitStatus(2):
-		return steward.STATUS_MUMBLE, nil
+		return steward.StatusMumble, nil
 	case exitStatus(3):
-		return steward.STATUS_CORRUPT, nil
+		return steward.StatusCorrupt, nil
 	case exitStatus(4):
-		return steward.STATUS_DOWN, nil
+		return steward.StatusDown, nil
 	}
 
-	return steward.STATUS_UNKNOWN, err
+	return steward.StatusUnknown, err
 }
 
 func put(checker string, ip string, port int, flag string) (cred, logs string,

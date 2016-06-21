@@ -23,7 +23,8 @@ func createCapturedFlagTable(db *sql.DB) (err error) {
 	return
 }
 
-func CaptureFlag(db *sql.DB, flag_id, team_id int) (err error) {
+// CaptureFlag add correct flag to db
+func CaptureFlag(db *sql.DB, flagID, teamID int) (err error) {
 
 	stmt, err := db.Prepare(
 		"INSERT INTO captured_flag (flag_id, team_id) " +
@@ -34,7 +35,7 @@ func CaptureFlag(db *sql.DB, flag_id, team_id int) (err error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(flag_id, team_id)
+	_, err = stmt.Exec(flagID, teamID)
 	if err != nil {
 		return
 	}
@@ -42,7 +43,8 @@ func CaptureFlag(db *sql.DB, flag_id, team_id int) (err error) {
 	return
 }
 
-func GetCapturedFlags(db *sql.DB, round, team_id int) (flgs []Flag, err error) {
+// GetCapturedFlags get all captured flags for team and round
+func GetCapturedFlags(db *sql.DB, round, teamID int) (flgs []Flag, err error) {
 
 	stmt, err := db.Prepare("SELECT id, flag, team_id, " +
 		"service_id, cred FROM flag WHERE round=$1")
@@ -63,8 +65,8 @@ func GetCapturedFlags(db *sql.DB, round, team_id int) (flgs []Flag, err error) {
 		var flag Flag
 		flag.Round = round
 
-		err = rows.Scan(&flag.Id, &flag.Flag, &flag.TeamId,
-			&flag.ServiceId, &flag.Cred)
+		err = rows.Scan(&flag.ID, &flag.Flag, &flag.TeamID,
+			&flag.ServiceID, &flag.Cred)
 		if err != nil {
 			return
 		}
@@ -80,7 +82,7 @@ func GetCapturedFlags(db *sql.DB, round, team_id int) (flgs []Flag, err error) {
 
 		var captured bool
 
-		err = nstmt.QueryRow(flag.Id, team_id).Scan(&captured)
+		err = nstmt.QueryRow(flag.ID, teamID).Scan(&captured)
 		if err != nil {
 			return flgs, err
 		}
@@ -93,7 +95,8 @@ func GetCapturedFlags(db *sql.DB, round, team_id int) (flgs []Flag, err error) {
 	return
 }
 
-func AlreadyCaptured(db *sql.DB, flagId int) (captured bool, err error) {
+// AlreadyCaptured returns false if flag already captured
+func AlreadyCaptured(db *sql.DB, flagID int) (captured bool, err error) {
 
 	stmt, err := db.Prepare("SELECT EXISTS(SELECT id FROM captured_flag " +
 		"WHERE flag_id=$1)")
@@ -103,7 +106,7 @@ func AlreadyCaptured(db *sql.DB, flagId int) (captured bool, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(flagId).Scan(&captured)
+	err = stmt.QueryRow(flagID).Scan(&captured)
 	if err != nil {
 		return
 	}

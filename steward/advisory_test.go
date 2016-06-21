@@ -101,11 +101,11 @@ func TestGetAdvisories(t *testing.T) {
 	adv2.Score = 20
 	adv2.Reviewed = true
 
-	adv1.Id, _ = steward.AddAdvisory(db.db, team_id, adv1.Text)
-	adv2.Id, _ = steward.AddAdvisory(db.db, team_id, adv2.Text)
+	adv1.ID, _ = steward.AddAdvisory(db.db, team_id, adv1.Text)
+	adv2.ID, _ = steward.AddAdvisory(db.db, team_id, adv2.Text)
 
-	steward.ReviewAdvisory(db.db, adv1.Id, adv1.Score)
-	steward.ReviewAdvisory(db.db, adv2.Id, adv2.Score)
+	steward.ReviewAdvisory(db.db, adv1.ID, adv1.Score)
+	steward.ReviewAdvisory(db.db, adv2.ID, adv2.Score)
 
 	advisories, err := steward.GetAdvisories(db.db)
 	if err != nil {
@@ -140,7 +140,7 @@ func TestHideUnhideAdvisory(*testing.T) {
 
 	team_id := 10
 
-	adv.Id, err = steward.AddAdvisory(db.db, team_id, adv.Text)
+	adv.ID, err = steward.AddAdvisory(db.db, team_id, adv.Text)
 	if err != nil {
 		log.Fatalln("Add advisory fail:", err)
 	}
@@ -154,7 +154,7 @@ func TestHideUnhideAdvisory(*testing.T) {
 		log.Fatalln("No added advisory")
 	}
 
-	err = steward.HideAdvisory(db.db, adv.Id, true)
+	err = steward.HideAdvisory(db.db, adv.ID, true)
 	if err != nil {
 		log.Fatalln("Hide advisory fail:", err)
 	}
@@ -168,7 +168,7 @@ func TestHideUnhideAdvisory(*testing.T) {
 		log.Fatalln("Hide advisory does not work")
 	}
 
-	err = steward.HideAdvisory(db.db, adv.Id, false)
+	err = steward.HideAdvisory(db.db, adv.ID, false)
 	if err != nil {
 		log.Fatalln("Hide advisory fail:", err)
 	}

@@ -184,7 +184,7 @@ func TestReceiver(*testing.T) {
 
 	// Flag must be captured only if service status ok
 	steward.PutStatus(db.db, steward.Status{firstRound, teamID, serviceID,
-		steward.STATUS_UP})
+		steward.StatusUP})
 
 	testFlag(addr, flag, capturedMsg)
 
@@ -224,7 +224,7 @@ func TestReceiver(*testing.T) {
 
 	curRound, err := steward.CurrentRound(db.db)
 
-	err = steward.AddFlag(db.db, steward.Flag{-1, flag2, curRound.Id, 8, 1, ""})
+	err = steward.AddFlag(db.db, steward.Flag{-1, flag2, curRound.ID, 8, 1, ""})
 	if err != nil {
 		log.Fatalln("Add flag failed:", err)
 	}
@@ -275,12 +275,12 @@ func TestReceiver(*testing.T) {
 	}
 
 	steward.PutStatus(db.db, steward.Status{roundID, teamID, serviceID,
-		steward.STATUS_DOWN})
+		steward.StatusDown})
 
 	testFlag(addr, flag5, serviceNotUpMsg)
 
 	steward.PutStatus(db.db, steward.Status{roundID, teamID, serviceID,
-		steward.STATUS_UP})
+		steward.StatusUP})
 
 	// If attempts limit exceeded flag must not be captured
 	newAddr := "127.0.0.1:64000"

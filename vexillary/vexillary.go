@@ -19,30 +19,33 @@ import (
 	"fmt"
 )
 
+// GenerateKey generate rsa key
 func GenerateKey() (priv *rsa.PrivateKey, err error) {
 	// 128 is minimal valid length for RSA key, which can validate flag
 	return rsa.GenerateKey(rand.Reader, 128)
 }
 
+// GenerateFlag generate signed flag
 func GenerateFlag(priv *rsa.PrivateKey) (string, error) {
 
-	rand_buf := make([]byte, 4)
+	randBuf := make([]byte, 4)
 
-	_, err := rand.Read(rand_buf)
-
-	if err != nil {
-		return "", err
-	}
-
-	signature, err := rsa.SignPKCS1v15(rand.Reader, priv, 0, rand_buf)
+	_, err := rand.Read(randBuf)
 
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%x%x=", rand_buf, signature), nil
+	signature, err := rsa.SignPKCS1v15(rand.Reader, priv, 0, randBuf)
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x%x=", randBuf, signature), nil
 }
 
+// ValidFlag verify flag
 func ValidFlag(flag string, pub rsa.PublicKey) (bool, error) {
 
 	if len(flag) != 41 {
@@ -53,7 +56,7 @@ func ValidFlag(flag string, pub rsa.PublicKey) (bool, error) {
 		return false, errors.New("no '=' at end")
 	}
 
-	rand_buf, err := hex.DecodeString(flag[0:8])
+	randBuf, err := hex.DecodeString(flag[0:8])
 
 	if err != nil {
 		return false, err
@@ -65,7 +68,7 @@ func ValidFlag(flag string, pub rsa.PublicKey) (bool, error) {
 		return false, err
 	}
 
-	err = rsa.VerifyPKCS1v15(&pub, 0, rand_buf, signature)
+	err = rsa.VerifyPKCS1v15(&pub, 0, randBuf, signature)
 
 	if err != nil {
 		return false, err

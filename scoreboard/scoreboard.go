@@ -13,46 +13,47 @@ package scoreboard
 import (
 	"database/sql"
 	"fmt"
-	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
 	"time"
+
+	"golang.org/x/net/websocket"
 )
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
 const (
-	CONTEST_STATE_NOT_AVAILABLE = "state n/a"
-	CONTEST_NOT_STARTED         = "not started"
-	CONTEST_RUNNING             = "running"
-	CONTEST_PAUSED              = "paused"
-	CONTEST_COMPLETED           = "completed"
+	contestStateNotAvailable = "state n/a"
+	contestNotStarted        = "not started"
+	contestRunning           = "running"
+	contestPaused            = "paused"
+	contestCompleted         = "completed"
 )
 
 var (
-	current_result string
-	current_round  string
-	last_updated   string
-	contest_status string
-	round          int
+	currentResult string
+	currentRound  string
+	lastUpdated   string
+	contestStatus string
+	round         int
 )
 
-func ScoreboardHandler(ws *websocket.Conn) {
+func scoreboardHandler(ws *websocket.Conn) {
 
 	defer ws.Close()
 
-	fmt.Fprint(ws, current_result)
-	sended_result := current_result
-	last_update := time.Now()
+	fmt.Fprint(ws, currentResult)
+	sendedResult := currentResult
+	lastUpdate := time.Now()
 
 	for {
-		if sended_result != current_result ||
-			time.Now().After(last_update.Add(time.Minute)) {
+		if sendedResult != currentResult ||
+			time.Now().After(lastUpdate.Add(time.Minute)) {
 
-			sended_result = current_result
-			last_update = time.Now()
+			sendedResult = currentResult
+			lastUpdate = time.Now()
 
-			_, err := fmt.Fprint(ws, current_result)
+			_, err := fmt.Fprint(ws, currentResult)
 			if err != nil {
 				log.Println("Socket closed:", err)
 				return
@@ -63,28 +64,28 @@ func ScoreboardHandler(ws *websocket.Conn) {
 	}
 }
 
-func GetInfo() string {
+func getInfo() string {
 
-	alert_type := ""
+	alertType := ""
 
-	if contest_status == CONTEST_RUNNING {
-		alert_type = "alert-danger"
+	if contestStatus == contestRunning {
+		alertType = "alert-danger"
 	}
 
 	info := fmt.Sprintf(
 		`<span class="alert %s">Contest %s</span>`+
 			`<span class="alert">Round %d</span>`+
 			`<span class="alert">Updated at %s</span>`,
-		alert_type, contest_status, round, last_updated)
+		alertType, contestStatus, round, lastUpdated)
 
 	return info
 }
 
-func InfoHandler(ws *websocket.Conn) {
+func infoHandler(ws *websocket.Conn) {
 
 	defer ws.Close()
 	for {
-		_, err := fmt.Fprint(ws, GetInfo())
+		_, err := fmt.Fprint(ws, getInfo())
 		if err != nil {
 			log.Println("Socket closed:", err)
 			return
@@ -94,81 +95,82 @@ func InfoHandler(ws *websocket.Conn) {
 	}
 }
 
-func ResultUpdater(db *sql.DB, update_timeout time.Duration,
-	darkest_time time.Time) {
+func resultUpdater(db *sql.DB, updateTimeout time.Duration,
+	darkestTime time.Time) {
 
 	for {
 		res, err := CollectLastResult(db)
 		if err != nil {
 			log.Println("Collect last result fail:", err)
-			time.Sleep(update_timeout)
+			time.Sleep(updateTimeout)
 			continue
 		}
 
-		if time.Now().Before(darkest_time) {
+		if time.Now().Before(darkestTime) {
 			CountScoreAndSort(&res)
-			current_result = res.ToHTML(false)
+			currentResult = res.ToHTML(false)
 		} else {
-			current_result = res.ToHTML(true) // hide score
+			currentResult = res.ToHTML(true) // hide score
 		}
 
 		now := time.Now()
-		last_updated = fmt.Sprintf("%02d:%02d:%02d", now.Hour(),
+		lastUpdated = fmt.Sprintf("%02d:%02d:%02d", now.Hour(),
 			now.Minute(), now.Second())
 
 		r, err := steward.CurrentRound(db)
 		if err != nil {
 			round = 0
 		} else {
-			round = r.Id
+			round = r.ID
 		}
 
-		time.Sleep(update_timeout)
+		time.Sleep(updateTimeout)
 	}
 }
 
-func StateUpdater(start, lunch_start_time, lunch_end_time, end_time time.Time,
+func stateUpdater(start, lunchStartTime, lunchEndTime, endTime time.Time,
 	timeout time.Duration) {
 
 	for {
 
 		if time.Now().Before(start) {
-			contest_status = CONTEST_NOT_STARTED
-		} else if time.Now().Before(lunch_start_time) {
-			contest_status = CONTEST_RUNNING
-		} else if time.Now().Before(lunch_end_time) {
-			contest_status = CONTEST_PAUSED
-		} else if time.Now().Before(end_time) {
-			contest_status = CONTEST_RUNNING
+			contestStatus = contestNotStarted
+		} else if time.Now().Before(lunchStartTime) {
+			contestStatus = contestRunning
+		} else if time.Now().Before(lunchEndTime) {
+			contestStatus = contestPaused
+		} else if time.Now().Before(endTime) {
+			contestStatus = contestRunning
 		} else {
-			contest_status = CONTEST_COMPLETED
+			contestStatus = contestCompleted
 		}
 
 		time.Sleep(timeout)
 	}
 }
 
-func Scoreboard(db *sql.DB, www_path, addr string, update_timeout time.Duration,
+// Scoreboard run scoreboard page
+func Scoreboard(db *sql.DB, wwwPath, addr string, updateTimeout time.Duration,
 	start time.Time, half, lunch, darkest time.Duration) (err error) {
 
-	contest_status = CONTEST_STATE_NOT_AVAILABLE
+	contestStatus = contestStateNotAvailable
 
-	lunch_start := start.Add(half)
-	lunch_end := lunch_start.Add(lunch)
-	end_time := lunch_end.Add(half)
+	lunchStart := start.Add(half)
+	lunchEnd := lunchStart.Add(lunch)
+	endTime := lunchEnd.Add(half)
 
-	darkest_time := end_time.Add(-darkest)
+	darkestTime := endTime.Add(-darkest)
 
-	go ResultUpdater(db, update_timeout, darkest_time)
-	go StateUpdater(start, lunch_start, lunch_end, end_time, update_timeout)
+	go resultUpdater(db, updateTimeout, darkestTime)
+	go stateUpdater(start, lunchStart, lunchEnd, endTime, updateTimeout)
 
-	go AdvisoryUpdater(db, update_timeout)
+	go advisoryUpdater(db, updateTimeout)
 
-	http.Handle("/scoreboard", websocket.Handler(ScoreboardHandler))
-	http.Handle("/advisory", websocket.Handler(AdvisoryHandler))
-	http.Handle("/info", websocket.Handler(InfoHandler))
-	http.Handle("/", http.FileServer(http.Dir(www_path)))
-	http.HandleFunc("/static-scoreboard", StaticScoreboard)
+	http.Handle("/scoreboard", websocket.Handler(scoreboardHandler))
+	http.Handle("/advisory", websocket.Handler(advisoryHandler))
+	http.Handle("/info", websocket.Handler(infoHandler))
+	http.Handle("/", http.FileServer(http.Dir(wwwPath)))
+	http.HandleFunc("/static-scoreboard", staticScoreboard)
 
 	log.Println("Launching scoreboard at", addr)
 

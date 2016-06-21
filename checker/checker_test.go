@@ -111,7 +111,7 @@ func checkServicesStatus(db *sql.DB, round int, teams []steward.Team,
 
 	for _, team := range teams {
 		for _, svc := range services {
-			halfStatus := steward.Status{round, team.ID, svc.Id, -1}
+			halfStatus := steward.Status{round, team.ID, svc.ID, -1}
 
 			state, err := steward.GetState(db, halfStatus)
 			if err != nil {
@@ -199,7 +199,7 @@ func TestFlagsWork(t *testing.T) {
 	}
 
 	// No services -> all down
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_DOWN)
+	checkServicesStatus(db.db, round, teams, services, steward.StatusDown)
 
 	// Start service
 	service.Start()
@@ -213,7 +213,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Put flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_MUMBLE)
+	checkServicesStatus(db.db, round, teams, services, steward.StatusMumble)
 
 	service.RestoreLogic()
 
@@ -231,7 +231,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Put flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_UP)
+	checkServicesStatus(db.db, round, teams, services, steward.StatusUP)
 
 	log.Println("Check flags of correct service...")
 
@@ -240,7 +240,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Check flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_UP)
+	checkServicesStatus(db.db, round, teams, services, steward.StatusUP)
 
 	service.ClearFlags()
 
@@ -251,7 +251,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Check flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_CORRUPT)
+	checkServicesStatus(db.db, round, teams, services, steward.StatusCorrupt)
 
 	log.Println("Stop service...")
 	service.Stop()
@@ -263,5 +263,5 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Check flags failed:", err)
 	}
 
-	checkServicesStatus(db.db, round, teams, services, steward.STATUS_DOWN)
+	checkServicesStatus(db.db, round, teams, services, steward.StatusDown)
 }

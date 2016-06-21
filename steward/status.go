@@ -10,48 +10,50 @@ package steward
 
 import "database/sql"
 
+// ServiceState provide type for service status
 type ServiceState int
 
 const (
-	// Service is online, serves the requests, stores and
+	// StatusUP Service is online, serves the requests, stores and
 	// returns flags and behaves as expected
-	STATUS_UP ServiceState = iota
-	// Service is online, but behaves not as expected, e.g. if HTTP server
-	// listens the port, but doesn't respond on request
-	STATUS_MUMBLE
-	// Service is online, but past flags cannot be retrieved
-	STATUS_CORRUPT
-	// Service is offline
-	STATUS_DOWN
-	// Checker error
-	STATUS_ERROR
-	// Unknown
-	STATUS_UNKNOWN
+	StatusUP ServiceState = iota
+	// StatusMumble Service is online, but behaves not as expected,
+	// e.g. if HTTP server listens the port, but doesn't respond on request
+	StatusMumble
+	// StatusCorrupt Service is online, but past flags cannot be retrieved
+	StatusCorrupt
+	// StatusDown Service is offline
+	StatusDown
+	// StatusError Checker error
+	StatusError
+	// StatusUnknown Unknown
+	StatusUnknown
 )
 
 func (state ServiceState) String() string {
 	switch state {
-	case STATUS_UP:
+	case StatusUP:
 		return "up"
-	case STATUS_MUMBLE:
+	case StatusMumble:
 		return "mumble"
-	case STATUS_CORRUPT:
+	case StatusCorrupt:
 		return "corrupt"
-	case STATUS_DOWN:
+	case StatusDown:
 		return "down"
-	case STATUS_ERROR:
+	case StatusError:
 		return "error"
-	case STATUS_UNKNOWN:
+	case StatusUnknown:
 		return "unknown"
 	}
 
 	return "undefined"
 }
 
+// Status contains info about services status
 type Status struct {
 	Round     int
-	TeamId    int
-	ServiceId int
+	TeamID    int
+	ServiceID int
 	State     ServiceState
 }
 
@@ -70,6 +72,7 @@ func createStatusTable(db *sql.DB) (err error) {
 	return
 }
 
+// PutStatus add status to database
 func PutStatus(db *sql.DB, status Status) (err error) {
 
 	stmt, err := db.Prepare("INSERT INTO status (round, team_id, " +
@@ -80,7 +83,7 @@ func PutStatus(db *sql.DB, status Status) (err error) {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(status.Round, status.TeamId, status.ServiceId,
+	_, err = stmt.Exec(status.Round, status.TeamID, status.ServiceID,
 		status.State)
 	if err != nil {
 		return
@@ -89,6 +92,7 @@ func PutStatus(db *sql.DB, status Status) (err error) {
 	return
 }
 
+// GetStates get states for services status
 func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 	err error) {
 
@@ -101,8 +105,8 @@ func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 
 	defer stmt.Close()
 
-	rows, err := stmt.Query(halfStatus.Round, halfStatus.TeamId,
-		halfStatus.ServiceId)
+	rows, err := stmt.Query(halfStatus.Round, halfStatus.TeamID,
+		halfStatus.ServiceID)
 	if err != nil {
 		return
 	}
@@ -123,6 +127,7 @@ func GetStates(db *sql.DB, halfStatus Status) (states []ServiceState,
 	return
 }
 
+// GetState get state for service status
 func GetState(db *sql.DB, halfStatus Status) (state ServiceState, err error) {
 
 	stmt, err := db.Prepare(
@@ -136,8 +141,8 @@ func GetState(db *sql.DB, halfStatus Status) (state ServiceState, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(halfStatus.Round, halfStatus.TeamId,
-		halfStatus.ServiceId).Scan(&state)
+	err = stmt.QueryRow(halfStatus.Round, halfStatus.TeamID,
+		halfStatus.ServiceID).Scan(&state)
 	if err != nil {
 		return
 	}

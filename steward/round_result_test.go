@@ -25,7 +25,7 @@ func TestAddRoundResult(t *testing.T) {
 	defer db.Close()
 
 	first := steward.RoundResult{-1, 10, 1, 30, 40}
-	second := steward.RoundResult{-1, first.TeamId, first.Round + 1, 130, 140}
+	second := steward.RoundResult{-1, first.TeamID, first.Round + 1, 130, 140}
 
 	_, err = steward.AddRoundResult(db.db, first)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestGetRoundResult(t *testing.T) {
 	defer db.Close()
 
 	first := steward.RoundResult{-1, 10, 1, 30, 40}
-	second := steward.RoundResult{-1, first.TeamId, first.Round + 1, 130, 140}
+	second := steward.RoundResult{-1, first.TeamID, first.Round + 1, 130, 140}
 
 	_, err = steward.AddRoundResult(db.db, first)
 	if err != nil {
@@ -60,12 +60,12 @@ func TestGetRoundResult(t *testing.T) {
 		log.Fatalln("Add round result failed:", err)
 	}
 
-	last_res, err := steward.GetLastResult(db.db, second.TeamId)
+	last_res, err := steward.GetLastResult(db.db, second.TeamID)
 	if err != nil {
 		log.Fatalln("Get last result failed:", err)
 	}
 
-	res, err := steward.GetRoundResult(db.db, second.TeamId, second.Round)
+	res, err := steward.GetRoundResult(db.db, second.TeamID, second.Round)
 	if err != nil {
 		log.Fatalln("Get round result failed:", err)
 	}

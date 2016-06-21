@@ -47,7 +47,7 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 	}
 
 	portOpen := true
-	if !svc.Udp {
+	if !svc.UDP {
 		portOpen = tcpPortOpen(team, svc)
 	}
 
@@ -61,23 +61,23 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 			return
 		}
 
-		if state != steward.STATUS_UP {
+		if state != steward.StatusUP {
 			log.Printf("Put flag, round %d, team %s, service %s: %s",
 				round, team.Name, svc.Name, logs)
 		}
 	} else {
-		state = steward.STATUS_DOWN
+		state = steward.StatusDown
 	}
 
 	err = steward.PutStatus(db,
-		steward.Status{round, team.ID, svc.Id, state})
+		steward.Status{round, team.ID, svc.ID, state})
 	if err != nil {
 		log.Println("Add status to database failed:", err)
 		return
 	}
 
 	err = steward.AddFlag(db,
-		steward.Flag{-1, flag, round, team.ID, svc.Id, cred})
+		steward.Flag{-1, flag, round, team.ID, svc.ID, cred})
 	if err != nil {
 		log.Println("Add flag to database failed:", err)
 		return
@@ -89,10 +89,10 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 func getFlag(db *sql.DB, round int, team steward.Team,
 	svc steward.Service) (state steward.ServiceState, err error) {
 
-	flag, cred, err := steward.GetCred(db, round, team.ID, svc.Id)
+	flag, cred, err := steward.GetCred(db, round, team.ID, svc.ID)
 	if err != nil {
 		log.Println("Get cred failed:", err)
-		state = steward.STATUS_CORRUPT
+		state = steward.StatusCorrupt
 		return
 	}
 
@@ -104,10 +104,10 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 	}
 
 	if flag != serviceFlag {
-		state = steward.STATUS_CORRUPT
+		state = steward.StatusCorrupt
 	}
 
-	if state != steward.STATUS_UP {
+	if state != steward.StatusUP {
 		log.Printf("Get flag, round %d, team %s, service %s: %s",
 			round, team.Name, svc.Name, logs)
 	}
@@ -124,7 +124,7 @@ func checkService(db *sql.DB, round int, team steward.Team,
 		return
 	}
 
-	if state != steward.STATUS_UP {
+	if state != steward.StatusUP {
 		log.Printf("Check, round %d, team %s, service %s: %s",
 			round, team.Name, svc.Name, logs)
 	}
@@ -140,7 +140,7 @@ func checkFlag(db *sql.DB, round int, team steward.Team, svc steward.Service,
 
 	// Check service port open
 	portOpen := true
-	if !svc.Udp {
+	if !svc.UDP {
 		portOpen = tcpPortOpen(team, svc)
 	}
 
@@ -148,16 +148,16 @@ func checkFlag(db *sql.DB, round int, team steward.Team, svc steward.Service,
 	if portOpen {
 		// First check service logic
 		state, _ = checkService(db, round, team, svc)
-		if state == steward.STATUS_UP {
+		if state == steward.StatusUP {
 			// If logic is correct, do flag check
 			state, _ = getFlag(db, round, team, svc)
 		}
 	} else {
-		state = steward.STATUS_DOWN
+		state = steward.StatusDown
 	}
 
 	err := steward.PutStatus(db, steward.Status{round,
-		team.ID, svc.Id, state})
+		team.ID, svc.ID, state})
 	if err != nil {
 		log.Println("Add status failed:", err)
 		return

@@ -13,17 +13,18 @@ package scoreboard
 import (
 	"database/sql"
 	"fmt"
-	"golang.org/x/net/websocket"
 	"html/template"
 	"time"
+
+	"golang.org/x/net/websocket"
 )
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
-func AdvisoryToHtml(adv steward.Advisory) (html string) {
+func advisoryToHTML(adv steward.Advisory) (html string) {
 
 	html = fmt.Sprintf("<h3>ISA-%d-%04d</h3>",
-		adv.Timestamp.Year(), adv.Id)
+		adv.Timestamp.Year(), adv.ID)
 
 	html += "<br><h4>Summary:</h4>"
 
@@ -44,35 +45,35 @@ func AdvisoryToHtml(adv steward.Advisory) (html string) {
 
 var advisories string
 
-func AdvisoryUpdater(db *sql.DB, update_timeout time.Duration) {
+func advisoryUpdater(db *sql.DB, updateTimeout time.Duration) {
 
 	for {
-		var tmp_advisories string
+		var tmpAdvisories string
 
 		advs, err := steward.GetAdvisories(db)
 		if err != nil {
-			time.Sleep(update_timeout)
+			time.Sleep(updateTimeout)
 			continue
 		}
 
 		for i := range advs {
 			adv := advs[len(advs)-i-1]
 			if adv.Reviewed {
-				tmp_advisories += AdvisoryToHtml(adv)
+				tmpAdvisories += advisoryToHTML(adv)
 			}
 		}
 
-		if len(tmp_advisories) == 0 {
+		if len(tmpAdvisories) == 0 {
 			advisories = "Current no advisories"
 		} else {
-			advisories = tmp_advisories
+			advisories = tmpAdvisories
 		}
 
-		time.Sleep(update_timeout)
+		time.Sleep(updateTimeout)
 	}
 }
 
-func AdvisoryHandler(ws *websocket.Conn) {
+func advisoryHandler(ws *websocket.Conn) {
 	defer ws.Close()
 	fmt.Fprint(ws, advisories)
 }

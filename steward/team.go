@@ -10,6 +10,7 @@ package steward
 
 import "database/sql"
 
+// Team contains info about team
 type Team struct {
 	ID        int
 	Name      string
@@ -33,6 +34,7 @@ func createTeamTable(db *sql.DB) (err error) {
 	return
 }
 
+// AddTeam add team to database
 func AddTeam(db *sql.DB, team Team) (id int, err error) {
 
 	stmt, err := db.Prepare("INSERT INTO team (name, subnet, vulnbox, " +
@@ -53,6 +55,7 @@ func AddTeam(db *sql.DB, team Team) (id int, err error) {
 	return
 }
 
+// GetTeams get all teams from database
 func GetTeams(db *sql.DB) (teams []Team, err error) {
 
 	rows, err := db.Query(
@@ -78,6 +81,7 @@ func GetTeams(db *sql.DB) (teams []Team, err error) {
 	return
 }
 
+// GetTeam get team by id from database
 func GetTeam(db *sql.DB, teamID int) (team Team, err error) {
 
 	stmt, err := db.Prepare(

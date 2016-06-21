@@ -17,7 +17,7 @@ import (
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
-func CollectTeamResult(db *sql.DB, team steward.Team,
+func collectTeamResult(db *sql.DB, team steward.Team,
 	services []steward.Service) (tr TeamResult, err error) {
 
 	tr.Name = team.Name
@@ -45,14 +45,14 @@ func CollectTeamResult(db *sql.DB, team steward.Team,
 	}
 
 	for _, svc := range services {
-		s := steward.Status{round.Id, team.ID, svc.Id, -1}
+		s := steward.Status{round.ID, team.ID, svc.ID, -1}
 		state, err := steward.GetState(db, s)
 		if err != nil {
 			// Try to get status from previous round
-			s.Round -= 1
+			s.Round--
 			state, err = steward.GetState(db, s)
 			if err != nil {
-				state = steward.STATUS_DOWN
+				state = steward.StatusDown
 			}
 		}
 
@@ -62,7 +62,7 @@ func CollectTeamResult(db *sql.DB, team steward.Team,
 	return
 }
 
-func Max(r *Result, fn func(TeamResult) float64) (max float64) {
+func max(r *Result, fn func(TeamResult) float64) (max float64) {
 	max = 0
 	for _, tr := range r.Teams {
 		if fn(tr) > max {
@@ -72,59 +72,61 @@ func Max(r *Result, fn func(TeamResult) float64) (max float64) {
 	return
 }
 
+// CountScoreAndSort update scoreboard helper
 func CountScoreAndSort(r *Result) {
 
-	max_attack := Max(r,
+	maxAttack := max(r,
 		func(tr TeamResult) float64 { return tr.Attack })
-	max_defence := Max(r,
+	maxDefence := max(r,
 		func(tr TeamResult) float64 { return tr.Defence })
-	max_advisory := Max(r,
+	maxAdvisory := max(r,
 		func(tr TeamResult) float64 { return float64(tr.Advisory) })
 
-	if max_attack == 0 {
-		max_attack = 1
+	if maxAttack == 0 {
+		maxAttack = 1
 	}
 
-	if max_defence == 0 {
-		max_defence = 1
+	if maxDefence == 0 {
+		maxDefence = 1
 	}
 
-	if max_advisory == 0 {
-		max_advisory = 1
+	if maxAdvisory == 0 {
+		maxAdvisory = 1
 	}
 
-	for i, _ := range r.Teams {
+	for i := range r.Teams {
 
 		tr := &r.Teams[i]
 
-		tr.AttackPercent = tr.Attack / max_attack * 100
-		tr.DefencePercent = tr.Defence / max_defence * 100
-		tr.AdvisoryPercent = float64(tr.Advisory) / max_advisory * 100
+		tr.AttackPercent = tr.Attack / maxAttack * 100
+		tr.DefencePercent = tr.Defence / maxDefence * 100
+		tr.AdvisoryPercent = float64(tr.Advisory) / maxAdvisory * 100
 
 		tr.Score = (tr.AttackPercent + tr.DefencePercent +
 			tr.AdvisoryPercent) / 3
 	}
 
-	max_score := Max(r,
+	maxScore := max(r,
 		func(tr TeamResult) float64 { return tr.Score })
 
-	if max_score == 0 {
-		max_score = 1
+	if maxScore == 0 {
+		maxScore = 1
 	}
 
-	for i, _ := range r.Teams {
+	for i := range r.Teams {
 		tr := &r.Teams[i]
-		tr.ScorePercent = tr.Score / max_score * 100
+		tr.ScorePercent = tr.Score / maxScore * 100
 	}
 
 	sort.Sort(ByScore(r.Teams))
 
-	for i, _ := range r.Teams {
+	for i := range r.Teams {
 		tr := &r.Teams[i]
 		tr.Rank = i + 1
 	}
 }
 
+// CollectLastResult returns actual scoreboard
 func CollectLastResult(db *sql.DB) (r Result, err error) {
 
 	teams, err := steward.GetTeams(db)
@@ -143,7 +145,7 @@ func CollectLastResult(db *sql.DB) (r Result, err error) {
 
 	for _, team := range teams {
 
-		tr, err := CollectTeamResult(db, team, services)
+		tr, err := collectTeamResult(db, team, services)
 		if err != nil {
 			return r, err
 		}

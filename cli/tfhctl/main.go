@@ -12,10 +12,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/olekukonko/tablewriter"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"log"
 	"os"
+
+	"github.com/olekukonko/tablewriter"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/jollheef/tin_foil_hat/config"
 	"github.com/jollheef/tin_foil_hat/scoreboard"
@@ -96,7 +97,7 @@ func main() {
 				continue
 			}
 
-			fmt.Printf(">>> Advisory: id %d <<<\n", advisory.Id)
+			fmt.Printf(">>> Advisory: id %d <<<\n", advisory.ID)
 			fmt.Printf("(Score: %d, Reviewed: %t, Timestamp: %s)\n",
 				advisory.Score, advisory.Reviewed,
 				advisory.Timestamp.String())

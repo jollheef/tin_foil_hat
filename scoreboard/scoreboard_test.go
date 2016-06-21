@@ -25,7 +25,7 @@ import (
 
 const (
 	db_path  string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
-	www_path string = "www"
+	wwwPath string = "www"
 )
 
 func TestCountScoreboard(*testing.T) {
@@ -114,7 +114,7 @@ func TestParallelWebSocketConnect(*testing.T) {
 	addr := ":8080"
 
 	go func() {
-		err := scoreboard.Scoreboard(db, www_path, addr, time.Second,
+		err := scoreboard.Scoreboard(db, wwwPath, addr, time.Second,
 			time.Now(), time.Minute, time.Minute, time.Second)
 		if err != nil {
 			log.Fatal(err)

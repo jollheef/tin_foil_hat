@@ -10,12 +10,13 @@ package steward
 
 import "database/sql"
 
+// Service contains info about service
 type Service struct {
-	Id          int
+	ID          int
 	Name        string
 	Port        int
 	CheckerPath string
-	Udp         bool
+	UDP         bool
 }
 
 func createServiceTable(db *sql.DB) (err error) {
@@ -32,6 +33,7 @@ func createServiceTable(db *sql.DB) (err error) {
 	return
 }
 
+// AddService add service to database
 func AddService(db *sql.DB, svc Service) error {
 
 	stmt, err := db.Prepare(
@@ -43,7 +45,7 @@ func AddService(db *sql.DB, svc Service) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(svc.Name, svc.Port, svc.CheckerPath, svc.Udp)
+	_, err = stmt.Exec(svc.Name, svc.Port, svc.CheckerPath, svc.UDP)
 
 	if err != nil {
 		return err
@@ -52,6 +54,7 @@ func AddService(db *sql.DB, svc Service) error {
 	return nil
 }
 
+// GetServices get all services from database
 func GetServices(db *sql.DB) (services []Service, err error) {
 
 	rows, err := db.Query("SELECT id,name, port, checker_path, udp " +
@@ -65,8 +68,8 @@ func GetServices(db *sql.DB) (services []Service, err error) {
 	for rows.Next() {
 		var svc Service
 
-		err = rows.Scan(&svc.Id, &svc.Name, &svc.Port, &svc.CheckerPath,
-			&svc.Udp)
+		err = rows.Scan(&svc.ID, &svc.Name, &svc.Port, &svc.CheckerPath,
+			&svc.UDP)
 		if err != nil {
 			return
 		}

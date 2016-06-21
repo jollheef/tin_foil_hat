@@ -124,7 +124,7 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		return
 	}
 
-	captured, err := steward.AlreadyCaptured(db, flg.Id)
+	captured, err := steward.AlreadyCaptured(db, flg.ID)
 	if err != nil {
 		log.Println("\tAlready captured check failed:", err)
 		fmt.Fprint(conn, internalErrorMsg)
@@ -142,17 +142,17 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		return
 	}
 
-	if flg.TeamId == team.ID {
+	if flg.TeamID == team.ID {
 		log.Printf("\tTeam %s try to send their flag", team.Name)
 		fmt.Fprint(conn, flagYoursMsg)
 		return
 	}
 
-	halfStatus := steward.Status{flg.Round, team.ID, flg.ServiceId,
-		steward.STATUS_UNKNOWN}
+	halfStatus := steward.Status{flg.Round, team.ID, flg.ServiceID,
+		steward.StatusUnknown}
 	state, err := steward.GetState(db, halfStatus)
 
-	if state != steward.STATUS_UP {
+	if state != steward.StatusUP {
 		log.Printf("\t%s service not ok, cannot capture", team.Name)
 		fmt.Fprint(conn, serviceNotUpMsg)
 		return
@@ -160,7 +160,7 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	round, err := steward.CurrentRound(db)
 
-	if round.Id != flg.Round {
+	if round.ID != flg.Round {
 		log.Printf("\t%s try to send flag from past round", team.Name)
 		fmt.Fprint(conn, flagExpiredMsg)
 		return
@@ -174,7 +174,7 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		return
 	}
 
-	err = steward.CaptureFlag(db, flg.Id, team.ID)
+	err = steward.CaptureFlag(db, flg.ID, team.ID)
 	if err != nil {
 		log.Println("\tCapture flag failed:", err)
 		fmt.Fprint(conn, internalErrorMsg)

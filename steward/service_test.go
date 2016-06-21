@@ -54,7 +54,7 @@ func TestGetServices(t *testing.T) {
 	}
 
 	for i := 0; i < len(services); i++ {
-		svc.Id = i + 1
+		svc.ID = i + 1
 		svc.Port = i
 		if services[i] != svc {
 			log.Fatalln("Get service", services[i], "instead", svc)

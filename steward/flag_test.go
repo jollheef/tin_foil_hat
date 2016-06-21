@@ -78,8 +78,8 @@ func TestGetCred(t *testing.T) {
 
 	err = steward.AddFlag(db.db, flg)
 
-	flag, cred, err := steward.GetCred(db.db, flg.Round, flg.TeamId,
-		flg.ServiceId)
+	flag, cred, err := steward.GetCred(db.db, flg.Round, flg.TeamID,
+		flg.ServiceID)
 	if err != nil {
 		log.Fatalln("Get cred failed:", err)
 	}

@@ -10,12 +10,13 @@ package steward
 
 import "database/sql"
 
+// Flag contains info about flag
 type Flag struct {
-	Id        int
+	ID        int
 	Flag      string
 	Round     int
-	TeamId    int
-	ServiceId int
+	TeamID    int
+	ServiceID int
 	Cred      string
 }
 
@@ -34,6 +35,7 @@ func createFlagTable(db *sql.DB) (err error) {
 	return
 }
 
+// AddFlag add flag to database
 func AddFlag(db *sql.DB, flg Flag) error {
 
 	stmt, err := db.Prepare("INSERT INTO flag " +
@@ -45,7 +47,7 @@ func AddFlag(db *sql.DB, flg Flag) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(flg.Round, flg.TeamId, flg.ServiceId,
+	_, err = stmt.Exec(flg.Round, flg.TeamID, flg.ServiceID,
 		flg.Flag, flg.Cred)
 	if err != nil {
 		return err
@@ -54,6 +56,7 @@ func AddFlag(db *sql.DB, flg Flag) error {
 	return nil
 }
 
+// FlagExist check for flag exist in database
 func FlagExist(db *sql.DB, flag string) (exist bool, err error) {
 
 	stmt, err := db.Prepare(
@@ -72,6 +75,7 @@ func FlagExist(db *sql.DB, flag string) (exist bool, err error) {
 	return
 }
 
+// GetFlagInfo returns info about flag
 func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 
 	flg.Flag = flag
@@ -85,8 +89,8 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(flag).Scan(&flg.Id, &flg.Round, &flg.TeamId,
-		&flg.ServiceId, &flg.Cred)
+	err = stmt.QueryRow(flag).Scan(&flg.ID, &flg.Round, &flg.TeamID,
+		&flg.ServiceID, &flg.Cred)
 	if err != nil {
 		return
 	}
@@ -94,6 +98,7 @@ func GetFlagInfo(db *sql.DB, flag string) (flg Flag, err error) {
 	return
 }
 
+// GetCred returns credentials for check flag in service
 func GetCred(db *sql.DB, round, team, service int) (flag, cred string, err error) {
 
 	stmt, err := db.Prepare("SELECT flag, cred FROM flag WHERE round=$1" +

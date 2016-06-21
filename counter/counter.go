@@ -20,8 +20,8 @@ import (
 func CountStatesResult(db *sql.DB, round, team int,
 	service steward.Service) (score float64, err error) {
 
-	halfStatus := steward.Status{round, team, service.Id,
-		steward.STATUS_UNKNOWN}
+	halfStatus := steward.Status{round, team, service.ID,
+		steward.StatusUnknown}
 
 	states, err := steward.GetStates(db, halfStatus)
 	if err != nil {
@@ -34,7 +34,7 @@ func CountStatesResult(db *sql.DB, round, team int,
 
 	ok := 0.0
 	for _, state := range states {
-		if state == steward.STATUS_UP {
+		if state == steward.StatusUP {
 			ok++
 		}
 	}
@@ -73,7 +73,7 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 	for _, team := range teams {
 
-		res := steward.RoundResult{TeamId: team.ID, Round: round}
+		res := steward.RoundResult{TeamID: team.ID, Round: round}
 
 		def, err := CountDefenceResult(db, round, team.ID, services)
 		if err != nil {
@@ -96,7 +96,7 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 		for _, flag := range cflags {
 
-			attackedTeam, err := steward.GetTeam(db, flag.TeamId)
+			attackedTeam, err := steward.GetTeam(db, flag.TeamID)
 			if err != nil {
 				return err
 			}

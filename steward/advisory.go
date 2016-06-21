@@ -12,8 +12,9 @@ import "time"
 
 import "database/sql"
 
+// Advisory contains info about advisory
 type Advisory struct {
-	Id        int
+	ID        int
 	Text      string
 	Reviewed  bool
 	Score     int
@@ -36,7 +37,8 @@ func createAdvisoryTable(db *sql.DB) (err error) {
 	return
 }
 
-func AddAdvisory(db *sql.DB, team_id int, text string) (id int, err error) {
+// AddAdvisory add advisory for team to database
+func AddAdvisory(db *sql.DB, teamID int, text string) (id int, err error) {
 
 	stmt, err := db.Prepare("INSERT INTO advisory (team_id, text) " +
 		"VALUES ($1, $2) RETURNING id")
@@ -46,7 +48,7 @@ func AddAdvisory(db *sql.DB, team_id int, text string) (id int, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(team_id, text).Scan(&id)
+	err = stmt.QueryRow(teamID, text).Scan(&id)
 	if err != nil {
 		return
 	}
@@ -54,7 +56,8 @@ func AddAdvisory(db *sql.DB, team_id int, text string) (id int, err error) {
 	return
 }
 
-func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
+// ReviewAdvisory used for set score for advisory
+func ReviewAdvisory(db *sql.DB, advisoryID int, score int) error {
 
 	stmt, err := db.Prepare(
 		"UPDATE advisory SET score=$1, reviewed=$2 WHERE id=$3")
@@ -64,7 +67,7 @@ func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(score, true, advisory_id)
+	_, err = stmt.Exec(score, true, advisoryID)
 
 	if err != nil {
 		return err
@@ -73,7 +76,8 @@ func ReviewAdvisory(db *sql.DB, advisory_id int, score int) error {
 	return nil
 }
 
-func HideAdvisory(db *sql.DB, advisory_id int, hide bool) error {
+// HideAdvisory used for hide advisory from cli
+func HideAdvisory(db *sql.DB, advisoryID int, hide bool) error {
 
 	stmt, err := db.Prepare(
 		"UPDATE advisory SET hided=$1 WHERE id=$2")
@@ -83,7 +87,7 @@ func HideAdvisory(db *sql.DB, advisory_id int, hide bool) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(hide, advisory_id)
+	_, err = stmt.Exec(hide, advisoryID)
 
 	if err != nil {
 		return err
@@ -92,7 +96,8 @@ func HideAdvisory(db *sql.DB, advisory_id int, hide bool) error {
 	return nil
 }
 
-func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
+// GetAdvisoryScore get advisory score for team
+func GetAdvisoryScore(db *sql.DB, teamID int) (score int, err error) {
 
 	stmt, err := db.Prepare(
 		"SELECT sum(score) FROM advisory WHERE team_id=$1 " +
@@ -103,7 +108,7 @@ func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(team_id, true).Scan(&score)
+	err = stmt.QueryRow(teamID, true).Scan(&score)
 	if err != nil {
 		return
 	}
@@ -111,6 +116,7 @@ func GetAdvisoryScore(db *sql.DB, team_id int) (score int, err error) {
 	return
 }
 
+// GetAdvisories get all advisories
 func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 
 	rows, err := db.Query(
@@ -125,7 +131,7 @@ func GetAdvisories(db *sql.DB) (advisories []Advisory, err error) {
 	for rows.Next() {
 		var adv Advisory
 
-		err = rows.Scan(&adv.Id, &adv.Text, &adv.Score, &adv.Timestamp,
+		err = rows.Scan(&adv.ID, &adv.Text, &adv.Score, &adv.Timestamp,
 			&adv.Reviewed)
 		if err != nil {
 			return

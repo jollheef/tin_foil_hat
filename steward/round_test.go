@@ -43,7 +43,7 @@ func TestRoundWork(t *testing.T) {
 		if err != nil {
 			log.Fatalln("Get current round fail:", err)
 		}
-		if current_round.Id != new_round {
+		if current_round.ID != new_round {
 			log.Fatalln("Current round number invalid")
 		}
 		if current_round.Len != round_len {

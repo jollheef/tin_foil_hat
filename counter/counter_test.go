@@ -68,10 +68,10 @@ func TestCountStatesResult(*testing.T) {
 
 	svc := steward.Service{s, "foo", 8080, "", false}
 
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.STATUS_MUMBLE})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusMumble})
 
 	res, err := counter.CountStatesResult(db.db, r, t, svc)
 	if err != nil {
@@ -104,24 +104,24 @@ func TestCountDefenceResult(*testing.T) {
 	services = append(services, steward.Service{3, "baz", 8082, "", false})
 	services = append(services, steward.Service{4, "qwe", 8083, "", false})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.STATUS_DOWN})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusDown})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.STATUS_DOWN})
+	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.STATUS_UP})
+	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.StatusUP})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_UP})
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_DOWN})
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_DOWN})
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.STATUS_DOWN})
+	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusDown})
 
 	res, err := counter.CountDefenceResult(db.db, r, t, services)
 	if err != nil {
@@ -203,7 +203,7 @@ func TestCountRound(*testing.T) {
 
 			flags = append(flags, flag)
 
-			flg := steward.Flag{-1, flag, round, team.ID, svc.Id, ""}
+			flg := steward.Flag{-1, flag, round, team.ID, svc.ID, ""}
 
 			err = steward.AddFlag(db.db, flg)
 			if err != nil {
@@ -211,7 +211,7 @@ func TestCountRound(*testing.T) {
 			}
 
 			err = steward.PutStatus(db.db, steward.Status{round,
-				team.ID, svc.Id, steward.STATUS_UP})
+				team.ID, svc.ID, steward.StatusUP})
 			if err != nil {
 				log.Fatalln("Put status to database failed:", err)
 			}
@@ -223,7 +223,7 @@ func TestCountRound(*testing.T) {
 		log.Fatalln("Get flag info failed:", err)
 	}
 
-	err = steward.CaptureFlag(db.db, flag1.Id, teams[2].ID)
+	err = steward.CaptureFlag(db.db, flag1.ID, teams[2].ID)
 	if err != nil {
 		log.Fatalln("Capture flag failed:", err)
 	}
@@ -233,7 +233,7 @@ func TestCountRound(*testing.T) {
 		log.Fatalln("Get flag info failed:", err)
 	}
 
-	err = steward.CaptureFlag(db.db, flag2.Id, teams[3].ID)
+	err = steward.CaptureFlag(db.db, flag2.ID, teams[3].ID)
 	if err != nil {
 		log.Fatalln("Capture flag failed:", err)
 	}

@@ -14,6 +14,7 @@ import "fmt"
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
+// TeamResult contain info for scoreboard
 type TeamResult struct {
 	Rank            int
 	Name            string
@@ -32,12 +33,13 @@ func td(s string, best bool) string {
 	if best {
 		return `<td bgcolor="#00AAAA"><font color="#FFFFFF">` +
 			s + "</td>"
-	} else {
-		return `<td>` + s + `</td>`
 	}
+
+	return `<td>` + s + `</td>`
 }
 
-func (tr TeamResult) ToHTML(hide_score bool) string {
+// ToHTML convert TeamResult to HTML
+func (tr TeamResult) ToHTML(hideScore bool) string {
 
 	var status string
 	for _, s := range tr.Status {
@@ -45,12 +47,12 @@ func (tr TeamResult) ToHTML(hide_score bool) string {
 		var label string
 
 		switch s {
-		case steward.STATUS_UP:
+		case steward.StatusUP:
 			label = "success"
-		case steward.STATUS_MUMBLE:
-		case steward.STATUS_CORRUPT:
+		case steward.StatusMumble:
+		case steward.StatusCorrupt:
 			label = "warning"
-		case steward.STATUS_UNKNOWN:
+		case steward.StatusUnknown:
 			label = "default"
 		default:
 			label = "important"
@@ -61,23 +63,23 @@ func (tr TeamResult) ToHTML(hide_score bool) string {
 			label, s.String())
 	}
 
-	var score_best, attack_best, defence_best, advisory_best bool
+	var scoreBest, attackBest, defenceBest, advisoryBest bool
 	if tr.ScorePercent == 100 {
-		score_best = true
+		scoreBest = true
 	}
 	if tr.AttackPercent == 100 {
-		attack_best = true
+		attackBest = true
 	}
 	if tr.DefencePercent == 100 {
-		defence_best = true
+		defenceBest = true
 	}
 	if tr.AdvisoryPercent == 100 {
-		advisory_best = true
+		advisoryBest = true
 	}
 
 	var info, score, attack, defence, advisory string
 
-	if hide_score {
+	if hideScore {
 		hidden := `<td>&#xFFFD</td>`
 		info = hidden + fmt.Sprintf("<td>%s</td>", tr.Name)
 		score = hidden
@@ -87,27 +89,30 @@ func (tr TeamResult) ToHTML(hide_score bool) string {
 		advisory = hidden
 	} else {
 		info = fmt.Sprintf("<td>%d</td><td>%s</td>", tr.Rank, tr.Name)
-		score = td(fmt.Sprintf("%05.2f&#37", tr.ScorePercent), score_best)
-		attack = td(fmt.Sprintf("%.3f", tr.Attack), attack_best)
-		defence = td(fmt.Sprintf("%.3f", tr.Defence), defence_best)
-		advisory = td(fmt.Sprintf("%d", tr.Advisory), advisory_best)
+		score = td(fmt.Sprintf("%05.2f&#37", tr.ScorePercent), scoreBest)
+		attack = td(fmt.Sprintf("%.3f", tr.Attack), attackBest)
+		defence = td(fmt.Sprintf("%.3f", tr.Defence), defenceBest)
+		advisory = td(fmt.Sprintf("%d", tr.Advisory), advisoryBest)
 	}
 
 	return "<tr>" + info + score + attack + defence + advisory + status + "</tr>"
 }
 
+// ByScore sort team result by score
 type ByScore []TeamResult
 
 func (tr ByScore) Len() int           { return len(tr) }
 func (tr ByScore) Swap(i, j int)      { tr[i], tr[j] = tr[j], tr[i] }
 func (tr ByScore) Less(i, j int) bool { return tr[i].Score > tr[j].Score }
 
+// Result contain result and services for scoreboard
 type Result struct {
 	Teams    []TeamResult
 	Services []string
 }
 
-func (r Result) ToHTML(hide_score bool) string {
+// ToHTML convert Result to HTML
+func (r Result) ToHTML(hideScore bool) string {
 
 	var services string
 	for _, s := range r.Services {
@@ -117,13 +122,13 @@ func (r Result) ToHTML(hide_score bool) string {
 	var teams string
 	for _, t := range r.Teams {
 
-		need_add := len(r.Services) - len(t.Status)
+		needAdd := len(r.Services) - len(t.Status)
 
-		for i := 0; i < need_add; i++ {
-			t.Status = append(t.Status, steward.STATUS_UNKNOWN)
+		for i := 0; i < needAdd; i++ {
+			t.Status = append(t.Status, steward.StatusUnknown)
 		}
 
-		teams += t.ToHTML(hide_score)
+		teams += t.ToHTML(hideScore)
 	}
 
 	return fmt.Sprintf("<thead><th>#</th><th>Team</th><th>Score</th>"+
