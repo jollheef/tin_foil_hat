@@ -12,6 +12,7 @@ package steward
 
 import (
 	"database/sql"
+
 	_ "github.com/lib/pq"
 )
 
@@ -76,6 +77,7 @@ func OpenDatabase(path string) (db *sql.DB, err error) {
 	return
 }
 
+// CleanDatabase remove all data from database and restart sequences
 func CleanDatabase(db *sql.DB) (err error) {
 
 	tables := []string{"team", "advisory", "captured_flag", "flag",

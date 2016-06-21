@@ -6,7 +6,7 @@
  * @brief test receiver package
  */
 
-package receiver_test
+package receiver
 
 import (
 	"bufio"
@@ -19,7 +19,6 @@ import (
 	"time"
 )
 
-import "github.com/jollheef/tin_foil_hat/receiver"
 import "github.com/jollheef/tin_foil_hat/steward"
 import "github.com/jollheef/tin_foil_hat/vexillary"
 
@@ -27,11 +26,16 @@ type testDB struct {
 	db *sql.DB
 }
 
-const db_path string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
+const dbPath string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
 
 func openDB() (t testDB, err error) {
 
-	t.db, err = steward.OpenDatabase(db_path)
+	t.db, err = steward.OpenDatabase(dbPath)
+	if err != nil {
+		return
+	}
+
+	err = steward.CleanDatabase(t.db)
 
 	return
 }
@@ -44,23 +48,23 @@ func (t testDB) Close() {
 	t.db.Close()
 }
 
-func TestParseAddr(t *testing.T) {
+func TestparseAddr(t *testing.T) {
 
 	for id := 0; id < 255; id++ {
 		addr := fmt.Sprintf("127.0.%d.1:44259", id)
 
-		team_id, err := receiver.ParseAddr(addr)
+		teamID, err := parseAddr(addr)
 		if err != nil {
 			log.Fatalln("Parse addr failed:", err)
 		}
 
-		if team_id != id {
-			log.Fatalf("Parsed [%v] instead [%v]", team_id, id)
+		if teamID != id {
+			log.Fatalf("Parsed [%v] instead [%v]", teamID, id)
 		}
 	}
 }
 
-func TestTeamByAddr(*testing.T) {
+func TestteamByAddr(*testing.T) {
 
 	db, err := openDB()
 	if err != nil {
@@ -75,23 +79,24 @@ func TestTeamByAddr(*testing.T) {
 
 		name := fmt.Sprintf("Team_%d", i)
 
-		t := steward.Team{-1, name, subnet, subnet}
+		t := steward.Team{ID: -1, Name: name, Subnet: subnet,
+			Vulnbox: subnet}
 
-		team_id, err := steward.AddTeam(db.db, t)
+		teamID, err := steward.AddTeam(db.db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}
 
 		addr := fmt.Sprintf("127.0.%d.115:3542", i)
 
-		team, err := receiver.TeamByAddr(db.db, addr)
+		team, err := teamByAddr(db.db, addr)
 		if err != nil {
 			log.Fatalln("Get team failed:", err)
 		}
 
-		if team.Id != team_id {
+		if team.ID != teamID {
 			log.Fatalf("Get team with id [%v] instead [%v]",
-				team.Id, team_id)
+				team.ID, teamID)
 		}
 	}
 }
@@ -103,15 +108,15 @@ func testFlag(addr, flag, response string) {
 		log.Fatalln("Connect to receiver failed:", err)
 	}
 
-	good_msg := strings.Split(receiver.GreetingMsg, "\n")[0]
+	goodMsg := strings.Split(greetingMsg, "\n")[0]
 
 	msg, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
 		log.Fatalln("Invalid greeting:", err)
 	}
 
-	if strings.Trim(good_msg, "\n") != good_msg {
-		log.Fatalf("Invalid message [%v] instead [%v]", msg, good_msg)
+	if strings.Trim(goodMsg, "\n") != goodMsg {
+		log.Fatalf("Invalid message [%v] instead [%v]", msg, goodMsg)
 	}
 
 	fmt.Fprint(conn, flag+"\n")
@@ -154,48 +159,49 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("Add flag failed:", err)
 	}
 
-	first_round, err := steward.NewRound(db.db, time.Minute*2)
+	firstRound, err := steward.NewRound(db.db, time.Minute*2)
 	if err != nil {
 		log.Fatalln("New round failed:", err)
 	}
 
-	go receiver.FlagReceiver(db.db, priv, addr, time.Nanosecond, time.Minute)
+	go FlagReceiver(db.db, priv, addr, time.Nanosecond, time.Minute)
 
 	time.Sleep(time.Second) // wait for init listener
 
 	// The attacker must appear to be a team (e.g. jury cannot attack)
-	testFlag(addr, flag, receiver.InvalidTeamMsg)
+	testFlag(addr, flag, invalidTeamMsg)
 
-	t := steward.Team{-1, "TestTeam", "127.0.0.1/24", "1"}
+	t := steward.Team{ID: -1, Name: "TestTeam", Subnet: "127.0.0.1/24",
+		Vulnbox: "1"}
 
 	// Correct flag must be captured
-	team_id, err := steward.AddTeam(db.db, t)
+	teamID, err := steward.AddTeam(db.db, t)
 	if err != nil {
 		log.Fatalln("Add team failed:", err)
 	}
 
-	service_id := 1
+	serviceID := 1
 
 	// Flag must be captured only if service status ok
-	steward.PutStatus(db.db, steward.Status{first_round, team_id, service_id,
+	steward.PutStatus(db.db, steward.Status{firstRound, teamID, serviceID,
 		steward.STATUS_UP})
 
-	testFlag(addr, flag, receiver.CapturedMsg)
+	testFlag(addr, flag, capturedMsg)
 
 	// Correct flag must be captured only one
-	testFlag(addr, flag, receiver.AlreadyCapturedMsg)
+	testFlag(addr, flag, alreadyCapturedMsg)
 
 	// Incorrect (non-signed or signed on other key) flag must be invalid
 	testFlag(addr, "1e7b642f2282886377d1655af6097dd6101eac5b=",
-		receiver.InvalidFlagMsg)
+		invalidFlagMsg)
 
 	// Correct flag that does not exist in database must not be captured
-	new_flag, err := vexillary.GenerateFlag(priv)
+	newFlag, err := vexillary.GenerateFlag(priv)
 	if err != nil {
 		log.Fatalln("Generate flag failed:", err)
 	}
 
-	testFlag(addr, new_flag, receiver.FlagDoesNotExistMsg)
+	testFlag(addr, newFlag, flagDoesNotExistMsg)
 
 	// Submitted flag does not belongs to the attacking team
 	flag4, err := vexillary.GenerateFlag(priv)
@@ -203,12 +209,12 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("Generate flag failed:", err)
 	}
 
-	err = steward.AddFlag(db.db, steward.Flag{-1, flag4, 1, team_id, 1, ""})
+	err = steward.AddFlag(db.db, steward.Flag{-1, flag4, 1, teamID, 1, ""})
 	if err != nil {
 		log.Fatalln("Add flag failed:", err)
 	}
 
-	testFlag(addr, flag4, receiver.FlagYoursMsg)
+	testFlag(addr, flag4, flagYoursMsg)
 
 	// Correct flag from another round must not be captured
 	flag2, err := vexillary.GenerateFlag(priv)
@@ -216,9 +222,9 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("Generate flag failed:", err)
 	}
 
-	cur_round, err := steward.CurrentRound(db.db)
+	curRound, err := steward.CurrentRound(db.db)
 
-	err = steward.AddFlag(db.db, steward.Flag{-1, flag2, cur_round.Id, 8, 1, ""})
+	err = steward.AddFlag(db.db, steward.Flag{-1, flag2, curRound.Id, 8, 1, ""})
 	if err != nil {
 		log.Fatalln("Add flag failed:", err)
 	}
@@ -228,11 +234,11 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("New round failed:", err)
 	}
 
-	testFlag(addr, flag2, receiver.FlagExpiredMsg)
+	testFlag(addr, flag2, flagExpiredMsg)
 
 	// Correct flag from expired round must not be captured
-	round_len := time.Second
-	round_id, err := steward.NewRound(db.db, round_len)
+	roundLen := time.Second
+	roundID, err := steward.NewRound(db.db, roundLen)
 	if err != nil {
 		log.Fatalln("New round failed:", err)
 	}
@@ -242,17 +248,17 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("Generate flag failed:", err)
 	}
 
-	err = steward.AddFlag(db.db, steward.Flag{-1, flag3, round_id, 8, 1, ""})
+	err = steward.AddFlag(db.db, steward.Flag{-1, flag3, roundID, 8, 1, ""})
 	if err != nil {
 		log.Fatalln("Add flag failed:", err)
 	}
 
-	time.Sleep(round_len) // wait end of round
+	time.Sleep(roundLen) // wait end of round
 
-	testFlag(addr, flag3, receiver.FlagExpiredMsg)
+	testFlag(addr, flag3, flagExpiredMsg)
 
 	// If service status down flag must not be captured
-	round_id, err = steward.NewRound(db.db, time.Minute)
+	roundID, err = steward.NewRound(db.db, time.Minute)
 	if err != nil {
 		log.Fatalln("New round failed:", err)
 	}
@@ -262,34 +268,34 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("Generate flag failed:", err)
 	}
 
-	err = steward.AddFlag(db.db, steward.Flag{-1, flag5, round_id, 8,
-		service_id, ""})
+	err = steward.AddFlag(db.db, steward.Flag{-1, flag5, roundID, 8,
+		serviceID, ""})
 	if err != nil {
 		log.Fatalln("Add flag failed:", err)
 	}
 
-	steward.PutStatus(db.db, steward.Status{round_id, team_id, service_id,
+	steward.PutStatus(db.db, steward.Status{roundID, teamID, serviceID,
 		steward.STATUS_DOWN})
 
-	testFlag(addr, flag5, receiver.ServiceNotUpMsg)
+	testFlag(addr, flag5, serviceNotUpMsg)
 
-	steward.PutStatus(db.db, steward.Status{round_id, team_id, service_id,
+	steward.PutStatus(db.db, steward.Status{roundID, teamID, serviceID,
 		steward.STATUS_UP})
 
 	// If attempts limit exceeded flag must not be captured
-	new_addr := "127.0.0.1:64000"
+	newAddr := "127.0.0.1:64000"
 
 	// Start new receiver for test timeouts
-	go receiver.FlagReceiver(db.db, priv, new_addr, time.Second, time.Minute)
+	go FlagReceiver(db.db, priv, newAddr, time.Second, time.Minute)
 
 	time.Sleep(time.Second) // wait for init listener
 
 	// Just for take timeout
-	testFlag(new_addr, flag3, receiver.FlagExpiredMsg)
+	testFlag(newAddr, flag3, flagExpiredMsg)
 
 	// Can't use testFlag, if attempts limit exceeded server does not send
 	// greeting message, and client has not able to send flag
-	conn, err := net.DialTimeout("tcp", new_addr, time.Second)
+	conn, err := net.DialTimeout("tcp", newAddr, time.Second)
 	if err != nil {
 		log.Fatalln("Connect to receiver failed:", err)
 	}
@@ -299,7 +305,7 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("Invalid response:", err)
 	}
 
-	response := receiver.AttemptsLimitMsg
+	response := attemptsLimitMsg
 
 	if msg != response {
 		log.Fatalf("Invalid message [%v] instead [%v]",

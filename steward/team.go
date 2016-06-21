@@ -11,36 +11,41 @@ package steward
 import "database/sql"
 
 type Team struct {
-	Id      int
-	Name    string
-	Subnet  string
-	Vulnbox string
+	ID        int
+	Name      string
+	Subnet    string
+	Vulnbox   string
+	UseNetbox bool
+	Netbox    string
 }
 
 func createTeamTable(db *sql.DB) (err error) {
 
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS team (
-		id	SERIAL PRIMARY KEY,
-		name	TEXT NOT NULL UNIQUE,
-		subnet	TEXT NOT NULL UNIQUE,
-		vulnbox	TEXT NOT NULL UNIQUE
+		id		SERIAL PRIMARY KEY,
+		name		TEXT NOT NULL UNIQUE,
+		subnet		TEXT NOT NULL UNIQUE,
+		vulnbox		TEXT NOT NULL UNIQUE,
+		use_netbox	BOOLEAN NOT NULL,
+                netbox		TEXT NOT NULL
 	)`)
-
 	return
 }
 
 func AddTeam(db *sql.DB, team Team) (id int, err error) {
 
-	stmt, err := db.Prepare("INSERT INTO team (name, subnet, vulnbox) " +
-		"VALUES ($1, $2, $3) RETURNING id")
+	stmt, err := db.Prepare("INSERT INTO team (name, subnet, vulnbox, " +
+		"use_netbox, netbox) " +
+		"VALUES ($1, $2, $3, $4, $5) RETURNING id")
 	if err != nil {
 		return
 	}
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(team.Name, team.Subnet, team.Vulnbox).Scan(&id)
+	err = stmt.QueryRow(team.Name, team.Subnet, team.Vulnbox,
+		team.UseNetbox, team.Netbox).Scan(&id)
 	if err != nil {
 		return
 	}
@@ -50,7 +55,8 @@ func AddTeam(db *sql.DB, team Team) (id int, err error) {
 
 func GetTeams(db *sql.DB) (teams []Team, err error) {
 
-	rows, err := db.Query("SELECT id, name, subnet, vulnbox FROM team")
+	rows, err := db.Query(
+		"SELECT id, name, subnet, vulnbox, use_netbox, netbox FROM team")
 	if err != nil {
 		return
 	}
@@ -60,8 +66,8 @@ func GetTeams(db *sql.DB) (teams []Team, err error) {
 	for rows.Next() {
 		var team Team
 
-		err = rows.Scan(
-			&team.Id, &team.Name, &team.Subnet, &team.Vulnbox)
+		err = rows.Scan(&team.ID, &team.Name, &team.Subnet,
+			&team.Vulnbox, &team.UseNetbox, &team.Netbox)
 		if err != nil {
 			return
 		}
@@ -72,20 +78,21 @@ func GetTeams(db *sql.DB) (teams []Team, err error) {
 	return
 }
 
-func GetTeam(db *sql.DB, team_id int) (team Team, err error) {
+func GetTeam(db *sql.DB, teamID int) (team Team, err error) {
 
-	stmt, err := db.Prepare("SELECT name, subnet, vulnbox FROM team " +
-		"WHERE id=$1")
+	stmt, err := db.Prepare(
+		"SELECT name, subnet, vulnbox, use_netbox, netbox FROM team " +
+			"WHERE id=$1")
 	if err != nil {
 		return
 	}
 
 	defer stmt.Close()
 
-	team.Id = team_id
+	team.ID = teamID
 
-	err = stmt.QueryRow(team_id).Scan(
-		&team.Name, &team.Subnet, &team.Vulnbox)
+	err = stmt.QueryRow(teamID).Scan(&team.Name, &team.Subnet,
+		&team.Vulnbox, &team.UseNetbox, &team.Netbox)
 	if err != nil {
 		return
 	}

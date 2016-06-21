@@ -111,7 +111,7 @@ func checkServicesStatus(db *sql.DB, round int, teams []steward.Team,
 
 	for _, team := range teams {
 		for _, svc := range services {
-			halfStatus := steward.Status{round, team.Id, svc.Id, -1}
+			halfStatus := steward.Status{round, team.ID, svc.Id, -1}
 
 			state, err := steward.GetState(db, halfStatus)
 			if err != nil {
@@ -159,7 +159,7 @@ func TestFlagsWork(t *testing.T) {
 
 		vulnbox := fmt.Sprintf("127.0.%d.3", index)
 
-		t := steward.Team{-1, team, subnet, vulnbox}
+		t := steward.Team{ID: -1, Name: team, Subnet: subnet, Vulnbox: vulnbox}
 
 		_, err = steward.AddTeam(db.db, t)
 		if err != nil {

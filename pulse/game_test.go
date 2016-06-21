@@ -132,7 +132,8 @@ func TestGame(*testing.T) {
 
 		vulnbox := fmt.Sprintf("127.0.%d.3", index)
 
-		t := steward.Team{-1, team, subnet, vulnbox}
+		t := steward.Team{ID: -1, Name: team, Subnet: subnet,
+			Vulnbox: vulnbox}
 
 		_, err = steward.AddTeam(db.db, t)
 		if err != nil {

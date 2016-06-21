@@ -25,6 +25,11 @@ const db_path string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
 func openDB() (t testDB, err error) {
 
 	t.db, err = steward.OpenDatabase(db_path)
+	if err != nil {
+		return
+	}
+
+	err = steward.CleanDatabase(t.db)
 
 	return
 }

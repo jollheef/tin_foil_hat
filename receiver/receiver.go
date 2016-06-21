@@ -29,29 +29,29 @@ import (
 )
 
 const (
-	GreetingMsg         string = "IBST.PSU CTF Flag Receiver\nInput flag: "
-	InvalidFlagMsg      string = "Invalid flag\n"
-	AlreadyCapturedMsg  string = "Flag already captured\n"
-	CapturedMsg         string = "Captured!\n"
-	InternalErrorMsg    string = "Internal error\n"
-	FlagDoesNotExistMsg string = "Flag does not exist\n"
-	FlagExpiredMsg      string = "Flag expired\n"
-	InvalidTeamMsg      string = "Team does not exist\n"
-	AttemptsLimitMsg    string = "Attack attempts limit exceeded\n"
-	FlagYoursMsg        string = "Flag belongs to the attacking team\n"
-	ServiceNotUpMsg     string = "The attacking team service is not up\n"
+	greetingMsg         string = "IBST.PSU CTF Flag Receiver\nInput flag: "
+	invalidFlagMsg      string = "Invalid flag\n"
+	alreadyCapturedMsg  string = "Flag already captured\n"
+	capturedMsg         string = "Captured!\n"
+	internalErrorMsg    string = "Internal error\n"
+	flagDoesNotExistMsg string = "Flag does not exist\n"
+	flagExpiredMsg      string = "Flag expired\n"
+	invalidTeamMsg      string = "Team does not exist\n"
+	attemptsLimitMsg    string = "Attack attempts limit exceeded\n"
+	flagYoursMsg        string = "Flag belongs to the attacking team\n"
+	serviceNotUpMsg     string = "The attacking team service is not up\n"
 )
 
-func ParseAddr(addr string) (subnet_no int, err error) {
+func parseAddr(addr string) (subnetNo int, err error) {
 
-	_, err = fmt.Sscanf(strings.Split(addr, ".")[2], "%d", &subnet_no)
+	_, err = fmt.Sscanf(strings.Split(addr, ".")[2], "%d", &subnetNo)
 
 	return
 }
 
-func TeamByAddr(db *sql.DB, addr string) (team steward.Team, err error) {
+func teamByAddr(db *sql.DB, addr string) (team steward.Team, err error) {
 
-	subnet_no, err := ParseAddr(addr)
+	subnetNo, err := parseAddr(addr)
 	if err != nil {
 		return
 	}
@@ -65,12 +65,12 @@ func TeamByAddr(db *sql.DB, addr string) (team steward.Team, err error) {
 
 		team = teams[i]
 
-		team_subnet_no, err := ParseAddr(team.Subnet)
+		teamSubnetNo, err := parseAddr(team.Subnet)
 		if err != nil {
 			return team, err
 		}
 
-		if team_subnet_no == subnet_no {
+		if teamSubnetNo == subnetNo {
 			return team, err
 		}
 	}
@@ -80,13 +80,13 @@ func TeamByAddr(db *sql.DB, addr string) (team steward.Team, err error) {
 	return
 }
 
-func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
+func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	addr := conn.RemoteAddr().String()
 
 	defer conn.Close()
 
-	fmt.Fprint(conn, GreetingMsg)
+	fmt.Fprint(conn, greetingMsg)
 
 	flag, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
@@ -102,59 +102,59 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		log.Println("\tValidate flag failed:", err)
 	}
 	if !valid {
-		fmt.Fprint(conn, InvalidFlagMsg)
+		fmt.Fprint(conn, invalidFlagMsg)
 		return
 	}
 
 	exist, err := steward.FlagExist(db, flag)
 	if err != nil {
 		log.Println("\tExist flag check failed:", err)
-		fmt.Fprint(conn, InternalErrorMsg)
+		fmt.Fprint(conn, internalErrorMsg)
 		return
 	}
 	if !exist {
-		fmt.Fprint(conn, FlagDoesNotExistMsg)
+		fmt.Fprint(conn, flagDoesNotExistMsg)
 		return
 	}
 
 	flg, err := steward.GetFlagInfo(db, flag)
 	if err != nil {
 		log.Println("\tGet flag info failed:", err)
-		fmt.Fprint(conn, InternalErrorMsg)
+		fmt.Fprint(conn, internalErrorMsg)
 		return
 	}
 
 	captured, err := steward.AlreadyCaptured(db, flg.Id)
 	if err != nil {
 		log.Println("\tAlready captured check failed:", err)
-		fmt.Fprint(conn, InternalErrorMsg)
+		fmt.Fprint(conn, internalErrorMsg)
 		return
 	}
 	if captured {
-		fmt.Fprint(conn, AlreadyCapturedMsg)
+		fmt.Fprint(conn, alreadyCapturedMsg)
 		return
 	}
 
-	team, err := TeamByAddr(db, addr)
+	team, err := teamByAddr(db, addr)
 	if err != nil {
 		log.Println("\tGet team by ip failed:", err)
-		fmt.Fprint(conn, InvalidTeamMsg)
+		fmt.Fprint(conn, invalidTeamMsg)
 		return
 	}
 
-	if flg.TeamId == team.Id {
+	if flg.TeamId == team.ID {
 		log.Printf("\tTeam %s try to send their flag", team.Name)
-		fmt.Fprint(conn, FlagYoursMsg)
+		fmt.Fprint(conn, flagYoursMsg)
 		return
 	}
 
-	halfStatus := steward.Status{flg.Round, team.Id, flg.ServiceId,
+	halfStatus := steward.Status{flg.Round, team.ID, flg.ServiceId,
 		steward.STATUS_UNKNOWN}
 	state, err := steward.GetState(db, halfStatus)
 
 	if state != steward.STATUS_UP {
 		log.Printf("\t%s service not ok, cannot capture", team.Name)
-		fmt.Fprint(conn, ServiceNotUpMsg)
+		fmt.Fprint(conn, serviceNotUpMsg)
 		return
 	}
 
@@ -162,30 +162,31 @@ func Handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 
 	if round.Id != flg.Round {
 		log.Printf("\t%s try to send flag from past round", team.Name)
-		fmt.Fprint(conn, FlagExpiredMsg)
+		fmt.Fprint(conn, flagExpiredMsg)
 		return
 	}
 
-	round_end_time := round.StartTime.Add(round.Len)
+	roundEndTime := round.StartTime.Add(round.Len)
 
-	if time.Now().After(round_end_time) {
+	if time.Now().After(roundEndTime) {
 		log.Printf("\t%s try to send flag from finished round", team.Name)
-		fmt.Fprint(conn, FlagExpiredMsg)
+		fmt.Fprint(conn, flagExpiredMsg)
 		return
 	}
 
-	err = steward.CaptureFlag(db, flg.Id, team.Id)
+	err = steward.CaptureFlag(db, flg.Id, team.ID)
 	if err != nil {
 		log.Println("\tCapture flag failed:", err)
-		fmt.Fprint(conn, InternalErrorMsg)
+		fmt.Fprint(conn, internalErrorMsg)
 		return
 	}
 
-	fmt.Fprint(conn, CapturedMsg)
+	fmt.Fprint(conn, capturedMsg)
 }
 
+// FlagReceiver starts flag receiver
 func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string,
-	timeout, socket_timeout time.Duration) {
+	timeout, socketTimeout time.Duration) {
 
 	log.Println("Launching receiver at", addr, "...")
 
@@ -203,27 +204,27 @@ func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string,
 		ip, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			log.Println("\tCannot split remote addr:", err)
-			fmt.Fprint(conn, InternalErrorMsg)
+			fmt.Fprint(conn, internalErrorMsg)
 			conn.Close()
 			continue
 		}
 
 		if time.Now().Before(connects[ip].Add(timeout)) {
 			log.Println("\tToo fast connects by", ip)
-			fmt.Fprint(conn, AttemptsLimitMsg)
+			fmt.Fprint(conn, attemptsLimitMsg)
 			conn.Close()
 			continue
 		}
 
-		err = conn.SetDeadline(time.Now().Add(socket_timeout))
+		err = conn.SetDeadline(time.Now().Add(socketTimeout))
 		if err != nil {
 			log.Println("Set deadline fail:", err)
-			fmt.Fprint(conn, InternalErrorMsg)
+			fmt.Fprint(conn, internalErrorMsg)
 			conn.Close()
 			continue
 		}
 
-		go Handler(conn, db, priv)
+		go handler(conn, db, priv)
 
 		connects[ip] = time.Now()
 	}

@@ -11,9 +11,9 @@ package steward_test
 import (
 	"log"
 	"testing"
-)
 
-import "github.com/jollheef/tin_foil_hat/steward"
+	"github.com/jollheef/tin_foil_hat/steward"
+)
 
 func TestAddTeam(t *testing.T) {
 
@@ -21,7 +21,9 @@ func TestAddTeam(t *testing.T) {
 
 	defer db.Close()
 
-	team := steward.Team{-1, "MySuperTeam", "192.168.111/24", "pl.hold1"}
+	team := steward.Team{
+		ID: -1, Name: "MySuperTeam", Subnet: "192.168.111/24",
+		Vulnbox: "pl.hold1", UseNetbox: true, Netbox: "nb.hold1"}
 
 	_, err = steward.AddTeam(db.db, team)
 	if err != nil {
@@ -35,11 +37,15 @@ func TestGetTeams(t *testing.T) {
 
 	defer db.Close()
 
-	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24", "pl.hold1"}
-	team2 := steward.Team{-1, "MyFooTeam", "192.168.112/24", "pl.hold2"}
+	team1 := steward.Team{
+		ID: -1, Name: "MySuperTeam", Subnet: "192.168.111/24",
+		Vulnbox: "pl.hold1", UseNetbox: false, Netbox: "nb.hold1"}
+	team2 := steward.Team{
+		ID: -1, Name: "MyFooTeam", Subnet: "192.168.112/24",
+		Vulnbox: "pl.hold2", UseNetbox: true, Netbox: "nb.hold2"}
 
-	team1.Id, _ = steward.AddTeam(db.db, team1)
-	team2.Id, _ = steward.AddTeam(db.db, team2)
+	team1.ID, _ = steward.AddTeam(db.db, team1)
+	team2.ID, _ = steward.AddTeam(db.db, team2)
 
 	teams, err := steward.GetTeams(db.db)
 	if err != nil {
@@ -61,11 +67,13 @@ func TestGetTeam(t *testing.T) {
 
 	defer db.Close()
 
-	team1 := steward.Team{-1, "MySuperTeam", "192.168.111/24", "pl.hold"}
+	team1 := steward.Team{
+		ID: -1, Name: "MySuperTeam", Subnet: "192.168.111/24",
+		Vulnbox: "pl.hold1", UseNetbox: false, Netbox: "nb.hold1"}
 
-	team1.Id, _ = steward.AddTeam(db.db, team1)
+	team1.ID, _ = steward.AddTeam(db.db, team1)
 
-	_team1, err := steward.GetTeam(db.db, team1.Id)
+	_team1, err := steward.GetTeam(db.db, team1.ID)
 	if err != nil {
 		log.Fatalln("Get team failed:", err)
 	}

@@ -22,7 +22,7 @@ func CollectTeamResult(db *sql.DB, team steward.Team,
 
 	tr.Name = team.Name
 
-	rr, err := steward.GetLastResult(db, team.Id)
+	rr, err := steward.GetLastResult(db, team.ID)
 	if err != nil {
 		// At game start, no result exist
 		rr = steward.RoundResult{AttackScore: 0, DefenceScore: 0}
@@ -31,7 +31,7 @@ func CollectTeamResult(db *sql.DB, team steward.Team,
 	tr.Attack = rr.AttackScore
 	tr.Defence = rr.DefenceScore
 
-	advisory, err := steward.GetAdvisoryScore(db, team.Id)
+	advisory, err := steward.GetAdvisoryScore(db, team.ID)
 	if err != nil {
 		tr.Advisory = 0
 	} else {
@@ -45,7 +45,7 @@ func CollectTeamResult(db *sql.DB, team steward.Team,
 	}
 
 	for _, svc := range services {
-		s := steward.Status{round.Id, team.Id, svc.Id, -1}
+		s := steward.Status{round.Id, team.ID, svc.Id, -1}
 		state, err := steward.GetState(db, s)
 		if err != nil {
 			// Try to get status from previous round

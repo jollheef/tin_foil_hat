@@ -73,9 +73,9 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 	for _, team := range teams {
 
-		res := steward.RoundResult{TeamId: team.Id, Round: round}
+		res := steward.RoundResult{TeamId: team.ID, Round: round}
 
-		def, err := CountDefenceResult(db, round, team.Id, services)
+		def, err := CountDefenceResult(db, round, team.ID, services)
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func CountRound(db *sql.DB, round int, teams []steward.Team,
 
 	for _, team := range teams {
 
-		cflags, err := steward.GetCapturedFlags(db, round, team.Id)
+		cflags, err := steward.GetCapturedFlags(db, round, team.ID)
 		if err != nil {
 			return err
 		}

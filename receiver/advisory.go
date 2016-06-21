@@ -22,7 +22,7 @@ import (
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
-func HasUnacceptableSymbols(s, regex string) bool {
+func hasUnacceptableSymbols(s, regex string) bool {
 
 	r, err := regexp.Compile(regex)
 	if err != nil {
@@ -33,7 +33,7 @@ func HasUnacceptableSymbols(s, regex string) bool {
 	return !r.MatchString(s)
 }
 
-func AdvisoryHandler(conn net.Conn, db *sql.DB) {
+func advisoryHandler(conn net.Conn, db *sql.DB) {
 
 	addr := conn.RemoteAddr().String()
 
@@ -42,13 +42,13 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 	round, err := steward.CurrentRound(db)
 	if err != nil {
 		log.Println("Get current round fail:", err)
-		fmt.Fprint(conn, InternalErrorMsg)
+		fmt.Fprint(conn, internalErrorMsg)
 		return
 	}
 
-	round_end_time := round.StartTime.Add(round.Len)
+	roundEndTime := round.StartTime.Add(round.Len)
 
-	if time.Now().After(round_end_time) {
+	if time.Now().After(roundEndTime) {
 		fmt.Fprintln(conn, "Current contest not runned")
 		return
 	}
@@ -70,9 +70,9 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 		}
 	}
 
-	http_get_root := "GET / HTTP/1.1"
-	if len(advisory) > len(http_get_root) {
-		if advisory[0:len(http_get_root)] == http_get_root {
+	httpGetRoot := "GET / HTTP/1.1"
+	if len(advisory) > len(httpGetRoot) {
+		if advisory[0:len(httpGetRoot)] == httpGetRoot {
 			fmt.Fprintf(conn, "\n\nIt's not a HTTP server! "+
 				"Use netcat for communication.")
 			return
@@ -80,30 +80,31 @@ func AdvisoryHandler(conn net.Conn, db *sql.DB) {
 	}
 
 	r := `[ -~]`
-	if HasUnacceptableSymbols(advisory, r) {
+	if hasUnacceptableSymbols(advisory, r) {
 		fmt.Fprintf(conn, "Accept only %s\n", r)
 		return
 	}
 
-	team, err := TeamByAddr(db, addr)
+	team, err := teamByAddr(db, addr)
 	if err != nil {
 		log.Println("\tGet team by ip failed:", err)
-		fmt.Fprint(conn, InvalidTeamMsg)
+		fmt.Fprint(conn, invalidTeamMsg)
 		return
 	}
 
-	_, err = steward.AddAdvisory(db, team.Id, advisory)
+	_, err = steward.AddAdvisory(db, team.ID, advisory)
 	if err != nil {
 		log.Println("\tAdd advisory failed:", err)
-		fmt.Fprint(conn, InternalErrorMsg)
+		fmt.Fprint(conn, internalErrorMsg)
 		return
 	}
 
 	fmt.Fprint(conn, "Accepted\n")
 }
 
+// AdvisoryReceiver starts advisory receiver
 func AdvisoryReceiver(db *sql.DB, addr string, timeout,
-	socket_timeout time.Duration) {
+	socketTimeout time.Duration) {
 
 	log.Println("Launching advisory receiver at", addr, "...")
 
@@ -121,7 +122,7 @@ func AdvisoryReceiver(db *sql.DB, addr string, timeout,
 		ip, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			log.Println("\tCannot split remote addr:", err)
-			fmt.Fprint(conn, InternalErrorMsg)
+			fmt.Fprint(conn, internalErrorMsg)
 			conn.Close()
 			continue
 		}
@@ -134,15 +135,15 @@ func AdvisoryReceiver(db *sql.DB, addr string, timeout,
 			continue
 		}
 
-		err = conn.SetDeadline(time.Now().Add(socket_timeout))
+		err = conn.SetDeadline(time.Now().Add(socketTimeout))
 		if err != nil {
 			log.Println("Set deadline fail:", err)
-			fmt.Fprint(conn, InternalErrorMsg)
+			fmt.Fprint(conn, internalErrorMsg)
 			conn.Close()
 			continue
 		}
 
-		go AdvisoryHandler(conn, db)
+		go advisoryHandler(conn, db)
 
 		connects[ip] = time.Now()
 	}

@@ -70,14 +70,14 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 	}
 
 	err = steward.PutStatus(db,
-		steward.Status{round, team.Id, svc.Id, state})
+		steward.Status{round, team.ID, svc.Id, state})
 	if err != nil {
 		log.Println("Add status to database failed:", err)
 		return
 	}
 
 	err = steward.AddFlag(db,
-		steward.Flag{-1, flag, round, team.Id, svc.Id, cred})
+		steward.Flag{-1, flag, round, team.ID, svc.Id, cred})
 	if err != nil {
 		log.Println("Add flag to database failed:", err)
 		return
@@ -89,7 +89,7 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 func getFlag(db *sql.DB, round int, team steward.Team,
 	svc steward.Service) (state steward.ServiceState, err error) {
 
-	flag, cred, err := steward.GetCred(db, round, team.Id, svc.Id)
+	flag, cred, err := steward.GetCred(db, round, team.ID, svc.Id)
 	if err != nil {
 		log.Println("Get cred failed:", err)
 		state = steward.STATUS_CORRUPT
@@ -157,7 +157,7 @@ func checkFlag(db *sql.DB, round int, team steward.Team, svc steward.Service,
 	}
 
 	err := steward.PutStatus(db, steward.Status{round,
-		team.Id, svc.Id, state})
+		team.ID, svc.Id, state})
 	if err != nil {
 		log.Println("Add status failed:", err)
 		return
