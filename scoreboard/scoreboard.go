@@ -149,6 +149,17 @@ func stateUpdater(start, lunchStartTime, lunchEndTime, endTime time.Time,
 	}
 }
 
+func handleStaticFile(pattern, file string) {
+	http.HandleFunc(pattern,
+		func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, file)
+		})
+}
+
+func handleStaticFileSimple(file, wwwPath string) {
+	handleStaticFile(file, wwwPath+file)
+}
+
 // Scoreboard run scoreboard page
 func Scoreboard(db *sql.DB, wwwPath, addr string, updateTimeout time.Duration,
 	start time.Time, half, lunch, darkest time.Duration) (err error) {
@@ -169,8 +180,33 @@ func Scoreboard(db *sql.DB, wwwPath, addr string, updateTimeout time.Duration,
 	http.Handle("/scoreboard", websocket.Handler(scoreboardHandler))
 	http.Handle("/advisory", websocket.Handler(advisoryHandler))
 	http.Handle("/info", websocket.Handler(infoHandler))
-	http.Handle("/", http.FileServer(http.Dir(wwwPath)))
-	http.HandleFunc("/static-scoreboard", staticScoreboard)
+
+	files := []string{
+		"/img/glyphicons-halflings-white.png",
+		"/img/background.jpg",
+		"/img/glyphicons-halflings.png",
+		"/info.html",
+		"/advisory.html",
+		"/css/bootstrap.min.css",
+		"/css/style.css",
+		"/css/fonts/Fixedsys500c.woff",
+		"/css/fonts/Fixedsys500c.otf",
+		"/css/fonts/Fixedsys500c.eot",
+		"/css/fonts/Fixedsys500c.ttf",
+		"/css/fonts/Fixedsys500c.svg",
+		"/css/bootstrap-responsive.css",
+		"/css/bootstrap.css",
+		"/css/bootstrap-responsive.min.css",
+		"/js/bootstrap.min.js",
+		"/js/bootstrap.js",
+	}
+
+	for _, file := range files {
+		handleStaticFileSimple(file, wwwPath)
+	}
+
+	http.HandleFunc("/", staticScoreboard)
+	http.HandleFunc("/index.html", staticScoreboard)
 
 	log.Println("Launching scoreboard at", addr)
 
