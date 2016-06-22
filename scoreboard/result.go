@@ -97,9 +97,9 @@ func (tr TeamResult) ToHTML(hideScore bool) string {
 
 	if advisoryEnabled {
 		return "<tr>" + info + score + attack + defence + advisory + status + "</tr>"
-	} else {
-		return "<tr>" + info + score + attack + defence + status + "</tr>"
 	}
+
+	return "<tr>" + info + score + attack + defence + status + "</tr>"
 }
 
 // ByScore sort team result by score
@@ -139,9 +139,9 @@ func (r Result) ToHTML(hideScore bool) string {
 		return fmt.Sprintf("<thead><th>#</th><th>Team</th><th>Score</th>"+
 			"<th>Attack</th><th>Defence</th><th>Advisory</th>%s"+
 			"</thead><tbody>%s</tbody>", services, teams)
-	} else {
-		return fmt.Sprintf("<thead><th>#</th><th>Team</th><th>Score</th>"+
-			"<th>Attack</th><th>Defence</th>%s"+
-			"</thead><tbody>%s</tbody>", services, teams)
 	}
+
+	return fmt.Sprintf("<thead><th>#</th><th>Team</th><th>Score</th>"+
+		"<th>Attack</th><th>Defence</th>%s"+
+		"</thead><tbody>%s</tbody>", services, teams)
 }
