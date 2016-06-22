@@ -54,8 +54,13 @@ func putFlag(db *sql.DB, priv *rsa.PrivateKey, round int, team steward.Team,
 	var cred, logs string
 	var state steward.ServiceState
 	if portOpen {
-		cred, logs, state, err = put(svc.CheckerPath, team.Vulnbox,
-			svc.Port, flag)
+		if team.UseNetbox {
+			cred, logs, state, err = sshPut(team.Netbox,
+				svc.CheckerPath, team.Vulnbox, svc.Port, flag)
+		} else {
+			cred, logs, state, err = put(svc.CheckerPath,
+				team.Vulnbox, svc.Port, flag)
+		}
 		if err != nil {
 			log.Println("Put flag to service failed:", err)
 			return
@@ -96,8 +101,16 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 		return
 	}
 
-	serviceFlag, logs, state, err := get(svc.CheckerPath, team.Vulnbox,
-		svc.Port, cred)
+	var logs string
+	var serviceFlag string
+
+	if team.UseNetbox {
+		serviceFlag, logs, state, err = sshGet(team.Netbox,
+			svc.CheckerPath, team.Vulnbox, svc.Port, cred)
+	} else {
+		serviceFlag, logs, state, err = get(svc.CheckerPath,
+			team.Vulnbox, svc.Port, cred)
+	}
 	if err != nil {
 		log.Println("Check service failed:", err)
 		return
@@ -118,7 +131,15 @@ func getFlag(db *sql.DB, round int, team steward.Team,
 func checkService(db *sql.DB, round int, team steward.Team,
 	svc steward.Service) (state steward.ServiceState, err error) {
 
-	state, logs, err := check(svc.CheckerPath, team.Vulnbox, svc.Port)
+	var logs string
+
+	if team.UseNetbox {
+		state, logs, err = sshCheck(team.Netbox, svc.CheckerPath,
+			team.Vulnbox, svc.Port)
+	} else {
+		state, logs, err = check(svc.CheckerPath, team.Vulnbox,
+			svc.Port)
+	}
 	if err != nil {
 		log.Println("Check service failed:", err)
 		return

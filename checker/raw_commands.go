@@ -20,7 +20,11 @@ import (
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
-var timeout = "10s" // max checker work time
+var (
+	timeout            = "10s" // max checker work time
+	connectionAttempts = "2"   // ssh option
+	connectTimeout     = "5"   // ssh option
+)
 
 // SetTimeout set max checker work time
 func SetTimeout(d time.Duration) {
@@ -102,6 +106,7 @@ func parseState(err error) (steward.ServiceState, error) {
 	case exitStatus(124): // returns by timeout
 		return steward.StatusDown, nil
 	case exitStatus(1):
+	case exitStatus(255): // Could not resolve hostname
 		return steward.StatusError, nil
 	case exitStatus(2):
 		return steward.StatusMumble, nil
@@ -114,7 +119,7 @@ func parseState(err error) (steward.ServiceState, error) {
 	return steward.StatusUnknown, err
 }
 
-func put(checker string, ip string, port int, flag string) (cred, logs string,
+func put(checker, ip string, port int, flag string) (cred, logs string,
 	state steward.ServiceState, err error) {
 
 	cred, logs, err = system("timeout", timeout, checker, "put", ip,
@@ -127,7 +132,23 @@ func put(checker string, ip string, port int, flag string) (cred, logs string,
 	return
 }
 
-func get(checker string, ip string, port int, cred string) (flag, logs string,
+func sshPut(host, checker, ip string, port int, flag string) (cred, logs string,
+	state steward.ServiceState, err error) {
+
+	cred, logs, err = system("ssh",
+		"-o", "ConnectTimeout="+connectTimeout,
+		"-o", "ConnectionAttempts="+connectionAttempts,
+		host, "timeout", timeout, checker,
+		"put", ip, fmt.Sprintf("%d", port), flag)
+
+	state, err = parseState(err)
+
+	cred = strings.Trim(cred, " \n")
+
+	return
+}
+
+func get(checker, ip string, port int, cred string) (flag, logs string,
 	state steward.ServiceState, err error) {
 
 	flag, logs, err = system("timeout", timeout, checker, "get", ip,
@@ -140,11 +161,41 @@ func get(checker string, ip string, port int, cred string) (flag, logs string,
 	return
 }
 
-func check(checker string, ip string, port int) (state steward.ServiceState,
+func sshGet(host, checker, ip string, port int, cred string) (flag, logs string,
+	state steward.ServiceState, err error) {
+
+	flag, logs, err = system("ssh",
+		"-o", "ConnectTimeout="+connectTimeout,
+		"-o", "ConnectionAttempts="+connectionAttempts,
+		host, "timeout", timeout, checker,
+		"get", ip, fmt.Sprintf("%d", port), cred)
+
+	state, err = parseState(err)
+
+	flag = strings.Trim(flag, " \n")
+
+	return
+}
+
+func check(checker, ip string, port int) (state steward.ServiceState,
 	logs string, err error) {
 
 	_, logs, err = system("timeout", timeout, checker, "chk", ip,
 		fmt.Sprintf("%d", port))
+
+	state, err = parseState(err)
+
+	return
+}
+
+func sshCheck(host, checker, ip string, port int) (state steward.ServiceState,
+	logs string, err error) {
+
+	_, logs, err = system("ssh",
+		"-o", "ConnectTimeout="+connectTimeout,
+		"-o", "ConnectionAttempts="+connectionAttempts,
+		host, "timeout", timeout, checker,
+		"chk", ip, fmt.Sprintf("%d", port))
 
 	state, err = parseState(err)
 

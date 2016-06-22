@@ -15,6 +15,8 @@ function fail() {
     exit 1
 }
 
+echo 'Do not forget set ulimit and start postgres'
+
 rm ${COVERAGE}
 
 for PKG in `go list github.com/jollheef/tin_foil_hat/... | tr '\n' ' '`; do
