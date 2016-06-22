@@ -43,6 +43,7 @@ type AdvisoryReceiver struct {
 	Addr           string
 	ReceiveTimeout Duration
 	SocketTimeout  Duration
+	Disabled       bool
 }
 
 // Config config

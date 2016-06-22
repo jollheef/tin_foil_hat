@@ -17,6 +17,13 @@ import (
 
 import "github.com/jollheef/tin_foil_hat/steward"
 
+var advisoryEnabled = true
+
+// DisableAdvisory turn off advisory in overall score
+func DisableAdvisory() {
+	advisoryEnabled = false
+}
+
 func collectTeamResult(db *sql.DB, team steward.Team,
 	services []steward.Service) (tr TeamResult, err error) {
 
@@ -102,8 +109,12 @@ func CountScoreAndSort(r *Result) {
 		tr.DefencePercent = tr.Defence / maxDefence * 100
 		tr.AdvisoryPercent = float64(tr.Advisory) / maxAdvisory * 100
 
-		tr.Score = (tr.AttackPercent + tr.DefencePercent +
-			tr.AdvisoryPercent) / 3
+		if advisoryEnabled {
+			tr.Score = (tr.AttackPercent + tr.DefencePercent +
+				tr.AdvisoryPercent) / 3
+		} else {
+			tr.Score = (tr.AttackPercent + tr.DefencePercent) / 2
+		}
 	}
 
 	maxScore := max(r,

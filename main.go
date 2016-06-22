@@ -131,6 +131,10 @@ func main() {
 
 	checker.SetTimeout(config.CheckerTimeout.Duration)
 
+	if config.AdvisoryReceiver.Disabled {
+		scoreboard.DisableAdvisory()
+	}
+
 	priv, err := vexillary.GenerateKey()
 	if err != nil {
 		log.Fatalln("Generate key fail:", err)
