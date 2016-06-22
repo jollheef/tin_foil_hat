@@ -44,6 +44,11 @@ const (
 
 func parseAddr(addr string) (subnetNo int, err error) {
 
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("Cannot parse '" + addr + "'")
+		}
+	}()
 	_, err = fmt.Sscanf(strings.Split(addr, ".")[2], "%d", &subnetNo)
 
 	return
