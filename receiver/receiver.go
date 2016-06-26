@@ -153,16 +153,6 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		return
 	}
 
-	halfStatus := steward.Status{flg.Round, team.ID, flg.ServiceID,
-		steward.StatusUnknown}
-	state, err := steward.GetState(db, halfStatus)
-
-	if state != steward.StatusUP {
-		log.Printf("\t%s service not ok, cannot capture", team.Name)
-		fmt.Fprint(conn, serviceNotUpMsg)
-		return
-	}
-
 	round, err := steward.CurrentRound(db)
 
 	if round.ID != flg.Round {
@@ -176,6 +166,16 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 	if time.Now().After(roundEndTime) {
 		log.Printf("\t%s try to send flag from finished round", team.Name)
 		fmt.Fprint(conn, flagExpiredMsg)
+		return
+	}
+
+	halfStatus := steward.Status{flg.Round, team.ID, flg.ServiceID,
+		steward.StatusUnknown}
+	state, err := steward.GetState(db, halfStatus)
+
+	if state != steward.StatusUP {
+		log.Printf("\t%s service not ok, cannot capture", team.Name)
+		fmt.Fprint(conn, serviceNotUpMsg)
 		return
 	}
 
