@@ -8,6 +8,7 @@ checker_timeout = "11s"
 [Database]
 connection = "user=postgres dbname=tinfoilhat sslmode=disable"
 max_connections = 90 # should be less than same value in postgresql.conf
+safe_reinit = false # disallow reinit after game start
 
 [Scoreboard]
 www_path = "/home/mikhail/dev/tin_foil_hat/src/tinfoilhat/scoreboard/www"

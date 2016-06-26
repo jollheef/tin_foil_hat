@@ -53,6 +53,7 @@ type Config struct {
 	Database       struct {
 		Connection     string
 		MaxConnections int
+		SafeReinit     bool
 	}
 	Scoreboard struct {
 		WwwPath       string

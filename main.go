@@ -95,6 +95,12 @@ func main() {
 
 	if *dbReinit {
 
+		if config.Database.SafeReinit {
+			if time.Now().After(config.Pulse.Start.Time) {
+				log.Fatalln("Reinit after start not allowed")
+			}
+		}
+
 		log.Println("Reinit database")
 
 		log.Println("Clean database")
