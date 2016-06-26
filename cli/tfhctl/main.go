@@ -25,7 +25,7 @@ import (
 
 var (
 	configPath = kingpin.Flag("config",
-		"Path to configuration file.").Required().String()
+		"Path to configuration file.").String()
 
 	score = kingpin.Command("scoreboard", "View scoreboard.")
 
@@ -69,6 +69,10 @@ func main() {
 	fmt.Println(buildInfo())
 
 	kingpin.Parse()
+
+	if *configPath == "" {
+		*configPath = "/etc/tinfoilhat/tinfoilhat.toml"
+	}
 
 	config, err := config.ReadConfig(*configPath)
 	if err != nil {

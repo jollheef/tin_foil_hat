@@ -32,7 +32,7 @@ import (
 
 var (
 	configPath = kingpin.Arg("config",
-		"Path to configuration file.").Required().String()
+		"Path to configuration file.").String()
 
 	dbReinit = kingpin.Flag("reinit", "Reinit database.").Bool()
 )
@@ -60,6 +60,11 @@ func main() {
 	fmt.Println(buildInfo())
 
 	kingpin.Parse()
+
+	if *configPath == "" {
+		log.Println("Use default config path")
+		*configPath = "/etc/tinfoilhat/tinfoilhat.toml"
+	}
 
 	config, err := config.ReadConfig(*configPath)
 	if err != nil {
