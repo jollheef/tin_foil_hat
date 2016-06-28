@@ -36,8 +36,10 @@ func TestGetCapturedFlags(t *testing.T) {
 	round := 1
 	team_id := 1
 
-	flg1 := steward.Flag{1, "f", round, team_id, 1, "1:2"}
-	flg2 := steward.Flag{2, "b", round, team_id, 1, "1:2"}
+	flg1 := steward.Flag{ID: 1, Flag: "f", Round: round, TeamID: team_id,
+		ServiceID: 1, Cred: "1:2"}
+	flg2 := steward.Flag{ID: 2, Flag: "b", Round: round, TeamID: team_id,
+		ServiceID: 1, Cred: "1:2"}
 
 	err = steward.AddFlag(db.db, flg1)
 	if err != nil {
@@ -81,8 +83,10 @@ func TestAlreadyCaptured(t *testing.T) {
 
 	defer db.Close()
 
-	flg1 := steward.Flag{1, "f", 1, 1, 1, "1:2"}
-	flg2 := steward.Flag{2, "b", 1, 1, 1, "1:2"}
+	flg1 := steward.Flag{ID: 1, Flag: "f", Round: 1, TeamID: 1,
+		ServiceID: 1, Cred: "1:2"}
+	flg2 := steward.Flag{ID: 2, Flag: "b", Round: 1, TeamID: 1,
+		ServiceID: 1, Cred: "1:2"}
 
 	err = steward.CaptureFlag(db.db, flg1.ID, 20)
 
