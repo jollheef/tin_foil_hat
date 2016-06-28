@@ -24,8 +24,10 @@ func TestAddRoundResult(t *testing.T) {
 
 	defer db.Close()
 
-	first := steward.RoundResult{-1, 10, 1, 30, 40}
-	second := steward.RoundResult{-1, first.TeamID, first.Round + 1, 130, 140}
+	first := steward.RoundResult{ID: -1, TeamID: 10, Round: 1,
+		AttackScore: 30, DefenceScore: 40}
+	second := steward.RoundResult{ID: -1, TeamID: first.TeamID,
+		Round: first.Round + 1, AttackScore: 130, DefenceScore: 140}
 
 	_, err = steward.AddRoundResult(db.db, first)
 	if err != nil {
@@ -47,8 +49,10 @@ func TestGetRoundResult(t *testing.T) {
 
 	defer db.Close()
 
-	first := steward.RoundResult{-1, 10, 1, 30, 40}
-	second := steward.RoundResult{-1, first.TeamID, first.Round + 1, 130, 140}
+	first := steward.RoundResult{ID: -1, TeamID: 10, Round: 1,
+		AttackScore: 30, DefenceScore: 40}
+	second := steward.RoundResult{ID: -1, TeamID: first.TeamID,
+		Round: first.Round + 1, AttackScore: 130, DefenceScore: 140}
 
 	_, err = steward.AddRoundResult(db.db, first)
 	if err != nil {
