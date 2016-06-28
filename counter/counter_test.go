@@ -244,22 +244,22 @@ func TestCountRound(*testing.T) {
 	}
 
 	res, err := steward.GetRoundResult(db.db, teams[0].ID, round)
-	if res.AttackScore != 0.0 || res.DefenceScore != 1.75 {
+	if err != nil || res.AttackScore != 0.0 || res.DefenceScore != 1.75 {
 		log.Fatalln("Invalid result:", res)
 	}
 
 	res, err = steward.GetRoundResult(db.db, teams[1].ID, round)
-	if res.AttackScore != 0.0 || res.DefenceScore != 1.75 {
+	if err != nil || res.AttackScore != 0.0 || res.DefenceScore != 1.75 {
 		log.Fatalln("Invalid result:", res)
 	}
 
 	res, err = steward.GetRoundResult(db.db, teams[2].ID, round)
-	if res.AttackScore != 0.25 || res.DefenceScore != 2.0 {
+	if err != nil || res.AttackScore != 0.25 || res.DefenceScore != 2.0 {
 		log.Fatalln("Invalid result:", res)
 	}
 
 	res, err = steward.GetRoundResult(db.db, teams[3].ID, round)
-	if res.AttackScore != 0.25 || res.DefenceScore != 2.0 {
+	if err != nil || res.AttackScore != 0.25 || res.DefenceScore != 2.0 {
 		log.Fatalln("Invalid result:", res)
 	}
 
