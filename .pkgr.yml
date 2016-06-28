@@ -1,9 +1,0 @@
-buildpack: "https://github.com/heroku/heroku-buildpack-go.git"
-cli: false
-
-services:
-  - postgres
-
-targets:
-  ubuntu-12.04:
-  ubuntu-14.04:
