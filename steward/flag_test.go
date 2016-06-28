@@ -35,7 +35,7 @@ func TestFlagExist(t *testing.T) {
 	defer db.Close()
 
 	flg := steward.Flag{ID: 0, Flag: "tralala", Round: 5, TeamID: 10,
-		ServieID: 4, Cred: "1:2"}
+		ServiceID: 4, Cred: "1:2"}
 
 	err = steward.AddFlag(db.db, flg)
 
