@@ -1,0 +1,8 @@
+cli: false
+
+services:
+  - postgres
+
+targets:
+  ubuntu-12.04:
+  ubuntu-14.04:
