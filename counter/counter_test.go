@@ -160,15 +160,7 @@ func TestCountDefenceResult(*testing.T) {
 	}
 }
 
-func TestCountRound(*testing.T) {
-
-	db, err := openDB()
-	if err != nil {
-		log.Fatalln("Open database failed:", err)
-	}
-
-	defer db.Close()
-
+func fillTestTeams(db *sql.DB) {
 	for index, team := range []string{
 		"FooTeam", "BarTeam", "BazTeam", "Ololosha"} {
 
@@ -180,21 +172,37 @@ func TestCountRound(*testing.T) {
 		t := steward.Team{ID: -1, Name: team, Subnet: subnet,
 			Vulnbox: vulnbox}
 
-		_, err = steward.AddTeam(db.db, t)
+		_, err = steward.AddTeam(db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}
 	}
+}
 
+func fillTestServices(db *sql.DB) {
 	for _, service := range []string{"Foo", "Bar", "Baz", "Boo"} {
 
-		err = steward.AddService(db.db,
+		err = steward.AddService(db,
 			steward.Service{ID: -1, Name: service, Port: 8080,
 				CheckerPath: "", UDP: false})
 		if err != nil {
 			log.Fatalln("Add service failed:", err)
 		}
 	}
+}
+
+func TestCountRound(*testing.T) {
+
+	db, err := openDB()
+	if err != nil {
+		log.Fatalln("Open database failed:", err)
+	}
+
+	defer db.Close()
+
+	fillTestTeams(db.db)
+
+	fillTestServices(db.db)
 
 	priv, err := vexillary.GenerateKey()
 	if err != nil {
