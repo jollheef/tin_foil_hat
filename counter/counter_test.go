@@ -189,7 +189,8 @@ func TestCountRound(*testing.T) {
 	for _, service := range []string{"Foo", "Bar", "Baz", "Boo"} {
 
 		err = steward.AddService(db.db,
-			steward.Service{-1, service, 8080, "", false})
+			steward.Service{ID: -1, Name: service, Port: 8080,
+				CheckerPath: "", UDP: false})
 		if err != nil {
 			log.Fatalln("Add service failed:", err)
 		}
@@ -227,15 +228,17 @@ func TestCountRound(*testing.T) {
 
 			flags = append(flags, flag)
 
-			flg := steward.Flag{-1, flag, round, team.ID, svc.ID, ""}
+			flg := steward.Flag{ID: -1, Flag: flag, Round: round,
+				TeamID: team.ID, ServiceID: svc.ID, CreD: ""}
 
 			err = steward.AddFlag(db.db, flg)
 			if err != nil {
 				log.Fatalln("Add flag to database failed:", err)
 			}
 
-			err = steward.PutStatus(db.db, steward.Status{round,
-				team.ID, svc.ID, steward.StatusUP})
+			err = steward.PutStatus(db.db, steward.Status{
+				Round: round, TeamID: team.ID,
+				ServiceID: svc.ID, State: steward.StatusUP})
 			if err != nil {
 				log.Fatalln("Put status to database failed:", err)
 			}

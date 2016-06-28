@@ -111,7 +111,8 @@ func checkServicesStatus(db *sql.DB, round int, teams []steward.Team,
 
 	for _, team := range teams {
 		for _, svc := range services {
-			halfStatus := steward.Status{round, team.ID, svc.ID, -1}
+			halfStatus := steward.Status{Round: round, TeamID: team.ID,
+				ServiceID: svc.ID, State: -1}
 
 			state, err := steward.GetState(db, halfStatus)
 			if err != nil {
@@ -172,7 +173,8 @@ func TestFlagsWork(t *testing.T) {
 	for _, service := range []string{"Foo", "Bar", "Baz"} {
 
 		err = steward.AddService(db.db,
-			steward.Service{-1, service, port, checker_path, false})
+			steward.Service{ID: -1, Name: service, Port: port,
+				CheckerPath: checker_path, UDP: false})
 		if err != nil {
 			log.Fatalln("Add service failed:", err)
 		}
