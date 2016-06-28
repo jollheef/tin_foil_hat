@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	db_path  string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
+	db_path string = "user=postgres dbname=tinfoilhat_test sslmode=disable"
 	wwwPath string = "www"
 )
 
