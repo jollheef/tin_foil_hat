@@ -146,7 +146,8 @@ func TestGame(*testing.T) {
 	for _, service := range []string{"Foo", "Bar", "Baz"} {
 
 		err = steward.AddService(db.db,
-			steward.Service{-1, service, port, checker_path, false})
+			steward.Service{ID: -1, Name: service, Port: port,
+				CheckerPath: checker_path, UDP: false})
 		if err != nil {
 			log.Fatalln("Add service failed:", err)
 		}

@@ -66,12 +66,17 @@ func TestCountStatesResult(*testing.T) {
 	t := 1 // team id
 	s := 1 // service id
 
-	svc := steward.Service{s, "foo", 8080, "", false}
+	svc := steward.Service{ID: s, Name: "foo", Port: 8080,
+		CheckerPath: "", UDP: false}
 
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, s, steward.StatusMumble})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: s, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: s, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: s, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: s, State: steward.StatusMumble})
 
 	res, err := counter.CountStatesResult(db.db, r, t, svc)
 	if err != nil {
@@ -99,29 +104,48 @@ func TestCountDefenceResult(*testing.T) {
 	t := 1
 
 	services := make([]steward.Service, 0)
-	services = append(services, steward.Service{1, "foo", 8080, "", false})
-	services = append(services, steward.Service{2, "bar", 8081, "", false})
-	services = append(services, steward.Service{3, "baz", 8082, "", false})
-	services = append(services, steward.Service{4, "qwe", 8083, "", false})
+	services = append(services, steward.Service{ID: 1, Name: "foo",
+		Port: 8080, CheckerPath: "", UDP: false})
+	services = append(services, steward.Service{ID: 2, Name: "bar",
+		Port: 8081, CheckerPath: "", UDP: false})
+	services = append(services, steward.Service{ID: 3, Name: "baz",
+		Port: 8082, CheckerPath: "", UDP: false})
+	services = append(services, steward.Service{ID: 4, Name: "qwe",
+		Port: 8083, CheckerPath: "", UDP: false})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, 1, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 1, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 1, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 1, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 1, State: steward.StatusDown})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
-	steward.PutStatus(db.db, steward.Status{r, t, 2, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 2, State: steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 2, State: steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 2, State: steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 2, State: steward.StatusDown})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, 3, steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 3, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 3, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 3, State: steward.StatusUP})
 
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusUP})
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusDown})
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusDown})
-	steward.PutStatus(db.db, steward.Status{r, t, 4, steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 4, State: steward.StatusUP})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 4, State: steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 4, State: steward.StatusDown})
+	steward.PutStatus(db.db, steward.Status{Round: r, TeamID: t,
+		ServiceID: 4, State: steward.StatusDown})
 
 	res, err := counter.CountDefenceResult(db.db, r, t, services)
 	if err != nil {
