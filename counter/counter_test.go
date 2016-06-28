@@ -172,7 +172,7 @@ func fillTestTeams(db *sql.DB) {
 		t := steward.Team{ID: -1, Name: team, Subnet: subnet,
 			Vulnbox: vulnbox}
 
-		_, err = steward.AddTeam(db, t)
+		_, err := steward.AddTeam(db, t)
 		if err != nil {
 			log.Fatalln("Add team failed:", err)
 		}
@@ -182,7 +182,7 @@ func fillTestTeams(db *sql.DB) {
 func fillTestServices(db *sql.DB) {
 	for _, service := range []string{"Foo", "Bar", "Baz", "Boo"} {
 
-		err = steward.AddService(db,
+		err := steward.AddService(db,
 			steward.Service{ID: -1, Name: service, Port: 8080,
 				CheckerPath: "", UDP: false})
 		if err != nil {
