@@ -21,7 +21,8 @@ func TestPutStatus(t *testing.T) {
 
 	defer db.Close()
 
-	status := steward.Status{10, 10, 10, 10}
+	status := steward.Status{Round: 10, TeamID: 10, ServiceID: 10,
+		State: 10}
 
 	err = steward.PutStatus(db.db, status)
 	if err != nil {
@@ -39,16 +40,19 @@ func TestGetAllStatus(t *testing.T) {
 	team := 2
 	service := 3
 
-	status1 := steward.Status{round, team, service, steward.StatusUP}
-	status2 := steward.Status{round, team, service, steward.StatusMumble}
-	status3 := steward.Status{round, team, service, steward.StatusCorrupt}
+	status1 := steward.Status{Round: round, TeamID: team,
+		ServiceID: service, State: steward.StatusUP}
+	status2 := steward.Status{Round: round, TeamID: team,
+		ServiceID: service, State: steward.StatusMumble}
+	status3 := steward.Status{Round: round, TeamID: team,
+		ServiceID: service, State: steward.StatusCorrupt}
 
 	steward.PutStatus(db.db, status1)
 	steward.PutStatus(db.db, status2)
 	steward.PutStatus(db.db, status3)
 
-	halfStatus := steward.Status{round, team, service,
-		steward.StatusUnknown}
+	halfStatus := steward.Status{Round: round, TeamID: team,
+		ServiceID: service, State: steward.StatusUnknown}
 
 	states, err := steward.GetStates(db.db, halfStatus)
 	if err != nil {
@@ -76,12 +80,13 @@ func TestGetServiceCurrentStatus(t *testing.T) {
 	team := 2
 	service := 3
 
-	status1 := steward.Status{round, team, service, steward.StatusUP}
+	status1 := steward.Status{Round: round, TeamID: team,
+		ServiceID: service, State: steward.StatusUP}
 
 	steward.PutStatus(db.db, status1)
 
-	halfStatus := steward.Status{round, team, service,
-		steward.StatusUnknown}
+	halfStatus := steward.Status{Round: round, TeamID: team,
+		ServiceID: service, State: steward.StatusUnknown}
 
 	state, err := steward.GetState(db.db, halfStatus)
 	if err != nil {
