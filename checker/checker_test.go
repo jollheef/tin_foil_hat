@@ -127,6 +127,23 @@ func checkServicesStatus(db *sql.DB, round int, teams []steward.Team,
 	}
 }
 
+func fillTestTeams(db *sql.DB) {
+	for index, team := range []string{"FooTeam", "BarTeam", "BazTeam"} {
+
+		// just trick for bypass UNIQUE team subnet
+		subnet := fmt.Sprintf("127.%d.0.1/24", index)
+
+		vulnbox := fmt.Sprintf("127.0.%d.3", index)
+
+		t := steward.Team{ID: -1, Name: team, Subnet: subnet, Vulnbox: vulnbox}
+
+		_, err := steward.AddTeam(db, t)
+		if err != nil {
+			log.Fatalln("Add team failed:", err)
+		}
+	}
+}
+
 func TestFlagsWork(t *testing.T) {
 
 	db, err := openDB()
@@ -153,20 +170,7 @@ func TestFlagsWork(t *testing.T) {
 		log.Fatalln("Generate key failed:", err)
 	}
 
-	for index, team := range []string{"FooTeam", "BarTeam", "BazTeam"} {
-
-		// just trick for bypass UNIQUE team subnet
-		subnet := fmt.Sprintf("127.%d.0.1/24", index)
-
-		vulnbox := fmt.Sprintf("127.0.%d.3", index)
-
-		t := steward.Team{ID: -1, Name: team, Subnet: subnet, Vulnbox: vulnbox}
-
-		_, err = steward.AddTeam(db.db, t)
-		if err != nil {
-			log.Fatalln("Add team failed:", err)
-		}
-	}
+	fillTestTeams(db.db)
 
 	checker_path := "python-api/dummy_checker.py"
 
