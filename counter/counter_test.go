@@ -229,7 +229,7 @@ func TestCountRound(*testing.T) {
 			flags = append(flags, flag)
 
 			flg := steward.Flag{ID: -1, Flag: flag, Round: round,
-				TeamID: team.ID, ServiceID: svc.ID, CreD: ""}
+				TeamID: team.ID, ServiceID: svc.ID, Cred: ""}
 
 			err = steward.AddFlag(db.db, flg)
 			if err != nil {
