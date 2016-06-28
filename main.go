@@ -11,16 +11,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"syscall"
 	"time"
 
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
-)
-
-import (
 	"github.com/jollheef/tin_foil_hat/checker"
 	"github.com/jollheef/tin_foil_hat/config"
 	"github.com/jollheef/tin_foil_hat/pulse"
@@ -28,6 +25,7 @@ import (
 	"github.com/jollheef/tin_foil_hat/scoreboard"
 	"github.com/jollheef/tin_foil_hat/steward"
 	"github.com/jollheef/tin_foil_hat/vexillary"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -53,6 +51,50 @@ func buildInfo() (str string) {
 		commitID, buildDate, buildTime)
 	str += "Author: Mikhail Klementyev <jollheef@riseup.net>\n"
 	return
+}
+
+func reinitDatabase(db *sql.DB, config config.Config) {
+
+	var err error
+
+	if config.Database.SafeReinit {
+		if time.Now().After(config.Pulse.Start.Time) {
+			log.Fatalln("Reinit after start not allowed")
+		}
+	}
+
+	log.Println("Reinit database")
+
+	log.Println("Clean database")
+
+	steward.CleanDatabase(db)
+
+	for _, team := range config.Teams {
+
+		log.Println("Add team", team.Name)
+
+		_, err = steward.AddTeam(db, team)
+		if err != nil {
+			log.Fatalln("Add team failed:", err)
+		}
+	}
+
+	for _, svc := range config.Services {
+
+		var network string
+		if svc.UDP {
+			network = "udp"
+		} else {
+			network = "tcp"
+		}
+
+		log.Printf("Add service %s (%s)\n", svc.Name, network)
+
+		err = steward.AddService(db, svc)
+		if err != nil {
+			log.Fatalln("Add service failed:", err)
+		}
+	}
 }
 
 func main() {
@@ -99,45 +141,7 @@ func main() {
 	db.SetMaxOpenConns(config.Database.MaxConnections)
 
 	if *dbReinit {
-
-		if config.Database.SafeReinit {
-			if time.Now().After(config.Pulse.Start.Time) {
-				log.Fatalln("Reinit after start not allowed")
-			}
-		}
-
-		log.Println("Reinit database")
-
-		log.Println("Clean database")
-
-		steward.CleanDatabase(db)
-
-		for _, team := range config.Teams {
-
-			log.Println("Add team", team.Name)
-
-			_, err = steward.AddTeam(db, team)
-			if err != nil {
-				log.Fatalln("Add team failed:", err)
-			}
-		}
-
-		for _, svc := range config.Services {
-
-			var network string
-			if svc.UDP {
-				network = "udp"
-			} else {
-				network = "tcp"
-			}
-
-			log.Printf("Add service %s (%s)\n", svc.Name, network)
-
-			err = steward.AddService(db, svc)
-			if err != nil {
-				log.Fatalln("Add service failed:", err)
-			}
-		}
+		reinitDatabase(db, config)
 	}
 
 	checker.SetTimeout(config.CheckerTimeout.Duration)
