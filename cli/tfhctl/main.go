@@ -11,6 +11,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -64,6 +65,79 @@ func buildInfo() (str string) {
 	return
 }
 
+func advisoryList(db *sql.DB) {
+	advisories, err := steward.GetAdvisories(db)
+	if err != nil {
+		log.Fatalln("Get advisories fail:", err)
+	}
+
+	for _, advisory := range advisories {
+
+		if *advNotReviewed && advisory.Reviewed {
+			continue
+		}
+
+		fmt.Printf(">>> Advisory: id %d <<<\n", advisory.ID)
+		fmt.Printf("(Score: %d, Reviewed: %t, Timestamp: %s)\n",
+			advisory.Score, advisory.Reviewed,
+			advisory.Timestamp.String())
+
+		fmt.Println(advisory.Text)
+	}
+
+}
+
+func advisoryReview(db *sql.DB) {
+	err := steward.ReviewAdvisory(db, *advReviewID, *advScore)
+	if err != nil {
+		log.Fatalln("Advisory review fail:", err)
+	}
+}
+
+func advisoryHide(db *sql.DB) {
+	err := steward.HideAdvisory(db, *advHideID, true)
+	if err != nil {
+		log.Fatalln("Advisory hide fail:", err)
+	}
+
+}
+
+func advisoryUnhide(db *sql.DB) {
+	err := steward.HideAdvisory(db, *advUnhideID, false)
+	if err != nil {
+		log.Fatalln("Advisory unhide fail:", err)
+	}
+}
+
+func scoreboardShow(db *sql.DB) {
+	res, err := scoreboard.CollectLastResult(db)
+	if err != nil {
+		log.Fatalln("Get last result fail:", err)
+	}
+
+	scoreboard.CountScoreAndSort(&res)
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Rank", "Name", "Score", "Attack",
+		"Defence", "Advisory"})
+
+	for _, tr := range res.Teams {
+
+		var row []string
+
+		row = append(row, fmt.Sprintf("%d", tr.Rank))
+		row = append(row, tr.Name)
+		row = append(row, fmt.Sprintf("%05.2f%%", tr.ScorePercent))
+		row = append(row, fmt.Sprintf("%.3f", tr.Attack))
+		row = append(row, fmt.Sprintf("%.3f", tr.Defence))
+		row = append(row, fmt.Sprintf("%d", tr.Advisory))
+
+		table.Append(row)
+	}
+
+	table.Render()
+}
+
 func main() {
 
 	fmt.Println(buildInfo())
@@ -90,69 +164,18 @@ func main() {
 
 	switch kingpin.Parse() {
 	case "advisory list":
-		advisories, err := steward.GetAdvisories(db)
-		if err != nil {
-			log.Fatalln("Get advisories fail:", err)
-		}
-
-		for _, advisory := range advisories {
-
-			if *advNotReviewed && advisory.Reviewed {
-				continue
-			}
-
-			fmt.Printf(">>> Advisory: id %d <<<\n", advisory.ID)
-			fmt.Printf("(Score: %d, Reviewed: %t, Timestamp: %s)\n",
-				advisory.Score, advisory.Reviewed,
-				advisory.Timestamp.String())
-
-			fmt.Println(advisory.Text)
-		}
+		advisoryList(db)
 
 	case "advisory review":
-		err := steward.ReviewAdvisory(db, *advReviewID, *advScore)
-		if err != nil {
-			log.Fatalln("Advisory review fail:", err)
-		}
+		advisoryReview(db)
 
 	case "advisory hide":
-		err := steward.HideAdvisory(db, *advHideID, true)
-		if err != nil {
-			log.Fatalln("Advisory hide fail:", err)
-		}
+		advisoryHide(db)
 
 	case "advisory unhide":
-		err := steward.HideAdvisory(db, *advUnhideID, false)
-		if err != nil {
-			log.Fatalln("Advisory unhide fail:", err)
-		}
+		advisoryUnhide(db)
 
 	case "scoreboard":
-		res, err := scoreboard.CollectLastResult(db)
-		if err != nil {
-			log.Fatalln("Get last result fail:", err)
-		}
-
-		scoreboard.CountScoreAndSort(&res)
-
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Rank", "Name", "Score", "Attack",
-			"Defence", "Advisory"})
-
-		for _, tr := range res.Teams {
-
-			var row []string
-
-			row = append(row, fmt.Sprintf("%d", tr.Rank))
-			row = append(row, tr.Name)
-			row = append(row, fmt.Sprintf("%05.2f%%", tr.ScorePercent))
-			row = append(row, fmt.Sprintf("%.3f", tr.Attack))
-			row = append(row, fmt.Sprintf("%.3f", tr.Defence))
-			row = append(row, fmt.Sprintf("%d", tr.Advisory))
-
-			table.Append(row)
-		}
-
-		table.Render()
+		scoreboardShow(db)
 	}
 }
