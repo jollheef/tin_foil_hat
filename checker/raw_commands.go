@@ -12,13 +12,12 @@ package checker
 
 import (
 	"fmt"
-	"io"
-	"os/exec"
 	"strings"
 	"time"
-)
 
-import "github.com/jollheef/tin_foil_hat/steward"
+	system "github.com/jollheef/go-system"
+	"github.com/jollheef/tin_foil_hat/steward"
+)
 
 var (
 	timeout            = "10s" // max checker work time
@@ -31,101 +30,37 @@ func SetTimeout(d time.Duration) {
 	timeout = fmt.Sprintf("%ds", int(d.Seconds()))
 }
 
-func readBytesUntilEOF(pipe io.ReadCloser) (buf []byte, err error) {
+func parseState(ret int) steward.ServiceState {
 
-	bufSize := 1024
-
-	for err != io.EOF {
-		stdout := make([]byte, bufSize)
-		var n int
-
-		n, err = pipe.Read(stdout)
-		if err != nil && err != io.EOF {
-			return
-		}
-
-		buf = append(buf, stdout[:n]...)
+	switch ret {
+	case 0:
+		return steward.StatusUP
+	case 124: // returns by timeout
+		return steward.StatusDown
+	case 1:
+	case 255: // Could not resolve hostname
+		return steward.StatusError
+	case 2:
+		return steward.StatusMumble
+	case 3:
+		return steward.StatusCorrupt
+	case 4:
+		return steward.StatusDown
 	}
 
-	if err == io.EOF {
-		err = nil
-	}
-
-	return
-}
-
-func readUntilEOF(pipe io.ReadCloser) (str string, err error) {
-	buf, err := readBytesUntilEOF(pipe)
-	str = string(buf)
-	return
-}
-
-func system(name string, arg ...string) (stdout string, stderr string,
-	err error) {
-
-	cmd := exec.Command(name, arg...)
-
-	outPipe, err := cmd.StdoutPipe()
-	if err != nil {
-		return
-	}
-
-	errPipe, err := cmd.StderrPipe()
-	if err != nil {
-		return
-	}
-
-	cmd.Start()
-
-	stdout, err = readUntilEOF(outPipe)
-	if err != nil {
-		return
-	}
-
-	stderr, err = readUntilEOF(errPipe)
-	if err != nil {
-		return
-	}
-
-	err = cmd.Wait()
-
-	return
-}
-
-func exitStatus(no int) string {
-	return fmt.Sprintf("exit status %d", no)
-}
-
-func parseState(err error) (steward.ServiceState, error) {
-
-	if err == nil {
-		return steward.StatusUP, nil
-	}
-
-	switch err.Error() {
-	case exitStatus(124): // returns by timeout
-		return steward.StatusDown, nil
-	case exitStatus(1):
-	case exitStatus(255): // Could not resolve hostname
-		return steward.StatusError, nil
-	case exitStatus(2):
-		return steward.StatusMumble, nil
-	case exitStatus(3):
-		return steward.StatusCorrupt, nil
-	case exitStatus(4):
-		return steward.StatusDown, nil
-	}
-
-	return steward.StatusUnknown, err
+	return steward.StatusUnknown
 }
 
 func put(checker, ip string, port int, flag string) (cred, logs string,
 	state steward.ServiceState, err error) {
 
-	cred, logs, err = system("timeout", timeout, checker, "put", ip,
+	cred, logs, ret, err := system.System("timeout", timeout, checker, "put", ip,
 		fmt.Sprintf("%d", port), flag)
 
-	state, err = parseState(err)
+	state = parseState(ret)
+	if state != steward.StatusUnknown {
+		err = nil
+	}
 
 	cred = strings.Trim(cred, " \n")
 
@@ -135,13 +70,16 @@ func put(checker, ip string, port int, flag string) (cred, logs string,
 func sshPut(host, checker, ip string, port int, flag string) (cred, logs string,
 	state steward.ServiceState, err error) {
 
-	cred, logs, err = system("ssh",
+	cred, logs, ret, err := system.System("ssh",
 		"-o", "ConnectTimeout="+connectTimeout,
 		"-o", "ConnectionAttempts="+connectionAttempts,
 		host, "timeout", timeout, checker,
 		"put", ip, fmt.Sprintf("%d", port), flag)
 
-	state, err = parseState(err)
+	state = parseState(ret)
+	if state != steward.StatusUnknown {
+		err = nil
+	}
 
 	cred = strings.Trim(cred, " \n")
 
@@ -151,10 +89,13 @@ func sshPut(host, checker, ip string, port int, flag string) (cred, logs string,
 func get(checker, ip string, port int, cred string) (flag, logs string,
 	state steward.ServiceState, err error) {
 
-	flag, logs, err = system("timeout", timeout, checker, "get", ip,
+	flag, logs, ret, err := system.System("timeout", timeout, checker, "get", ip,
 		fmt.Sprintf("%d", port), cred)
 
-	state, err = parseState(err)
+	state = parseState(ret)
+	if state != steward.StatusUnknown {
+		err = nil
+	}
 
 	flag = strings.Trim(flag, " \n")
 
@@ -164,13 +105,16 @@ func get(checker, ip string, port int, cred string) (flag, logs string,
 func sshGet(host, checker, ip string, port int, cred string) (flag, logs string,
 	state steward.ServiceState, err error) {
 
-	flag, logs, err = system("ssh",
+	flag, logs, ret, err := system.System("ssh",
 		"-o", "ConnectTimeout="+connectTimeout,
 		"-o", "ConnectionAttempts="+connectionAttempts,
 		host, "timeout", timeout, checker,
 		"get", ip, fmt.Sprintf("%d", port), cred)
 
-	state, err = parseState(err)
+	state = parseState(ret)
+	if state != steward.StatusUnknown {
+		err = nil
+	}
 
 	flag = strings.Trim(flag, " \n")
 
@@ -180,10 +124,13 @@ func sshGet(host, checker, ip string, port int, cred string) (flag, logs string,
 func check(checker, ip string, port int) (state steward.ServiceState,
 	logs string, err error) {
 
-	_, logs, err = system("timeout", timeout, checker, "chk", ip,
+	_, logs, ret, err := system.System("timeout", timeout, checker, "chk", ip,
 		fmt.Sprintf("%d", port))
 
-	state, err = parseState(err)
+	state = parseState(ret)
+	if state != steward.StatusUnknown {
+		err = nil
+	}
 
 	return
 }
@@ -191,13 +138,16 @@ func check(checker, ip string, port int) (state steward.ServiceState,
 func sshCheck(host, checker, ip string, port int) (state steward.ServiceState,
 	logs string, err error) {
 
-	_, logs, err = system("ssh",
+	_, logs, ret, err := system.System("ssh",
 		"-o", "ConnectTimeout="+connectTimeout,
 		"-o", "ConnectionAttempts="+connectionAttempts,
 		host, "timeout", timeout, checker,
 		"chk", ip, fmt.Sprintf("%d", port))
 
-	state, err = parseState(err)
+	state = parseState(ret)
+	if state != steward.StatusUnknown {
+		err = nil
+	}
 
 	return
 }
