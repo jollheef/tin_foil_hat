@@ -6,6 +6,8 @@
 # Tin foil hat
 Unix-way contest checking system.
 
+Fundamental principle: if tin_foil_hat is not helping you make attack-defence CTF easily, then there is a bug in tin_foil_hat.
+
 ### Components
 #### Counter
 Count scoreboard.
