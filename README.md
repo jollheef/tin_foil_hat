@@ -38,7 +38,7 @@ Web scoreboard.
 
     $ sudo psql -U postgres
     postgres=# CREATE DATABASE tinfoilhat;
-    postgres=# CREATE USER tfh WITH password 'STRENGTH_PASSWORD'
+    postgres=# CREATE USER tfh WITH password 'STRENGTH_PASSWORD';
     postgres=# GRANT ALL privileges ON DATABASE tinfoilhat TO tfh;
 
 After that you need to fix 'connection' parameter in configuration file.
