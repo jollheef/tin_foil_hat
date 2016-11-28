@@ -15,6 +15,9 @@ www_path = "/home/mikhail/dev/tin_foil_hat/src/tinfoilhat/scoreboard/www"
 addr = ":8000"
 update_timeout = "1s"
 
+[API]
+attack_buffer = 10000
+
 [Pulse]
 start = "Aug 2 15:04 2015"
 half = "4h"

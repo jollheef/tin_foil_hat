@@ -60,6 +60,9 @@ type Config struct {
 		Addr          string
 		UpdateTimeout Duration
 	}
+	API struct {
+		AttackBuffer int
+	}
 	Pulse            Pulse
 	FlagReceiver     FlagReceiver
 	AdvisoryReceiver AdvisoryReceiver

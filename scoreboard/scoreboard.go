@@ -161,8 +161,9 @@ func handleStaticFileSimple(file, wwwPath string) {
 }
 
 // Scoreboard run scoreboard page
-func Scoreboard(db *sql.DB, wwwPath, addr string, updateTimeout time.Duration,
-	start time.Time, half, lunch, darkest time.Duration) (err error) {
+func Scoreboard(db *sql.DB, attackFlow chan Attack, wwwPath, addr string,
+	updateTimeout time.Duration, start time.Time, half, lunch,
+	darkest time.Duration) (err error) {
 
 	contestStatus = contestStateNotAvailable
 
@@ -180,6 +181,11 @@ func Scoreboard(db *sql.DB, wwwPath, addr string, updateTimeout time.Duration,
 	http.Handle("/scoreboard", websocket.Handler(scoreboardHandler))
 	http.Handle("/advisory", websocket.Handler(advisoryHandler))
 	http.Handle("/info", websocket.Handler(infoHandler))
+
+	http.Handle("/api/attacks", websocket.Handler(
+		func(ws *websocket.Conn) {
+			attackFlowHandler(ws, attackFlow)
+		}))
 
 	files := []string{
 		"/img/glyphicons-halflings-white.png",

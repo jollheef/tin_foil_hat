@@ -10,12 +10,13 @@ package scoreboard_test
 
 import (
 	"database/sql"
-	"golang.org/x/net/websocket"
 	"log"
 	"sort"
 	"sync"
 	"testing"
 	"time"
+
+	"golang.org/x/net/websocket"
 )
 
 import (
@@ -113,9 +114,12 @@ func TestParallelWebSocketConnect(*testing.T) {
 
 	addr := ":8080"
 
+	attackFlow := make(chan scoreboard.Attack, 100)
+
 	go func() {
-		err := scoreboard.Scoreboard(db, wwwPath, addr, time.Second,
-			time.Now(), time.Minute, time.Minute, time.Second)
+		err := scoreboard.Scoreboard(db, attackFlow, wwwPath, addr,
+			time.Second, time.Now(), time.Minute, time.Minute,
+			time.Second)
 		if err != nil {
 			log.Fatal(err)
 		}

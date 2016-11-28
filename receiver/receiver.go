@@ -24,6 +24,7 @@ import (
 )
 
 import (
+	"github.com/jollheef/tin_foil_hat/scoreboard"
 	"github.com/jollheef/tin_foil_hat/steward"
 	"github.com/jollheef/tin_foil_hat/vexillary"
 )
@@ -85,7 +86,8 @@ func teamByAddr(db *sql.DB, addr string) (team steward.Team, err error) {
 	return
 }
 
-func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
+func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey,
+	attackFlow chan scoreboard.Attack) {
 
 	addr := conn.RemoteAddr().String()
 
@@ -186,12 +188,29 @@ func handler(conn net.Conn, db *sql.DB, priv *rsa.PrivateKey) {
 		return
 	}
 
+	go func() {
+		attack := scoreboard.Attack{
+			Attacker:  team.ID,
+			Victim:    flg.TeamID,
+			Service:   flg.ServiceID,
+			Timestamp: time.Now().Unix(),
+		}
+
+		select {
+		case attackFlow <- attack:
+		default:
+			_ = <-attackFlow
+			attackFlow <- attack
+		}
+	}()
+
 	fmt.Fprint(conn, capturedMsg)
 }
 
 // FlagReceiver starts flag receiver
 func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string,
-	timeout, socketTimeout time.Duration) {
+	timeout, socketTimeout time.Duration,
+	attackFlow chan scoreboard.Attack) {
 
 	log.Println("Launching receiver at", addr, "...")
 
@@ -229,7 +248,7 @@ func FlagReceiver(db *sql.DB, priv *rsa.PrivateKey, addr string,
 			continue
 		}
 
-		go handler(conn, db, priv)
+		go handler(conn, db, priv, attackFlow)
 
 		connects[ip] = time.Now()
 	}

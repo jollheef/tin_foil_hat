@@ -155,15 +155,19 @@ func main() {
 		log.Fatalln("Generate key fail:", err)
 	}
 
+	attackFlow := make(chan scoreboard.Attack, config.API.AttackBuffer)
+
 	go receiver.FlagReceiver(db, priv, config.FlagReceiver.Addr,
 		config.FlagReceiver.ReceiveTimeout.Duration,
-		config.FlagReceiver.SocketTimeout.Duration)
+		config.FlagReceiver.SocketTimeout.Duration,
+		attackFlow)
 
 	go receiver.AdvisoryReceiver(db, config.AdvisoryReceiver.Addr,
 		config.AdvisoryReceiver.ReceiveTimeout.Duration,
 		config.AdvisoryReceiver.SocketTimeout.Duration)
 
-	go scoreboard.Scoreboard(db, config.Scoreboard.WwwPath,
+	go scoreboard.Scoreboard(db, attackFlow,
+		config.Scoreboard.WwwPath,
 		config.Scoreboard.Addr,
 		config.Scoreboard.UpdateTimeout.Duration,
 		config.Pulse.Start.Time,

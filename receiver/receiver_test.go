@@ -19,8 +19,11 @@ import (
 	"time"
 )
 
-import "github.com/jollheef/tin_foil_hat/steward"
-import "github.com/jollheef/tin_foil_hat/vexillary"
+import (
+	"github.com/jollheef/tin_foil_hat/scoreboard"
+	"github.com/jollheef/tin_foil_hat/steward"
+	"github.com/jollheef/tin_foil_hat/vexillary"
+)
 
 type testDB struct {
 	db *sql.DB
@@ -164,7 +167,9 @@ func TestReceiver(*testing.T) {
 		log.Fatalln("New round failed:", err)
 	}
 
-	go FlagReceiver(db.db, priv, addr, time.Nanosecond, time.Minute)
+	attackFlow := make(chan scoreboard.Attack)
+
+	go FlagReceiver(db.db, priv, addr, time.Nanosecond, time.Minute, attackFlow)
 
 	time.Sleep(time.Second) // wait for init listener
 
@@ -286,7 +291,7 @@ func TestReceiver(*testing.T) {
 	newAddr := "127.0.0.1:64000"
 
 	// Start new receiver for test timeouts
-	go FlagReceiver(db.db, priv, newAddr, time.Second, time.Minute)
+	go FlagReceiver(db.db, priv, newAddr, time.Second, time.Minute, attackFlow)
 
 	time.Sleep(time.Second) // wait for init listener
 
