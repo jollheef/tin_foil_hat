@@ -20,7 +20,7 @@ import (
 
 func TestAttackFlowHandler(*testing.T) {
 
-	attackFlow := make(chan Attack, 10)
+	attackFlow := make(chan Attack, 3)
 
 	addr := "127.0.0.1:49000"
 	apiURL := "/attack_flow_handler_test"
@@ -40,7 +40,7 @@ func TestAttackFlowHandler(*testing.T) {
 	time.Sleep(time.Second)
 
 	go func() {
-		for i := 0; i < 100; i++ {
+		for i := 0; i < 10; i++ {
 			attackFlow <- Attack{i, i * 2, i * 3, int64(i * 4)}
 		}
 	}()
@@ -52,7 +52,7 @@ func TestAttackFlowHandler(*testing.T) {
 		panic(err)
 	}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		var n int
 		if n, err = ws.Read(msg); err != nil {
 			panic(err)
