@@ -48,7 +48,7 @@ func (b *broadcast) Run() {
 		}
 		attack := <-b.attackFlow
 		for l := range b.listeners {
-			l <- attack
+			go func() { l <- attack }()
 		}
 	}
 }

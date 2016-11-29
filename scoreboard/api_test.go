@@ -10,7 +10,6 @@ package scoreboard
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -66,11 +65,16 @@ func TestAttackFlowHandler(*testing.T) {
 			panic(err)
 		}
 
-		attackEtalon := Attack{i, i * 2, i * 3, int64(i * 4)}
-
-		if attack != attackEtalon {
-			log.Println(attack, attackEtalon)
-			panic("Attack not matched")
+		ok := false
+		for i := 0; i < 10; i++ {
+			attackEtalon := Attack{i, i * 2, i * 3, int64(i * 4)}
+			if attack == attackEtalon {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			panic("Something went wrong")
 		}
 	}
 }
