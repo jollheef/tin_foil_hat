@@ -27,6 +27,7 @@ func DisableAdvisory() {
 func collectTeamResult(db *sql.DB, team steward.Team,
 	services []steward.Service) (tr TeamResult, err error) {
 
+	tr.ID = team.ID
 	tr.Name = team.Name
 
 	rr, err := steward.GetLastResult(db, team.ID)

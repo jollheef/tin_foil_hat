@@ -11,11 +11,12 @@ package scoreboard
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"golang.org/x/net/websocket"
 )
 
-// Attack
+// Attack describe attack for api
 type Attack struct {
 	Attacker  int
 	Victim    int
@@ -39,5 +40,19 @@ func attackFlowHandler(ws *websocket.Conn, attackFlow chan Attack) {
 			log.Println("Attack flow write error:", err)
 			return
 		}
+	}
+}
+
+func resultHandler(w http.ResponseWriter, r *http.Request) {
+	buf, err := json.Marshal(lastResult)
+	if err != nil {
+		log.Println("Serialization error:", err)
+		return
+	}
+
+	_, err = w.Write(buf)
+	if err != nil {
+		log.Println("Result write error:", err)
+		return
 	}
 }

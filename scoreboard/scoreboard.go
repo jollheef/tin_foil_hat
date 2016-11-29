@@ -95,6 +95,8 @@ func infoHandler(ws *websocket.Conn) {
 	}
 }
 
+var lastResult Result
+
 func resultUpdater(db *sql.DB, updateTimeout time.Duration,
 	darkestTime time.Time) {
 
@@ -105,6 +107,8 @@ func resultUpdater(db *sql.DB, updateTimeout time.Duration,
 			time.Sleep(updateTimeout)
 			continue
 		}
+
+		lastResult = res
 
 		if time.Now().Before(darkestTime) {
 			CountScoreAndSort(&res)
@@ -166,7 +170,6 @@ func Scoreboard(db *sql.DB, attackFlow chan Attack, wwwPath, addr string,
 	darkest time.Duration) (err error) {
 
 	contestStatus = contestStateNotAvailable
-
 	lunchStart := start.Add(half)
 	lunchEnd := lunchStart.Add(lunch)
 	endTime := lunchEnd.Add(half)
@@ -186,6 +189,8 @@ func Scoreboard(db *sql.DB, attackFlow chan Attack, wwwPath, addr string,
 		func(ws *websocket.Conn) {
 			attackFlowHandler(ws, attackFlow)
 		}))
+
+	http.Handle("/api/result", http.HandlerFunc(resultHandler))
 
 	files := []string{
 		"/img/glyphicons-halflings-white.png",

@@ -16,6 +16,7 @@ import "github.com/jollheef/tin_foil_hat/steward"
 
 // TeamResult contain info for scoreboard
 type TeamResult struct {
+	ID              int
 	Rank            int
 	Name            string
 	Score           float64

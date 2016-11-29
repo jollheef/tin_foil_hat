@@ -23,9 +23,9 @@ func TestAttackFlowHandler(*testing.T) {
 	attackFlow := make(chan Attack, 10)
 
 	addr := "127.0.0.1:49000"
-	apiUrl := "/attack_flow_handler_test"
+	apiURL := "/attack_flow_handler_test"
 
-	http.Handle(apiUrl, websocket.Handler(
+	http.Handle(apiURL, websocket.Handler(
 		func(ws *websocket.Conn) {
 			attackFlowHandler(ws, attackFlow)
 		}))
@@ -47,7 +47,7 @@ func TestAttackFlowHandler(*testing.T) {
 
 	var msg = make([]byte, 4096)
 
-	ws, err := websocket.Dial("ws://"+addr+apiUrl, "", "http://"+addr)
+	ws, err := websocket.Dial("ws://"+addr+apiURL, "", "http://"+addr)
 	if err != nil {
 		panic(err)
 	}
