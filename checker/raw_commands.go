@@ -21,12 +21,14 @@ import (
 
 var (
 	timeout            = "10s" // max checker work time
-	connectionAttempts = "2"   // ssh option
-	connectTimeout     = "5"   // ssh option
+	portCheckTimeout   = time.Second * 10
+	connectionAttempts = "2" // ssh option
+	connectTimeout     = "5" // ssh option
 )
 
 // SetTimeout set max checker work time
 func SetTimeout(d time.Duration) {
+	portCheckTimeout = d
 	timeout = fmt.Sprintf("%ds", int(d.Seconds()))
 }
 

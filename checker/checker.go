@@ -17,9 +17,7 @@ import (
 	"log"
 	"net"
 	"sync"
-)
 
-import (
 	"github.com/jollheef/tin_foil_hat/steward"
 	"github.com/jollheef/tin_foil_hat/vexillary"
 )
@@ -28,7 +26,7 @@ func tcpPortOpen(team steward.Team, svc steward.Service) bool {
 
 	addr := fmt.Sprintf("%s:%d", team.Vulnbox, svc.Port)
 
-	conn, err := net.Dial("tcp", addr)
+	conn, err := net.DialTimeout("tcp", addr, portCheckTimeout)
 	if err != nil {
 		return false
 	}
