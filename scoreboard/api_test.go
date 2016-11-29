@@ -25,9 +25,11 @@ func TestAttackFlowHandler(*testing.T) {
 	addr := "127.0.0.1:49000"
 	apiURL := "/attack_flow_handler_test"
 
+	b := newBroadcast(attackFlow)
+	go b.Run()
 	http.Handle(apiURL, websocket.Handler(
 		func(ws *websocket.Conn) {
-			attackFlowHandler(ws, attackFlow)
+			attackFlowHandler(ws, b)
 		}))
 
 	go func() {

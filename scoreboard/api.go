@@ -12,6 +12,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -24,10 +26,55 @@ type Attack struct {
 	Timestamp int64
 }
 
-func attackFlowHandler(ws *websocket.Conn, attackFlow chan Attack) {
-	defer ws.Close()
+type broadcast struct {
+	listeners  map[chan<- Attack]bool
+	mutex      sync.Mutex
+	attackFlow chan Attack
+}
+
+func newBroadcast(attackFlow chan Attack) *broadcast {
+	b := broadcast{}
+	b.mutex = sync.Mutex{}
+	b.listeners = make(map[chan<- Attack]bool)
+	b.attackFlow = attackFlow
+	return &b
+}
+
+func (b *broadcast) Run() {
 	for {
-		attack := <-attackFlow
+		if len(b.listeners) == 0 {
+			time.Sleep(time.Second)
+			continue
+		}
+		attack := <-b.attackFlow
+		for l := range b.listeners {
+			l <- attack
+		}
+	}
+}
+
+func (b *broadcast) NewListener() (c chan Attack) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	c = make(chan Attack, cap(b.attackFlow))
+	b.listeners[c] = true
+	return
+}
+
+func (b *broadcast) Detach(c chan Attack) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	delete(b.listeners, c)
+}
+
+func attackFlowHandler(ws *websocket.Conn, b *broadcast) {
+	defer ws.Close()
+	localFlow := b.NewListener()
+	defer b.Detach(localFlow)
+	for {
+		attack := <-localFlow
 
 		buf, err := json.Marshal(attack)
 		if err != nil {
@@ -44,6 +91,20 @@ func attackFlowHandler(ws *websocket.Conn, attackFlow chan Attack) {
 }
 
 func resultHandler(w http.ResponseWriter, r *http.Request) {
+	buf, err := json.Marshal(lastResult)
+	if err != nil {
+		log.Println("Serialization error:", err)
+		return
+	}
+
+	_, err = w.Write(buf)
+	if err != nil {
+		log.Println("Result write error:", err)
+		return
+	}
+}
+
+func roundHandler(w http.ResponseWriter, r *http.Request) {
 	buf, err := json.Marshal(lastResult)
 	if err != nil {
 		log.Println("Serialization error:", err)

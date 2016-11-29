@@ -185,9 +185,11 @@ func Scoreboard(db *sql.DB, attackFlow chan Attack, wwwPath, addr string,
 	http.Handle("/advisory", websocket.Handler(advisoryHandler))
 	http.Handle("/info", websocket.Handler(infoHandler))
 
+	b := newBroadcast(attackFlow)
+	go b.Run()
 	http.Handle("/api/attacks", websocket.Handler(
 		func(ws *websocket.Conn) {
-			attackFlowHandler(ws, attackFlow)
+			attackFlowHandler(ws, b)
 		}))
 
 	http.Handle("/api/result", http.HandlerFunc(resultHandler))
