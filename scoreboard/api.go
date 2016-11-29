@@ -67,6 +67,7 @@ func (b *broadcast) Detach(c chan Attack) {
 	defer b.mutex.Unlock()
 
 	delete(b.listeners, c)
+	close(c)
 }
 
 func attackFlowHandler(ws *websocket.Conn, b *broadcast) {
