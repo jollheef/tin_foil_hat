@@ -3,8 +3,10 @@ language: go
 go:
   - 1.x
 
+services:
+  - postgresql
+
 addons:
-  postgresql: "9.4"
   apt:
     packages:
       - python3
